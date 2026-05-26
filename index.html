@@ -1,1768 +1,477 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="Thimi Tech — a Nepal-based software studio delivering geoportals, AI, surveys and modern web for governments and ambitious teams." />
+<title>Thimi Tech — Software, built in Nepal.</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path fill-rule='evenodd' clip-rule='evenodd' d='M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z' fill='%2315140f'/><path fill-rule='evenodd' clip-rule='evenodd' d='M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z' fill='%2315140f'/></svg>" />
+<link rel="stylesheet" href="styles.css" />
+</head>
 
-    <!-- SEO Meta Tags -->
-    <meta
-      name="description"
-      content="Thimi Tech is a Nepal-based software company delivering intelligent digital solutions including geoportals, municipal management systems, AI/ML applications, data visualization, and modern web development for businesses and government bodies."
-    />
-    <meta
-      name="keywords"
-      content="Thimi Tech, Nepal software company, geoportal solutions, municipal management systems, AI machine learning, data visualization, web development, digital solutions, Nepal technology, government software, geospatial solutions, smart governance, IT consulting, Nepal developers"
-    />
-    <meta name="author" content="Thimi Tech" />
-    <meta
-      name="robots"
-      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
-    />
-    <meta name="language" content="English" />
-    <meta name="revisit-after" content="7 days" />
-    <meta name="theme-color" content="#141414" />
+<body>
 
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://thimitech.com/" />
+<!-- ============ LOADER ============ -->
+<div class="loader" aria-hidden="true">
+  <div class="loader-mark">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z" fill="currentColor"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z" fill="currentColor"/>
+    </svg>
+    <span>Thimi Tech</span>
+    <div class="loader-bar"></div>
+    <span class="num">000</span>
+  </div>
+</div>
 
-    <!-- Sitemap -->
-    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <a href="#top" class="nav-logo">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z" fill="currentColor"/>
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z" fill="currentColor"/>
+    </svg>
+    <span>Thimi Tech</span>
+    <span class="dot" aria-hidden="true"></span>
+  </a>
+  <div class="nav-center">
+    <a href="#services">Services</a>
+    <a href="#work">Work</a>
+    <a href="#mission">Mission</a>
+    <a href="#team">Team</a>
+  </div>
+  <div class="nav-right">
+    <a href="#contact" class="nav-cta">
+      <span>Start a project</span>
+      <span class="arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+</nav>
 
-    <!-- GEO Tags -->
-    <meta name="geo.region" content="NP" />
-    <meta name="geo.placename" content="Nepal" />
-    <meta name="geo.position" content="27.7172;85.3240" />
-    <meta name="ICBM" content="27.7172, 85.3240" />
-    <meta
-      name="DC.title"
-      content="Thimi Tech - Intelligent Digital Solutions"
-    />
-    <meta name="DC.creator" content="Thimi Tech" />
-    <meta
-      name="DC.subject"
-      content="Software Development, Digital Solutions, Geospatial Technology"
-    />
-    <meta
-      name="DC.description"
-      content="Nepal-based software company specializing in geoportals, municipal management systems, AI/ML, and web development"
-    />
-    <meta name="DC.publisher" content="Thimi Tech" />
-    <meta name="DC.contributor" content="Thimi Tech" />
-    <meta name="DC.date" content="2025-01-27" />
-    <meta name="DC.type" content="Service" />
-    <meta name="DC.format" content="text/html" />
-    <meta name="DC.identifier" content="https://thimitech.com/" />
-    <meta name="DC.language" content="en" />
-    <meta name="DC.coverage" content="Nepal" />
-    <meta name="DC.rights" content="© 2025 Thimi Tech" />
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://thimitech.com/" />
-    <meta
-      property="og:title"
-      content="Thimi Tech - Intelligent Digital Solutions"
-    />
-    <meta
-      property="og:description"
-      content="Nepal-based software company delivering intelligent digital solutions including geoportals, municipal management systems, AI/ML applications, and modern web development."
-    />
-    <meta
-      property="og:image"
-      content="https://thimitech.com/assets/thimitech.jpg"
-    />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Thimi Tech Logo" />
-    <meta property="og:site_name" content="Thimi Tech" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:locale:alternate" content="ne_NP" />
+  <div class="hero-meta">
+    <span>Thimi Tech · Software Studio</span>
+    <span class="live" id="clock">Kathmandu, NP</span>
+    <span>2024 ↗</span>
+  </div>
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://thimitech.com/" />
-    <meta
-      name="twitter:title"
-      content="Thimi Tech - Intelligent Digital Solutions"
-    />
-    <meta
-      name="twitter:description"
-      content="Nepal-based software company delivering intelligent digital solutions including geoportals, municipal management systems, AI/ML applications, and modern web development."
-    />
-    <meta
-      name="twitter:image"
-      content="https://thimitech.com/assets/thimitech.jpg"
-    />
-    <meta name="twitter:image:alt" content="Thimi Tech Logo" />
-    <meta name="twitter:creator" content="@thimitech" />
-    <meta name="twitter:site" content="@thimitech" />
+  <div class="hero-text">
+    <span class="eyebrow">Reality, into Vision</span>
+    <h1 class="hero-title">
+      <div class="row"><span class="word">Software,</span></div>
+      <div class="row"><span class="word">built <em>in</em></span></div>
+      <div class="row"><span class="word">Nepal.</span></div>
+    </h1>
+    <p class="hero-sub">
+      A studio crafting <strong style="color:var(--ink); font-weight:500;">geospatial systems</strong>, <strong style="color:var(--ink); font-weight:500;">AI products</strong>, and <strong style="color:var(--ink); font-weight:500;">modern web</strong> for governments and ambitious teams.
+    </p>
+    <div class="hero-actions">
+      <a href="#work" class="btn-primary">
+        <span>See our work</span>
+        <span class="ico" aria-hidden="true">→</span>
+      </a>
+      <a href="#contact" class="btn-ghost">
+        <span>Start a project</span>
+      </a>
+    </div>
+  </div>
 
-    <!-- Additional Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="Thimi Tech" />
-    <meta name="application-name" content="Thimi Tech" />
-    <meta name="msapplication-TileColor" content="#141414" />
-    <meta name="msapplication-config" content="/browserconfig.xml" />
+  <div class="hero-globe-wrap">
+    <span class="globe-label tl">27.7°N · 85.3°E</span>
+    <span class="globe-label br">Kathmandu</span>
+    <div class="hero-globe" id="globe"></div>
+    <span class="globe-hint">⟳&nbsp;&nbsp;Drag to spin</span>
+  </div>
 
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Thimi Tech",
-        "alternateName": "Thimi Technology",
-        "url": "https://thimitech.com",
-        "logo": "https://thimitech.com/assets/thimitech.jpg",
-        "description": "Nepal-based software company delivering intelligent digital solutions including geoportals, municipal management systems, AI/ML applications, data visualization, and modern web development.",
-        "address": {
-          "@type": "PostalAddress",
-          "addressCountry": "NP",
-          "addressLocality": "Nepal"
-        },
-        "contactPoint": {
-          "@type": "ContactPoint",
-          "email": "info@thimitech.com",
-          "contactType": "Customer Service",
-          "availableLanguage": ["English", "Nepali"]
-        },
-        "sameAs": [
-          "https://www.facebook.com/profile.php?id=61585729408478",
-          "https://www.instagram.com/thimitech/",
-          "https://www.linkedin.com/company/thimitech"
-        ],
-        "areaServed": {
-          "@type": "Country",
-          "name": "Nepal"
-        },
-        "knowsAbout": [
-          "Geoportal Solutions",
-          "Municipal Management Systems",
-          "Artificial Intelligence",
-          "Machine Learning",
-          "Data Visualization",
-          "Web Development",
-          "Software Development",
-          "Geospatial Technology"
-        ],
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Digital Solutions",
-          "itemListElement": [
-            {
-              "@type": "Offer",
-              "itemOffered": {
-                "@type": "Service",
-                "name": "GeoPortal Solutions",
-                "description": "Interactive platforms for visualizing and managing geographic data"
-              }
-            },
-            {
-              "@type": "Offer",
-              "itemOffered": {
-                "@type": "Service",
-                "name": "Municipal Management Systems",
-                "description": "Smart systems to streamline local government operations and services"
-              }
-            },
-            {
-              "@type": "Offer",
-              "itemOffered": {
-                "@type": "Service",
-                "name": "AI & Machine Learning",
-                "description": "Custom AI/ML solutions for automation, prediction, and smarter decision-making"
-              }
-            },
-            {
-              "@type": "Offer",
-              "itemOffered": {
-                "@type": "Service",
-                "name": "Data Management & Visualization",
-                "description": "Tools to organize data and turn it into clear, actionable insights"
-              }
-            },
-            {
-              "@type": "Offer",
-              "itemOffered": {
-                "@type": "Service",
-                "name": "Web & App Development",
-                "description": "Modern, responsive websites and mobile applications tailored to your goals"
-              }
-            }
-          ]
-        }
-      }
-    </script>
+  <div class="hero-foot">
+    <span><strong>Est. 2024</strong> — A Nepal-based software studio</span>
+    <span>Scroll to explore ↓</span>
+  </div>
+</header>
 
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Thimi Tech",
-        "url": "https://thimitech.com",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://thimitech.com/?s={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
-      }
-    </script>
+<!-- ============ MARQUEE ============ -->
+<section class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">Reality, into Vision</span>
+    <span class="marquee-dot"></span>
+    <span class="marquee-item alt">Vision, into Reality</span>
+    <span class="marquee-dot"></span>
+    <span class="marquee-item">Reality, into Vision</span>
+    <span class="marquee-dot"></span>
+    <span class="marquee-item alt">Vision, into Reality</span>
+    <span class="marquee-dot"></span>
+    <span class="marquee-item">Reality, into Vision</span>
+    <span class="marquee-dot"></span>
+    <span class="marquee-item alt">Vision, into Reality</span>
+    <span class="marquee-dot"></span>
+  </div>
+</section>
 
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "name": "Thimi Tech",
-        "image": "https://thimitech.com/assets/thimitech.jpg",
-        "@id": "https://thimitech.com",
-        "url": "https://thimitech.com",
-        "telephone": "+977-XXXXXXXXXX",
-        "priceRange": "$$",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "",
-          "addressLocality": "Kathmandu",
-          "addressRegion": "Bagmati Province",
-          "postalCode": "",
-          "addressCountry": "NP"
-        },
-        "geo": {
-          "@type": "GeoCoordinates",
-          "latitude": 27.7172,
-          "longitude": 85.324
-        },
-        "openingHoursSpecification": {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "09:00",
-          "closes": "18:00"
-        }
-      }
-    </script>
+<!-- ============ SERVICES (horizontal pinned) ============ -->
+<section class="services" id="services" aria-label="Services">
+  <div class="services-rail">
+    <div class="services-sticky">
+      <div class="services-head">
+        <h2>What <em>we do</em>.</h2>
+        <span><span class="now">01</span> / 06 · Drag the page</span>
+        <div class="bar"></div>
+      </div>
 
-    <!-- Site Navigation Structured Data for Google Sitelinks -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SiteNavigationElement",
-        "name": "Main Navigation",
-        "url": "https://thimitech.com",
-        "hasPart": [
-          {
-            "@type": "SiteNavigationElement",
-            "name": "About",
-            "url": "https://thimitech.com/#about",
-            "description": "Learn about Thimi Tech, a Nepal-based software company delivering intelligent digital solutions"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "name": "Services",
-            "url": "https://thimitech.com/#services",
-            "description": "Our services include geoportal solutions, municipal management systems, AI/ML, data visualization, and web development"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "name": "Projects",
-            "url": "https://thimitech.com/#projects",
-            "description": "View our portfolio of innovative digital solutions and projects"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "name": "Contact",
-            "url": "https://thimitech.com/#contact",
-            "description": "Get in touch with Thimi Tech for your digital solution needs"
-          }
-        ]
-      }
-    </script>
+      <div class="services-stage">
+        <div class="services-track">
 
-    <!-- Breadcrumb Structured Data -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://thimitech.com"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "About",
-            "item": "https://thimitech.com/#about"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": "Services",
-            "item": "https://thimitech.com/#services"
-          },
-          {
-            "@type": "ListItem",
-            "position": 4,
-            "name": "Projects",
-            "item": "https://thimitech.com/#projects"
-          },
-          {
-            "@type": "ListItem",
-            "position": 5,
-            "name": "Contact",
-            "item": "https://thimitech.com/#contact"
-          }
-        ]
-      }
-    </script>
+          <article class="service-card">
+            <span class="idx">S / 01</span>
+            <div class="ico-3d" aria-hidden="true">
+              <!-- isometric globe -->
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                <ellipse cx="50" cy="50" rx="38" ry="38"/>
+                <ellipse cx="50" cy="50" rx="38" ry="14"/>
+                <ellipse cx="50" cy="50" rx="14" ry="38"/>
+                <circle cx="62" cy="36" r="3" fill="currentColor"/>
+              </svg>
+            </div>
+            <h3>GeoPortal <em>Solutions</em></h3>
+            <p>Interactive platforms for visualizing and managing geographic data.</p>
+            <span class="more">Spatial intelligence →</span>
+          </article>
 
-    <link rel="preconnect" href="https://www.youtube-nocookie.com" />
-    <link rel="preconnect" href="https://www.youtube.com" />
-    <link rel="preconnect" href="https://i.ytimg.com" />
-    <link rel="dns-prefetch" href="https://www.youtube-nocookie.com" />
-    <link rel="dns-prefetch" href="https://www.youtube.com" />
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path fill-rule='evenodd' clip-rule='evenodd' d='M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z' fill='%23141414'/><path fill-rule='evenodd' clip-rule='evenodd' d='M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z' fill='%23141414'/><style>@media (prefers-color-scheme: dark) { path { fill: white; } }</style></svg>"
-    />
-    <title>Thimi Tech - Intelligent Digital Solutions</title>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <link rel="stylesheet" href="app.css" />
-  </head>
+          <article class="service-card">
+            <span class="idx">S / 02</span>
+            <div class="ico-3d" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                <rect x="20" y="35" width="22" height="40"/>
+                <rect x="42" y="20" width="22" height="55"/>
+                <rect x="64" y="45" width="16" height="30"/>
+                <path d="M14 75h72"/>
+              </svg>
+            </div>
+            <h3>Municipal <em>Management</em></h3>
+            <p>Smart systems to streamline local government operations.</p>
+            <span class="more">Smart governance →</span>
+          </article>
 
-  <body class="home-page loading">
-    <div class="loader">
-      <h1 id="loader-text" data-splitting>Thimi Tech</h1>
-      <div class="loader-progress">
-        <div class="loader-progress-bar"></div>
+          <article class="service-card">
+            <span class="idx">S / 03</span>
+            <div class="ico-3d" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                <circle cx="50" cy="50" r="14" fill="currentColor"/>
+                <circle cx="50" cy="50" r="30"/>
+                <path d="M50 14v8M50 78v8M14 50h8M78 50h8M24 24l6 6M70 70l6 6M24 76l6-6M70 30l6-6"/>
+              </svg>
+            </div>
+            <h3>AI & Machine <em>Learning</em></h3>
+            <p>Custom AI/ML for automation, prediction, and smarter decisions.</p>
+            <span class="more">Intelligence shipped →</span>
+          </article>
+
+          <article class="service-card">
+            <span class="idx">S / 04</span>
+            <div class="ico-3d" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                <path d="M14 14v72h72"/>
+                <path d="M26 70l16-18 14 12 16-28"/>
+                <circle cx="26" cy="70" r="3" fill="currentColor"/>
+                <circle cx="42" cy="52" r="3" fill="currentColor"/>
+                <circle cx="56" cy="64" r="3" fill="currentColor"/>
+                <circle cx="72" cy="36" r="3" fill="currentColor"/>
+              </svg>
+            </div>
+            <h3>Data <em>Visualization</em></h3>
+            <p>Tools that turn complex data into clear, actionable insight.</p>
+            <span class="more">Decisions, made obvious →</span>
+          </article>
+
+          <article class="service-card">
+            <span class="idx">S / 05</span>
+            <div class="ico-3d" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                <path d="M30 24L14 50l16 26M70 24l16 26-16 26M58 16L42 84"/>
+              </svg>
+            </div>
+            <h3>Web & App <em>Development</em></h3>
+            <p>Modern, responsive products tailored to your audience and stack.</p>
+            <span class="more">End-to-end craft →</span>
+          </article>
+
+          <article class="service-card">
+            <span class="idx">S / 06</span>
+            <div class="ico-3d" aria-hidden="true">
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
+                <rect x="14" y="22" width="72" height="56" rx="3"/>
+                <path d="M14 36h72M26 50h18M52 50h12M26 60h36M26 68h22"/>
+              </svg>
+            </div>
+            <h3>Dashboards & <em>Reporting</em></h3>
+            <p>Real-time dashboards and tools for effective monitoring & reports.</p>
+            <span class="more">See everything →</span>
+          </article>
+
+        </div>
       </div>
     </div>
-    <div id="main-container">
-      <!-- ============ HEADER COMPONENT ============ -->
-      <nav class="header">
-        <div class="header-container">
-          <div class="header-logo">
-            <a
-              id="logo-link"
-              href="./"
-              aria-label="Go back to homepage"
-              class="logo-home-link"
-            >
-              <div class="logo-home-wrapper">
-                <div id="logo-home" class="">
-                  <img
-                    src="/assets/thimitech.jpg"
-                    alt="Thimi Tech"
-                    class="logo-image"
-                  />
-                </div>
-              </div>
-            </a>
-          </div>
-          <div class="header-wrapper">
-            <div class="header-wrapper-LN">
-              <a href="#about">about</a>
-              <a href="#services">services</a>
-              <a href="#projects">projects</a>
-              <a href="#contact" class="contact-button">contact us</a>
-            </div>
-            <div class="header-wrapper-HB">
-              <button class="button-menu" aria-label="Open menu">
-                <svg
-                  width="24"
-                  height="18"
-                  viewBox="0 0 24 18"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3 3H21"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <path
-                    d="M3 9H21"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                  <path
-                    d="M3 15H21"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-      <!-- ============ /HEADER COMPONENT ============ -->
+  </div>
+</section>
 
-      <!-- ============ MOBILE MENU COMPONENT ============ -->
-      <div class="menu-wrap">
-        <div class="hidden-img">
-          <!-- <img src="./static/assets/img/23.jpg" alt="Image 1" /> -->
-        </div>
-        <div class="menu-wrap-header">
-          <a href="./" class="logo-text">
-            <img
-              src="/assets/thimitech.jpg"
-              alt="Thimi Tech"
-              class="logo-image"
-            />
-          </a>
-          <button
-            class="button-close"
-            title="Close menu"
-            aria-label="Close menu"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M18 6L6 18"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-              <path
-                d="M6 6L18 18"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-              />
-            </svg>
-          </button>
-        </div>
-        <main class="menu-wrap-main">
-          <nav>
-            <section class="nav">
-              <a
-                href="#about"
-                class="nav-link"
-                id="nav-link1"
-                data-name="about"
-                data-image="image1"
-              >
-                <span class="nav-link-text">about</span>
-                <span class="nav-link-text">.about</span>
-              </a>
-              <a
-                href="#services"
-                class="nav-link"
-                id="nav-link2"
-                data-name="services"
-                data-image="image2"
-              >
-                <span class="nav-link-text">services</span>
-                <span class="nav-link-text">.services</span>
-              </a>
-              <a
-                href="#projects"
-                class="nav-link"
-                id="nav-link3"
-                data-name="projects"
-                data-image="image3"
-              >
-                <span class="nav-link-text">projects</span>
-                <span class="nav-link-text">.projects</span>
-              </a>
-              <a
-                href="#contact"
-                class="nav-link contact-button-menu"
-                id="nav-link4"
-                data-name="contact"
-                data-image="image4"
-              >
-                <span class="nav-link-text">contact us</span>
-                <span class="nav-link-text">.contact us</span>
-              </a>
-            </section>
-            <section class="socials">
-              <ul class="socials-links">
-                <li class="socials-links-horizontal">
-                  <a href="#" target="_blank" rel="noopener noreferrer"
-                    ><i class="fab fa-linkedin"></i> LINKEDIN</a
-                  >
-                </li>
-                <li class="socials-links-horizontal">
-                  <a href="#" target="_blank" rel="noopener noreferrer"
-                    ><i class="fab fa-github"></i> GITHUB</a
-                  >
-                </li>
-                <li class="socials-links-horizontal">
-                  <a href="#" target="_blank" rel="noopener noreferrer"
-                    ><i class="fab fa-twitter"></i> TWITTER</a
-                  >
-                </li>
-              </ul>
-            </section>
-          </nav>
-        </main>
-        <footer class="menu-wrap-footer">
-          <a href="mailto:info@thimitech.com">
-            <h3>Get in touch</h3>
-          </a>
-        </footer>
-      </div>
-      <!-- ============ /MOBILE MENU COMPONENT ============ -->
-
-      <!-- Main Content -->
-      <section class="switchPage">
-        <main class="hero">
-          <section class="hero-text-wrapper">
-            <h1 class="hero-title" style="font-weight: bolder">
-              <span class="line-wrapper"><span class="line">We Are</span></span>
-              <span class="line-wrapper"
-                ><span class="line">Thimi Tech</span></span
-              >
-            </h1>
-            <div class="hero-subtitle">
-              <span class="subtitle-line"
-                >We are a team of developers who are passionate about creating
-                innovative solutions for our clients. We are here to transfer
-                <strong>Reality to Vision</strong> and
-                <strong>Vision to Reality</strong>.</span
-              >
-            </div>
-
-            <div class="hero-buttons">
-              <a href="#projects" class="hero-button hero-button-primary">
-                <span><i class="fas fa-briefcase"></i> View our projects</span>
-              </a>
-              <a href="#contact" class="hero-button hero-button-secondary">
-                <span><i class="fas fa-envelope"></i> Get in touch</span>
-              </a>
-            </div>
-          </section>
-        </main>
-
-        <!-- ============ ABOUT US SECTION ============ -->
-        <section class="selected-work" id="about">
-          <div class="selected-work-container">
-            <div class="selected-work-home-content">
-              <h2 class="selected-work-home-title" data-splitting>About Us</h2>
-              <p class="selected-work-home-subtitle">
-                Thimi Tech is a Nepal-based software company, delivering
-                intelligent digital solutions for businesses and governmental
-                bodies. We specialize in development of geoportals, municipal
-                management systems, AI and machine learning applications, data
-                visualization, and modern web development. Our mission is to
-                empower organizations with innovative, scalable, and
-                purpose-driven technology that enhances governance, streamlines
-                operations, and drives meaningful impact across communities.
-              </p>
-            </div>
-          </div>
-        </section>
-        <!-- ============ /ABOUT US SECTION ============ -->
-
-        <!-- ============ CLIENTS SECTION ============ -->
-        <section class="company-logos" id="clients">
-          <div class="company-logos-container">
-            <div class="company-logos-content">
-              <h2 class="company-logos-title" data-splitting>
-                Trusted by Our Clients
-              </h2>
-              <p class="company-logos-subtitle">
-                We're proud to work with innovative organizations and businesses
-                that trust us to deliver exceptional digital solutions.
-              </p>
-            </div>
-            <div class="company-logos-grid">
-              <div class="company-logos-item">
-                <img
-                  src="/assets/bagmati.png"
-                  alt="Bagmati Province"
-                  class="company-logo-image"
-                />
-                <div class="company-logo-text">Bagmati Province</div>
-              </div>
-              <div class="company-logos-item">
-                <img
-                  src="/assets/explore-nepal.png"
-                  alt="Explore Nepal"
-                  class="company-logo-image"
-                />
-                <div class="company-logo-text">Explore Nepal</div>
-              </div>
-              <div class="company-logos-item">
-                <img
-                  src="/assets/modish.png"
-                  alt="Modish Era"
-                  class="company-logo-image"
-                />
-                <div class="company-logo-text">Modish Era</div>
-              </div>
-              <div class="company-logos-item">
-                <img
-                  src="/assets/navtech.png"
-                  alt="Navtech"
-                  class="company-logo-image"
-                />
-                <div class="company-logo-text">
-                  Navtech Engineering Solutions
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <!-- ============ /CLIENTS SECTION ============ -->
-
-        <!-- ============ SERVICES SECTION ============ -->
-        <section class="design-process" id="services">
-          <div class="design-process-container">
-            <div class="design-process-content">
-              <h2 class="design-process-title" data-splitting>Services</h2>
-              <p class="design-process-subtitle">
-                We offer a wide range of services to help you achieve your
-                goals.
-              </p>
-            </div>
-            <div class="design-process-grid">
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-map-marked-alt"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">GeoPortal Solutions</h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Interactive platforms for visualizing and managing
-                    geographic data.
-                  </p>
-                </div>
-              </article>
-
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-city"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">
-                    Municipal Management Systems
-                  </h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Smart systems to streamline local government operations and
-                    services.
-                  </p>
-                </div>
-              </article>
-
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-brain"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">
-                    AI & Machine Learning
-                  </h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Custom AI/ML solutions for automation, prediction, and
-                    smarter decision-making.
-                  </p>
-                </div>
-              </article>
-
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">
-                    Data Management & Visualization
-                  </h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Tools to organize data and turn it into clear, actionable
-                    insights.
-                  </p>
-                </div>
-              </article>
-
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-code"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">
-                    Web & App Development
-                  </h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Modern, responsive websites and mobile applications tailored
-                    to your goals.
-                  </p>
-                </div>
-              </article>
-
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-lightbulb"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">
-                    IT Consulting & Digital Strategy
-                  </h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Expert guidance on digital transformation, system
-                    architecture, and scalability.
-                  </p>
-                </div>
-              </article>
-
-              <article class="design-process-card">
-                <div class="design-process-card-icon">
-                  <i class="fas fa-tachometer-alt"></i>
-                </div>
-                <div class="design-process-card-header">
-                  <h3 class="design-process-card-title">
-                    Interactive Dashboards & Reporting Tools
-                  </h3>
-                </div>
-                <div class="design-process-card-description">
-                  <p>
-                    Real-time dashboards and tools for effective monitoring,
-                    reports, and analytics.
-                  </p>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-        <!-- ============ /SERVICES SECTION ============ -->
-
-        <!-- ============ MISSION SECTION ============ -->
-        <section class="experiments" id="mission">
-          <div class="experiments-container">
-            <div class="experiments-content">
-              <h2 class="experiments-title" data-splitting>Our Mission</h2>
-              <p class="experiments-subtitle">
-                We are committed to creating impactful digital solutions that
-                transform businesses and enhance user experiences. Through
-                innovation and expertise, we deliver excellence in every
-                project.
-              </p>
-            </div>
-            <div class="experiments-grid experiments-grid-fullwidth">
-              <article
-                class="experiments-card experiments-card-fullwidth experiments-card-left"
-              >
-                <div class="experiments-card-content">
-                  <div class="experiments-card-icon">
-                    <i class="fas fa-shield-alt"></i>
-                  </div>
-                  <div class="experiments-card-text">
-                    <h3 class="experiments-card-title">Smart Governance</h3>
-                    <p class="experiments-card-description">
-                      Empowering governance and businesses with innovative smart
-                      technology solutions that streamline operations, enhance
-                      citizen engagement, and drive digital transformation. We
-                      develop comprehensive platforms that enable data-driven
-                      decision-making, automate administrative processes, and
-                      create transparent, efficient systems for public and
-                      private sectors.
-                    </p>
-                  </div>
-                </div>
-              </article>
-
-              <article
-                class="experiments-card experiments-card-fullwidth experiments-card-right"
-              >
-                <div class="experiments-card-content">
-                  <div class="experiments-card-text">
-                    <h3 class="experiments-card-title">
-                      Geospatial Innovation
-                    </h3>
-                    <p class="experiments-card-description">
-                      Building cutting-edge geoportals and municipal tools for
-                      enhanced spatial intelligence. Our geospatial solutions
-                      transform complex geographic data into intuitive,
-                      interactive visualizations that help organizations make
-                      informed decisions about land use, infrastructure
-                      planning, resource management, and urban development.
-                    </p>
-                  </div>
-                  <div class="experiments-card-icon">
-                    <i class="fas fa-globe-asia"></i>
-                  </div>
-                </div>
-              </article>
-
-              <article
-                class="experiments-card experiments-card-fullwidth experiments-card-left"
-              >
-                <div class="experiments-card-content">
-                  <div class="experiments-card-icon">
-                    <i class="fas fa-robot"></i>
-                  </div>
-                  <div class="experiments-card-text">
-                    <h3 class="experiments-card-title">AI-Driven Solutions</h3>
-                    <p class="experiments-card-description">
-                      Leveraging AI/ML technologies for smarter, data-driven
-                      decision-making. We create intelligent systems that
-                      automate complex processes, predict trends, and provide
-                      actionable insights. From custom chatbots with trainable
-                      knowledge bases to predictive analytics platforms, our AI
-                      solutions help businesses optimize operations and deliver
-                      exceptional user experiences.
-                    </p>
-                  </div>
-                </div>
-              </article>
-
-              <article
-                class="experiments-card experiments-card-fullwidth experiments-card-right"
-              >
-                <div class="experiments-card-content">
-                  <div class="experiments-card-text">
-                    <h3 class="experiments-card-title">Data Intelligence</h3>
-                    <p class="experiments-card-description">
-                      Transforming complex data into clear, actionable business
-                      insights. We design powerful data management systems and
-                      interactive dashboards that turn raw information into
-                      strategic advantages. Our visualization tools enable
-                      real-time monitoring, comprehensive reporting, and
-                      data-driven decision-making across all levels of your
-                      organization.
-                    </p>
-                  </div>
-                  <div class="experiments-card-icon">
-                    <i class="fas fa-database"></i>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-        <!-- ============ /MISSION SECTION ============ -->
-
-        <!-- ============ PROJECTS SECTION ============ -->
-        <section class="selected-work" id="projects">
-          <div class="selected-work-container">
-            <div class="selected-work-home-content">
-              <h2 class="selected-work-home-title" data-splitting>Projects</h2>
-              <p class="selected-work-home-subtitle">
-                Focus on scalable, intuitive solutions that drive real-world
-                impact
-              </p>
-            </div>
-            <div class="selected-work-grid">
-              <article class="selected-work-card">
-                <a
-                  href="https://nepal.thimitech.cloud/"
-                  target="_blank"
-                  class="selected-work-card-link"
-                >
-                  <div class="selected-work-card-image">
-                    <img
-                      src="/assets/explore-nepal-home.png"
-                      alt="Explore Nepal"
-                    />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">Explore Nepal</h3>
-                    <p class="selected-work-card-subtitle">
-                      Travel & Culture Platform
-                    </p>
-                    <p class="selected-work-card-description">
-                      A dynamic platform showcasing Nepal's culture,
-                      destinations, and travel tools — combining design, data,
-                      and storytelling.
-                    </p>
-                  </div>
-                </a>
-              </article>
-              <article class="selected-work-card">
-                <a
-                  href="https://ai.thimitech.cloud/"
-                  target="_blank"
-                  class="selected-work-card-link"
-                >
-                  <div class="selected-work-card-image">
-                    <img
-                      src="/assets/ai-bot.png"
-                      alt="Custom Chatbot Service"
-                    />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">
-                      Custom Chatbot Service
-                    </h3>
-                    <p class="selected-work-card-subtitle">
-                      AI Assistant Platform
-                    </p>
-                    <p class="selected-work-card-description">
-                      Custom chatbot service with a custom knowledge base that
-                      clients can train to provide intelligent, context-aware
-                      responses tailored to their specific needs.
-                    </p>
-                  </div>
-                </a>
-              </article>
-            </div>
-
-            <!-- Full-width card -->
-            <article class="selected-work-card selected-work-card-full-width">
-              <a
-                href="https://gis.thimitech.cloud/"
-                target="_blank"
-                class="selected-work-card-link"
-              >
-                <div class="selected-work-card-image">
-                  <img
-                    src="/assets/municipal.png"
-                    alt="Municipal Management System"
-                  />
-                </div>
-                <div class="selected-work-card-content">
-                  <h3 class="selected-work-card-title">
-                    Municipal Management System
-                  </h3>
-                  <p class="selected-work-card-subtitle">
-                    Government Management Platform
-                  </p>
-                  <p class="selected-work-card-description">
-                    A geo-based system developed for municipalities to assign
-                    and manage house numbers efficiently and accurately.
-                  </p>
-                </div>
-              </a>
-            </article>
-
-            <!-- Second row -->
-            <div class="selected-work-grid selected-work-grid-second">
-              <article class="selected-work-card selected-work-card-tall">
-                <a
-                  href="https://psdi.bagamati.gov.np/"
-                  target="_blank"
-                  class="selected-work-card-link"
-                >
-                  <div class="selected-work-card-image">
-                    <img
-                      src="/assets/bagmati-portal.png"
-                      alt="House Numbering System"
-                    />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">
-                      Geospatial Data Center
-                    </h3>
-                    <p class="selected-work-card-subtitle">
-                      Data Management and Geospatial Visualizations
-                    </p>
-                    <p class="selected-work-card-description">
-                      A centralized platform that offers comprehensive spatial
-                      data, interactive mapping tools, and intelligent
-                      visualizations — designed to support planners,
-                      researchers, educators, and government bodies in making
-                      informed and impactful choices
-                    </p>
-                  </div>
-                </a>
-              </article>
-              <article class="selected-work-card">
-                <a href="#" class="selected-work-card-link">
-                  <div class="selected-work-card-image">
-                    <img src="/assets/modish-era.png" alt="The Modish Era" />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">The Modish Era</h3>
-                    <p class="selected-work-card-subtitle">
-                      E-commerce Platform
-                    </p>
-                    <p class="selected-work-card-description">
-                      A e-commerce platform offering a wide range of products
-                      from various vendors.
-                    </p>
-                  </div>
-                </a>
-              </article>
-            </div>
-
-            <!-- Third row -->
-            <!-- <div class="selected-work-grid">
-              <article class="selected-work-card">
-                <a href="#" class="selected-work-card-link">
-                  <div class="selected-work-card-image">
-                    <img
-                      src="/assets/thimi-guesser.jpg"
-                      alt="Thimi Guesser Game"
-                    />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">Thimi Guesser Game</h3>
-                    <p class="selected-work-card-subtitle">Interactive Game</p>
-                    <p class="selected-work-card-description">
-                      A game that allows users to guess the name of a place
-                      based on a description.
-                    </p>
-                  </div>
-                </a>
-              </article>
-              <article class="selected-work-card">
-                <a href="#" class="selected-work-card-link">
-                  <div class="selected-work-card-image">
-                    <img
-                      src="/assets/waste-management.jpg"
-                      alt="Waste Management System"
-                    />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">
-                      Waste Management System
-                    </h3>
-                    <p class="selected-work-card-subtitle">
-                      Public Services Platform
-                    </p>
-                    <p class="selected-work-card-description">
-                      The Mapping and Visualizing the Public Places system is a
-                      web-based application that allows users to view and locate
-                      various public places, including dustbins, parks, and
-                      public restrooms on a map.
-                    </p>
-                  </div>
-                </a>
-              </article>
-            </div>
-
-     
-            <div class="selected-work-grid">
-              <article class="selected-work-card">
-                <a href="#" class="selected-work-card-link">
-                  <div class="selected-work-card-image">
-                    <img
-                      src="/assets/newari-tts.jpg"
-                      alt="Newari Text to Speech"
-                    />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">
-                      Newari Text to Speech
-                    </h3>
-                    <p class="selected-work-card-subtitle">
-                      Language Technology
-                    </p>
-                    <p class="selected-work-card-description">
-                      A text-to-speech application that converts text into
-                      Newari language, providing an accessible and engaging
-                      experience for users.
-                    </p>
-                  </div>
-                </a>
-              </article>
-              <article class="selected-work-card">
-                <a href="#" class="selected-work-card-link">
-                  <div class="selected-work-card-image">
-                    <img src="/assets/woda-league.jpg" alt="Woda League Cup" />
-                  </div>
-                  <div class="selected-work-card-content">
-                    <h3 class="selected-work-card-title">Woda League Cup</h3>
-                    <p class="selected-work-card-subtitle">
-                      Sports Management Platform
-                    </p>
-                    <p class="selected-work-card-description">
-                      A web-based platform for managing and tracking the Woda
-                      League Cup, a football tournament organized by the Woda
-                      Football Club.
-                    </p>
-                  </div>
-                </a>
-              </article>
-            </div> -->
-
-            <!-- Fifth row -->
-            <article class="selected-work-card selected-work-card-full-width">
-              <a href="#" class="selected-work-card-link">
-                <div class="selected-work-card-image">
-                  <img src="/assets/thimi-live.png" alt="Thimi.live" />
-                </div>
-                <div class="selected-work-card-content">
-                  <h3 class="selected-work-card-title">Thimi.live</h3>
-                  <p class="selected-work-card-subtitle">
-                    Sports Management Platform
-                  </p>
-                  <p class="selected-work-card-description">
-                    A web-based platform for managing and tracking the
-                    Thimi.live, a football tournament organized by the Thimi
-                    Football Club.
-                  </p>
-                </div>
-              </a>
-            </article>
-          </div>
-        </section>
-        <!-- ============ /PROJECTS SECTION ============ -->
-
-        <!-- ============ TEAM SECTION ============ -->
-        <section class="experiments" id="team">
-          <div class="experiments-container">
-            <div class="experiments-content">
-              <h2 class="experiments-title" data-splitting>Our Team</h2>
-              <p class="experiments-subtitle">
-                Meet the talented individuals who make Thimi Tech possible.
-              </p>
-            </div>
-            <div class="experiments-grid team-grid">
-              <article class="experiments-card team-card">
-                <div class="team-card-image">
-                  <img
-                    src="/assets/team/kshittiz.jpg"
-                    alt="Kshittiz Chaudhary"
-                    class="team-member-photo"
-                  />
-                </div>
-                <div class="experiments-card-content team-card-content">
-                  <h3 class="experiments-card-title">Kshittiz Chaudhary</h3>
-                  <p class="experiments-card-subtitle">Full Stack Developer</p>
-                  <p class="team-card-description">
-                    Passionate about building scalable web applications and
-                    creating seamless user experiences.
-                  </p>
-                </div>
-              </article>
-
-              <article class="experiments-card team-card">
-                <div class="team-card-image">
-                  <img
-                    src="/assets/team/suresh.jpg"
-                    alt="Suresh Rokaya"
-                    class="team-member-photo"
-                  />
-                </div>
-                <div class="experiments-card-content team-card-content">
-                  <h3 class="experiments-card-title">Suresh Rokaya</h3>
-                  <p class="experiments-card-subtitle">Full Stack Developer</p>
-                  <p class="team-card-description">
-                    Expert in modern web technologies with a focus on
-                    performance and clean code architecture.
-                  </p>
-                </div>
-              </article>
-
-              <article class="experiments-card team-card">
-                <div class="team-card-image">
-                  <img
-                    src="/assets/team/nayana.jpg"
-                    alt="Nayana Koju"
-                    class="team-member-photo"
-                  />
-                </div>
-                <div class="experiments-card-content team-card-content">
-                  <h3 class="experiments-card-title">Nayana Koju</h3>
-                  <p class="experiments-card-subtitle">AI Intern</p>
-                  <p class="team-card-description">
-                    Exploring the frontiers of artificial intelligence and
-                    machine learning to solve real-world problems.
-                  </p>
-                </div>
-              </article>
-
-              <article class="experiments-card team-card">
-                <div class="team-card-image">
-                  <img
-                    src="/assets/team/rubi.jpg"
-                    alt="Rubi Bhuju"
-                    class="team-member-photo"
-                  />
-                </div>
-                <div class="experiments-card-content team-card-content">
-                  <h3 class="experiments-card-title">Rubi Bhuju</h3>
-                  <p class="experiments-card-subtitle">
-                    Marketing/Communication Intern
-                  </p>
-                  <p class="team-card-description">
-                    Crafting compelling narratives and building meaningful
-                    connections between our products and users.
-                  </p>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-        <!-- ============ /TEAM SECTION ============ -->
-
-        <!-- ============ CONTACT SECTION ============ -->
-        <section class="selected-work" id="contact">
-          <div class="selected-work-container">
-            <div class="selected-work-home-content">
-              <h2 class="selected-work-home-title" data-splitting>
-                Contact Us
-              </h2>
-              <p class="selected-work-home-subtitle">
-                We're always here to help! Whether you have a question, need
-                support, or want to work with us — feel free to reach out.
-              </p>
-            </div>
-            <div
-              class="selected-work-grid"
-              style="max-width: 800px; margin: 0 auto"
-            >
-              <article class="selected-work-card" style="width: 100%">
-                <form class="contact-form" style="padding: 2rem">
-                  <div style="margin-bottom: 1.5rem">
-                    <label
-                      for="full-name"
-                      style="
-                        display: block;
-                        margin-bottom: 0.5rem;
-                        font-weight: 500;
-                      "
-                      ><i class="fas fa-user"></i> Full Name</label
-                    >
-                    <input
-                      type="text"
-                      id="full-name"
-                      name="full-name"
-                      required
-                      style="
-                        width: 100%;
-                        padding: 0.75rem;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        font-size: 1rem;
-                      "
-                    />
-                  </div>
-                  <div style="margin-bottom: 1.5rem">
-                    <label
-                      for="email"
-                      style="
-                        display: block;
-                        margin-bottom: 0.5rem;
-                        font-weight: 500;
-                      "
-                      ><i class="fas fa-envelope"></i> Email Address</label
-                    >
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      style="
-                        width: 100%;
-                        padding: 0.75rem;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        font-size: 1rem;
-                      "
-                    />
-                  </div>
-                  <div style="margin-bottom: 1.5rem">
-                    <label
-                      for="subject"
-                      style="
-                        display: block;
-                        margin-bottom: 0.5rem;
-                        font-weight: 500;
-                      "
-                      ><i class="fas fa-tag"></i> Subject</label
-                    >
-                    <input
-                      type="text"
-                      id="subject"
-                      name="subject"
-                      required
-                      style="
-                        width: 100%;
-                        padding: 0.75rem;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        font-size: 1rem;
-                      "
-                    />
-                  </div>
-                  <div style="margin-bottom: 1.5rem">
-                    <label
-                      for="message"
-                      style="
-                        display: block;
-                        margin-bottom: 0.5rem;
-                        font-weight: 500;
-                      "
-                      ><i class="fas fa-comment"></i> Message</label
-                    >
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows="6"
-                      required
-                      style="
-                        width: 100%;
-                        padding: 0.75rem;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        font-size: 1rem;
-                        resize: vertical;
-                      "
-                    ></textarea>
-                  </div>
-                  <button
-                    type="submit"
-                    class="hero-button hero-button-primary"
-                    style="width: 100%"
-                  >
-                    <span><i class="fas fa-paper-plane"></i> Send Message</span>
-                  </button>
-                </form>
-              </article>
-            </div>
-          </div>
-        </section>
-        <!-- ============ /CONTACT SECTION ============ -->
-
-        <!-- ============ FOOTER SECTION ============ -->
-        <footer class="footer">
-          <div class="footer-container">
-            <div class="footer-left">
-              <div class="footer-cta">
-                <h2 class="footer-cta-title">
-                  Ready to start your next project?
-                </h2>
-                <div class="footer-cta-subtitle">
-                  <a href="#contact">Let's create something amazing together</a>
-                </div>
-              </div>
-              <div class="footer-bottom">
-                <p class="footer-copyright">© 2025 Thimi Tech</p>
-                <div class="footer-logo">
-                  <div class="footer-logo-icon"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="footer-right">
-              <div class="footer-links">
-                <div class="footer-column">
-                  <h3 class="footer-column-title">Quick Links</h3>
-                  <div class="footer-column-links">
-                    <a href="#about">about</a>
-                    <a href="#services">services</a>
-                    <a href="#projects">projects</a>
-                    <a href="#contact" data-name="contact">contact</a>
-                  </div>
-                </div>
-
-                <div class="footer-column">
-                  <h3 class="footer-column-title">Get in touch</h3>
-                  <div class="footer-column-links footer-contact-links">
-                    <a
-                      href="mailto:info@techthimi@gmail.com"
-                      class="footer-email-link"
-                      ><i class="fas fa-envelope"></i> techthimi@gmail.com</a
-                    >
-                    <span class="footer-contact-text"
-                      >or fill the form above</span
-                    >
-                  </div>
-                </div>
-
-                <div class="footer-column">
-                  <h3 class="footer-column-title">Follow Us</h3>
-                  <div class="footer-column-links">
-                    <a
-                      href="https://www.facebook.com/profile.php?id=61585729408478"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      ><i class="fab fa-facebook"></i> Facebook</a
-                    >
-                    <a
-                      href="https://www.instagram.com/thimitech/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      ><i class="fab fa-instagram"></i> Instagram</a
-                    >
-                    <a href="#" target="_blank" rel="noopener noreferrer"
-                      ><i class="fab fa-linkedin"></i> Linkedin</a
-                    >
-                  </div>
-                </div>
-
-                <div class="footer-column">
-                  <h3 class="footer-column-title">Legal</h3>
-                  <div class="footer-column-links">
-                    <a href="#">Terms & Conditions</a>
-                    <a href="#">Privacy Policy</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
-        <!-- ============ /FOOTER SECTION ============ -->
-      </section>
-      <div class="overlay-loader-wrapper">
-        <h1 class="overlay-text"></h1>
-      </div>
-      <svg
-        class="overlay"
-        width="100%"
-        height="100%"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-      >
-        <path
-          class="overlay-path"
-          vector-effect="non-scaling-stroke"
-          d="M 0 100 V 100 Q 50 100 100 100 V 100 z"
-        />
-      </svg>
+<!-- ============ PROJECTS (4 featured) ============ -->
+<section class="section" id="work">
+  <div class="section-head reveal-up">
+    <div>
+      <span class="section-num">01 / Work</span>
+      <h2 class="section-title">Selected <em>projects</em>.</h2>
     </div>
-    <script>
-      // Remove loader after page loads
-      window.addEventListener("load", function () {
-        const loader = document.querySelector(".loader");
-        const body = document.body;
+    <p class="section-lede">
+      Recent shipments — from a national travel platform to province-scale geospatial intelligence.
+    </p>
+  </div>
 
-        // Hide loader after a short delay
-        setTimeout(function () {
-          if (loader) {
-            loader.style.opacity = "0";
-            loader.style.transition = "opacity 0.5s ease";
-            setTimeout(function () {
-              loader.style.display = "none";
-              body.classList.remove("loading");
-            }, 500);
-          }
-        }, 1000);
-      });
+  <div class="projects-grid">
 
-      // Mobile menu functionality
-      document.addEventListener("DOMContentLoaded", function () {
-        const menuButton = document.querySelector(".button-menu");
-        const closeButton = document.querySelector(".button-close");
-        const menuWrap = document.querySelector(".menu-wrap");
-        const menuLinks = document.querySelectorAll(".menu-wrap .nav-link");
+    <a class="project half reveal-up" href="https://planmynepal.com/" target="_blank" rel="noopener">
+      <div class="thumb">
+        <img src="assets/explore-nepal-home.png" alt="PlanMyNepal" loading="lazy"/>
+      </div>
+      <div class="body">
+        <div>
+          <div class="meta">Travel · Planning · 2025</div>
+          <h3>Plan<em>My</em>Nepal</h3>
+          <p>An end-to-end trip-planning platform for travellers exploring Nepal — itineraries, destinations, and tools, woven together.</p>
+        </div>
+        <div class="arrow" aria-hidden="true">↗</div>
+      </div>
+    </a>
 
-        // Open menu
-        if (menuButton) {
-          menuButton.addEventListener("click", function () {
-            if (menuWrap) {
-              menuWrap.classList.add("active");
-              document.body.style.overflow = "hidden";
-            }
-          });
-        }
+    <a class="project half reveal-up d1" href="https://ai.thimitech.com/" target="_blank" rel="noopener">
+      <div class="thumb">
+        <img src="assets/ai-bot.png" alt="AI by Thimi Tech" loading="lazy"/>
+      </div>
+      <div class="body">
+        <div>
+          <div class="meta">AI · Custom Chatbot · 2025</div>
+          <h3><em>AI</em> by Thimi&nbsp;Tech</h3>
+          <p>Custom chatbots with a trainable knowledge base — context-aware assistants clients tailor to their own products.</p>
+        </div>
+        <div class="arrow" aria-hidden="true">↗</div>
+      </div>
+    </a>
 
-        // Close menu
-        if (closeButton) {
-          closeButton.addEventListener("click", function () {
-            if (menuWrap) {
-              menuWrap.classList.remove("active");
-              document.body.style.overflow = "";
-            }
-          });
-        }
+    <a class="project wide reveal-up" href="https://psdi.bagamati.gov.np/" target="_blank" rel="noopener">
+      <div class="thumb">
+        <img src="assets/bagmati-portal.png" alt="Bagmati Geospatial Data Center" loading="lazy"/>
+      </div>
+      <div class="body">
+        <div>
+          <div class="meta">Featured · Government · Geospatial · 2025</div>
+          <h3>Bagmati <em>Geospatial</em> Data Center</h3>
+          <p>A centralized provincial platform offering comprehensive spatial data, interactive mapping tools, and intelligent visualizations — built for planners, researchers, educators, and government bodies.</p>
+        </div>
+        <div class="arrow" aria-hidden="true">↗</div>
+      </div>
+    </a>
 
-        // Close menu when clicking on a link
-        menuLinks.forEach(function (link) {
-          link.addEventListener("click", function () {
-            if (menuWrap) {
-              menuWrap.classList.remove("active");
-              document.body.style.overflow = "";
-            }
-          });
-        });
+    <a class="project wide reveal-up" href="https://survey.thimitech.com/" target="_blank" rel="noopener">
+      <div class="thumb">
+        <img src="assets/municipal.png" alt="Survey by Thimi Tech" loading="lazy"/>
+      </div>
+      <div class="body">
+        <div>
+          <div class="meta">Data Collection · Forms · 2025</div>
+          <h3><em>Survey</em> by Thimi&nbsp;Tech</h3>
+          <p>A flexible survey & data-collection platform for field teams, researchers, and governments — designed for offline-first reliability and easy reporting.</p>
+        </div>
+        <div class="arrow" aria-hidden="true">↗</div>
+      </div>
+    </a>
 
-        // Smooth scroll for anchor links
-        const anchorLinks = document.querySelectorAll('a[href^="#"]');
+  </div>
+</section>
 
-        anchorLinks.forEach((link) => {
-          link.addEventListener("click", function (e) {
-            const href = this.getAttribute("href");
-            if (href !== "#" && href.length > 1) {
-              const target = document.querySelector(href);
-              if (target) {
-                e.preventDefault();
-                target.scrollIntoView({
-                  behavior: "smooth",
-                  block: "start",
-                });
-              }
-            }
-          });
-        });
+<!-- ============ MISSION ============ -->
+<section class="section mission" id="mission">
+  <div class="section-head reveal-up">
+    <div>
+      <span class="section-num">02 / Mission</span>
+      <h2 class="section-title">Why <em>we<br/>show up</em>.</h2>
+    </div>
+    <p class="section-lede">
+      Four principles guiding everything we ship — for businesses, governments, and the communities they serve.
+    </p>
+  </div>
 
-        // Contact form handling
-        const contactFormElement = document.querySelector(".contact-form");
-        if (contactFormElement) {
-          contactFormElement.addEventListener("submit", function (e) {
-            e.preventDefault();
-            alert("Thank you for your message! We'll get back to you soon.");
-            contactFormElement.reset();
-          });
-        }
+  <div class="mission-grid reveal-up">
+    <div class="mission-tile">
+      <span class="num">01</span>
+      <div class="gem" aria-hidden="true">
+        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M30 4L8 14v18c0 11 9 22 22 24 13-2 22-13 22-24V14L30 4z" fill="var(--accent)" fill-opacity="0.15"/>
+          <path d="M22 30l5 5 11-11"/>
+        </svg>
+      </div>
+      <h3>Smart <em>governance</em></h3>
+      <p>Streamlined operations, citizen engagement, transparent systems.</p>
+    </div>
+    <div class="mission-tile">
+      <span class="num">02</span>
+      <div class="gem" aria-hidden="true">
+        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+          <circle cx="30" cy="30" r="22" fill="var(--accent)" fill-opacity="0.15"/>
+          <path d="M8 30h44M30 8c5 7 5 37 0 44M30 8c-5 7-5 37 0 44"/>
+        </svg>
+      </div>
+      <h3>Geospatial <em>innovation</em></h3>
+      <p>Maps that decide. Tools that turn geography into strategy.</p>
+    </div>
+    <div class="mission-tile">
+      <span class="num">03</span>
+      <div class="gem" aria-hidden="true">
+        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="14" y="22" width="32" height="28" rx="3" fill="var(--accent)" fill-opacity="0.15"/>
+          <circle cx="30" cy="14" r="4"/>
+          <path d="M22 32h16M22 38h10"/>
+        </svg>
+      </div>
+      <h3>AI-driven <em>solutions</em></h3>
+      <p>Intelligent systems that automate, predict, and surface insight.</p>
+    </div>
+    <div class="mission-tile">
+      <span class="num">04</span>
+      <div class="gem" aria-hidden="true">
+        <svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1">
+          <ellipse cx="30" cy="14" rx="20" ry="6" fill="var(--accent)" fill-opacity="0.15"/>
+          <path d="M10 14v32c0 3 9 6 20 6s20-3 20-6V14M10 28c0 3 9 6 20 6s20-3 20-6"/>
+        </svg>
+      </div>
+      <h3>Data <em>intelligence</em></h3>
+      <p>Raw information into clear, decisive, beautiful dashboards.</p>
+    </div>
+  </div>
+</section>
 
-        // Handle missing images - replace with placeholder
-        const images = document.querySelectorAll("img");
-        images.forEach(function (img) {
-          // Skip logo images - they have text fallbacks
-          if (img.classList.contains("company-logo-image")) {
-            img.addEventListener("error", function () {
-              // Hide the image and show text fallback
-              this.style.display = "none";
-              const textFallback = this.nextElementSibling;
-              if (
-                textFallback &&
-                textFallback.classList.contains("company-logo-text")
-              ) {
-                textFallback.style.display = "block";
-              }
-            });
-          } else if (img.classList.contains("team-member-photo")) {
-            // Team member photos - use placeholder
-            img.addEventListener("error", function () {
-              this.src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ccircle cx='200' cy='150' r='50' fill='%23ccc'/%3E%3Cpath d='M100 300 Q200 250 300 300' stroke='%23ccc' stroke-width='40' fill='none'/%3E%3C/svg%3E";
-              this.alt = "Team member photo";
-            });
-          } else {
-            img.addEventListener("error", function () {
-              this.src =
-                "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect width='400' height='300' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999' font-family='Arial, sans-serif' font-size='16'%3EImage Coming Soon%3C/text%3E%3C/svg%3E";
-              this.alt = "Image placeholder";
-            });
-          }
-        });
+<!-- ============ TEAM ============ -->
+<section class="section" id="team">
+  <div class="section-head reveal-up">
+    <div>
+      <span class="section-num">03 / Team</span>
+      <h2 class="section-title">The <em>humans</em><br/>behind it.</h2>
+    </div>
+    <p class="section-lede">
+      A small, deliberate team. Each one a little bit obsessed with their craft.
+    </p>
+  </div>
 
-        // Handle logo images - show text if image doesn't load
-        const logoImages = document.querySelectorAll(".company-logo-image");
-        logoImages.forEach(function (img) {
-          // Check if image loaded successfully
-          if (img.complete && img.naturalHeight === 0) {
-            // Image failed to load
-            img.style.display = "none";
-            const textFallback = img.nextElementSibling;
-            if (
-              textFallback &&
-              textFallback.classList.contains("company-logo-text")
-            ) {
-              textFallback.style.display = "block";
-            }
-          } else if (img.complete) {
-            // Image loaded successfully, hide text
-            const textFallback = img.nextElementSibling;
-            if (
-              textFallback &&
-              textFallback.classList.contains("company-logo-text")
-            ) {
-              textFallback.style.display = "none";
-            }
-          }
-        });
+  <div class="team-grid">
+    <article class="team-card founder reveal-up">
+      <div class="team-photo">S</div>
+      <div class="team-info">
+        <div class="pos">01 / 04</div>
+        <h3>Sachin Manandhar</h3>
+        <div class="role">Founder</div>
+      </div>
+    </article>
 
-        // ============ SCROLL ANIMATIONS ============
-        // Intersection Observer for scroll-triggered animations
-        const observerOptions = {
-          threshold: 0.1,
-          rootMargin: "0px 0px -50px 0px",
-        };
+    <article class="team-card reveal-up d1">
+      <div class="team-photo">K</div>
+      <div class="team-info">
+        <div class="pos">02 / 04</div>
+        <h3>Kshittiz Chaudhary</h3>
+        <div class="role">Full-Stack Developer</div>
+      </div>
+    </article>
 
-        const observer = new IntersectionObserver(function (entries) {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("animated");
-              observer.unobserve(entry.target);
-            }
-          });
-        }, observerOptions);
+    <article class="team-card reveal-up d2">
+      <div class="team-photo">S</div>
+      <div class="team-info">
+        <div class="pos">03 / 04</div>
+        <h3>Suresh Rokaya</h3>
+        <div class="role">Full-Stack Developer</div>
+      </div>
+    </article>
 
-        // Animate sections on scroll
-        const animateElements = document.querySelectorAll(
-          ".selected-work-card, .design-process-card, .experiments-card, .company-logos-item, .team-card, .selected-work-home-content, .design-process-content, .experiments-content, .company-logos-content"
-        );
+    <article class="team-card reveal-up d3">
+      <div class="team-photo">R</div>
+      <div class="team-info">
+        <div class="pos">04 / 04</div>
+        <h3>Rubi Bhuju</h3>
+        <div class="role">Marketing & Communication Officer</div>
+      </div>
+    </article>
+  </div>
+</section>
 
-        // Explicitly remove any animation classes from About Us section
-        const aboutSection = document.getElementById("about");
-        if (aboutSection) {
-          const aboutElements = aboutSection.querySelectorAll("*");
-          aboutElements.forEach((el) => {
-            el.classList.remove(
-              "animate-on-scroll",
-              "fade-up",
-              "fade-down",
-              "fade-left",
-              "fade-right",
-              "scale-in",
-              "animated"
-            );
-            el.style.opacity = "1";
-            el.style.transform = "none";
-            el.style.transition = "none";
-          });
-        }
+<!-- ============ CTA — invite block ============ -->
+<section class="cta" id="contact">
+  <div class="cta-inner">
+    <div>
+      <span class="cta-eyebrow">Got an idea? · Let's build it</span>
+      <h2>Have a <em>project</em>?</h2>
+      <p>
+        We work with governments, enterprises, and ambitious startups — across Nepal and beyond. Tell us what you're building. We'll get back within one business day.
+      </p>
+      <div class="cta-actions">
+        <a href="mailto:info@thimitech.com" class="btn-primary">
+          <span>info@thimitech.com</span>
+          <span class="ico" aria-hidden="true">→</span>
+        </a>
+        <a href="https://www.linkedin.com/company/thimitech" target="_blank" rel="noopener" class="btn-ghost">
+          <span>LinkedIn ↗</span>
+        </a>
+      </div>
+    </div>
+    <div class="cta-orb" id="cta-orb"></div>
+  </div>
+</section>
 
-        animateElements.forEach((el, index) => {
-          // Skip About Us section (id="about")
-          if (aboutSection && aboutSection.contains(el)) {
-            return; // Skip this element
-          }
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="logo">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z" fill="currentColor"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z" fill="currentColor"/>
+        </svg>
+        Thimi Tech
+      </div>
+      <p>A Nepal-based software studio delivering intelligent digital solutions — geospatial systems, AI, modern web — for businesses, governments, and the communities they serve.</p>
+    </div>
+    <div>
+      <h4>Sitemap</h4>
+      <ul>
+        <li><a href="#top">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#mission">Mission</a></li>
+        <li><a href="#team">Team</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Social</h4>
+      <ul>
+        <li><a href="https://www.linkedin.com/company/thimitech" target="_blank" rel="noopener">LinkedIn ↗</a></li>
+        <li><a href="https://www.instagram.com/thimitech/" target="_blank" rel="noopener">Instagram ↗</a></li>
+        <li><a href="https://www.facebook.com/profile.php?id=61585729408478" target="_blank" rel="noopener">Facebook ↗</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:info@thimitech.com">info@thimitech.com</a></li>
+        <li><a href="#">Kathmandu, NP</a></li>
+      </ul>
+    </div>
+  </div>
 
-          // Add animation classes based on element type
-          if (el.classList.contains("selected-work-card")) {
-            el.classList.add("animate-on-scroll", "fade-up");
-            el.style.transitionDelay = `${(index % 3) * 0.1}s`;
-          } else if (el.classList.contains("design-process-card")) {
-            el.classList.add("animate-on-scroll", "scale-in");
-            el.style.transitionDelay = `${(index % 7) * 0.1}s`;
-          } else if (el.classList.contains("experiments-card")) {
-            el.classList.add("animate-on-scroll", "fade-up");
-            el.style.transitionDelay = `${(index % 4) * 0.15}s`;
-          } else if (el.classList.contains("company-logos-item")) {
-            el.classList.add("animate-on-scroll", "scale-in");
-            el.style.transitionDelay = `${(index % 4) * 0.1}s`;
-          } else if (el.classList.contains("team-card")) {
-            el.classList.add("animate-on-scroll", "fade-up");
-            el.style.transitionDelay = `${(index % 4) * 0.1}s`;
-          } else {
-            el.classList.add("animate-on-scroll", "fade-up");
-          }
+  <div class="footer-base">
+    <span>© 2025 Thimi Tech</span>
+    <span>Reality, into Vision.</span>
+    <span>Built with care · Kathmandu, NP</span>
+  </div>
+</footer>
 
-          observer.observe(el);
-        });
-
-        // Animate cards in grids with stagger effect
-        const cardGrids = document.querySelectorAll(
-          ".selected-work-grid, .design-process-grid, .experiments-grid, .company-logos-grid, .team-grid"
-        );
-
-        cardGrids.forEach((grid) => {
-          const cards = grid.querySelectorAll(
-            ".selected-work-card, .design-process-card, .experiments-card, .company-logos-item, .team-card"
-          );
-          cards.forEach((card, index) => {
-            card.style.transitionDelay = `${index * 0.1}s`;
-          });
-        });
-
-        // Parallax effect for hero section (disabled to prevent overlap)
-        // let lastScrollTop = 0;
-        // const hero = document.querySelector(".hero");
-        // if (hero) {
-        //   window.addEventListener("scroll", function () {
-        //     const scrollTop =
-        //       window.pageYOffset || document.documentElement.scrollTop;
-        //     if (scrollTop < window.innerHeight) {
-        //       const parallaxValue = scrollTop * 0.5;
-        //       hero.style.transform = `translateY(${parallaxValue}px)`;
-        //     }
-        //     lastScrollTop = scrollTop;
-        //   });
-        // }
-
-        // Header scroll effect
-        const header = document.querySelector(".header");
-        let lastScroll = 0;
-        window.addEventListener("scroll", function () {
-          const currentScroll = window.pageYOffset;
-          if (currentScroll > 100) {
-            header.style.boxShadow = "0 2px 20px rgba(0, 0, 0, 0.1)";
-            header.style.background = "rgba(255, 255, 255, 0.98)";
-          } else {
-            header.style.boxShadow = "none";
-            header.style.background = "rgba(255, 255, 255, 0.95)";
-          }
-          lastScroll = currentScroll;
-        });
-
-        // Smooth reveal animation for titles (excluding About Us)
-        const titles = document.querySelectorAll(
-          ".selected-work-home-title, .design-process-title, .experiments-title, .company-logos-title"
-        );
-        titles.forEach((title) => {
-          // Skip About Us section title
-          if (aboutSection && aboutSection.contains(title)) {
-            return; // Skip this title
-          }
-          title.classList.add("animate-on-scroll", "fade-down");
-          observer.observe(title);
-        });
-
-        // Animate contact form
-        if (contactFormElement) {
-          contactFormElement.classList.add("animate-on-scroll", "fade-up");
-          observer.observe(contactFormElement);
-        }
-
-        // Image loading animation
-        const animatedImages = document.querySelectorAll(
-          ".selected-work-card-image img, .team-member-photo"
-        );
-        animatedImages.forEach((img) => {
-          if (img.complete) {
-            img.classList.add("loaded");
-          } else {
-            img.addEventListener("load", function () {
-              this.classList.add("loaded");
-            });
-          }
-        });
-
-        // Add stagger animation to mobile menu items
-        const menuNavLinks = document.querySelectorAll(".menu-wrap .nav-link");
-        menuNavLinks.forEach((link, index) => {
-          link.style.opacity = "0";
-          link.style.transform = "translateX(20px)";
-          link.style.transition = `opacity 0.4s ease ${
-            index * 0.1
-          }s, transform 0.4s ease ${index * 0.1}s`;
-        });
-
-        // Animate menu items when menu opens
-        const originalMenuOpen = menuWrap?.classList.contains.bind(
-          menuWrap.classList
-        );
-        if (menuButton) {
-          menuButton.addEventListener("click", function () {
-            setTimeout(() => {
-              menuNavLinks.forEach((link) => {
-                link.style.opacity = "1";
-                link.style.transform = "translateX(0)";
-              });
-            }, 50);
-          });
-        }
-
-        if (closeButton) {
-          closeButton.addEventListener("click", function () {
-            menuNavLinks.forEach((link) => {
-              link.style.opacity = "0";
-              link.style.transform = "translateX(20px)";
-            });
-          });
-        }
-      });
-    </script>
-  </body>
+<!-- Three.js for hero globe + CTA orb -->
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="scroll.js"></script>
+</body>
 </html>
