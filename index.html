@@ -39,6 +39,7 @@
     <a href="#work">Work</a>
     <a href="#mission">Mission</a>
     <a href="#team">Team</a>
+    <a href="#hiring">Hiring</a>
   </div>
   <div class="nav-right">
     <a href="#contact" class="nav-cta">
@@ -82,7 +83,26 @@
     <span class="globe-label tl">27.7°N · 85.3°E</span>
     <span class="globe-label br">Kathmandu</span>
     <div class="hero-globe" id="globe"></div>
-    <span class="globe-hint">⟳&nbsp;&nbsp;Drag to spin</span>
+    <div class="globe-controls" aria-label="Globe zoom controls">
+      <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+      <button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+      <button id="zoom-reset" title="Reset view" aria-label="Reset view">□</button>
+    </div>
+    <span class="globe-hint">⟳&nbsp;&nbsp;Drag · Scroll to zoom</span>
+
+    <!-- 3D Controller — click buttons to control globe & satellite -->
+    <div class="controller-3d-wrap" id="ps5">
+      <div class="controller-3d" id="controller3d"></div>
+      <div class="controller-hints">
+        <span><kbd>D-pad</kbd>rotate</span>
+        <span><kbd>L1/L2</kbd>zoom out</span>
+        <span><kbd>R1/R2</kbd>zoom in</span>
+        <span><kbd>✕</kbd>boost sat</span>
+        <span><kbd>△</kbd>reset</span>
+        <span><kbd>○</kbd>auto-spin</span>
+        <span><kbd>□</kbd>hide sat</span>
+      </div>
+    </div>
   </div>
 
   <div class="hero-foot">
@@ -91,22 +111,11 @@
   </div>
 </header>
 
-<!-- ============ MARQUEE ============ -->
-<section class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span class="marquee-item">Reality, into Vision</span>
-    <span class="marquee-dot"></span>
-    <span class="marquee-item alt">Vision, into Reality</span>
-    <span class="marquee-dot"></span>
-    <span class="marquee-item">Reality, into Vision</span>
-    <span class="marquee-dot"></span>
-    <span class="marquee-item alt">Vision, into Reality</span>
-    <span class="marquee-dot"></span>
-    <span class="marquee-item">Reality, into Vision</span>
-    <span class="marquee-dot"></span>
-    <span class="marquee-item alt">Vision, into Reality</span>
-    <span class="marquee-dot"></span>
-  </div>
+<!-- ============ FLICKER ============ -->
+<section class="flicker" aria-hidden="true">
+  <span class="flicker-meta">Tagline / 01</span>
+  <span class="flicker-meta r">— Thimi Tech</span>
+  <span class="flicker-text" data-text="Reality, into Vision">Reality, into Vision</span>
 </section>
 
 <!-- ============ SERVICES (horizontal pinned) ============ -->
@@ -124,13 +133,34 @@
 
           <article class="service-card">
             <span class="idx">S / 01</span>
-            <div class="ico-3d" aria-hidden="true">
-              <!-- isometric globe -->
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
-                <ellipse cx="50" cy="50" rx="38" ry="38"/>
-                <ellipse cx="50" cy="50" rx="38" ry="14"/>
-                <ellipse cx="50" cy="50" rx="14" ry="38"/>
-                <circle cx="62" cy="36" r="3" fill="currentColor"/>
+            <div class="service-art" aria-hidden="true">
+              <svg class="art-geo" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice">
+                <!-- grid -->
+                <g class="grid">
+                  <path d="M0 16h160M0 32h160M0 48h160M0 64h160M0 80h160M16 0v100M32 0v100M48 0v100M64 0v100M80 0v100M96 0v100M112 0v100M128 0v100M144 0v100"/>
+                </g>
+                <!-- stylized country shapes -->
+                <path class="land" d="M28 40 Q40 32 56 36 Q72 30 84 38 Q96 44 92 56 Q88 68 72 70 Q56 74 44 68 Q30 62 26 52 Z"/>
+                <path class="land-2" d="M100 22 Q112 18 124 24 Q134 32 130 44 Q124 52 116 50 Q104 48 102 38 Z"/>
+                <path class="land-2" d="M110 68 Q124 64 138 72 Q146 80 140 88 Q132 92 122 88 Q112 82 110 76 Z"/>
+                <!-- pins -->
+                <g transform="translate(60 52)">
+                  <circle class="pin-ring" cx="0" cy="0" r="1"/>
+                  <circle class="pin-ring b" cx="0" cy="0" r="1"/>
+                  <circle class="pin" cx="0" cy="0" r="1.6"/>
+                </g>
+                <g transform="translate(116 36)">
+                  <circle class="pin-ring c" cx="0" cy="0" r="1"/>
+                  <circle class="pin" cx="0" cy="0" r="1.4"/>
+                </g>
+                <g transform="translate(126 78)">
+                  <circle class="pin-ring" cx="0" cy="0" r="1"/>
+                  <circle class="pin" cx="0" cy="0" r="1.4"/>
+                </g>
+                <g transform="translate(40 60)">
+                  <circle class="pin-ring b" cx="0" cy="0" r="1"/>
+                  <circle class="pin" cx="0" cy="0" r="1.2"/>
+                </g>
               </svg>
             </div>
             <h3>GeoPortal <em>Solutions</em></h3>
@@ -140,12 +170,53 @@
 
           <article class="service-card">
             <span class="idx">S / 02</span>
-            <div class="ico-3d" aria-hidden="true">
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
-                <rect x="20" y="35" width="22" height="40"/>
-                <rect x="42" y="20" width="22" height="55"/>
-                <rect x="64" y="45" width="16" height="30"/>
-                <path d="M14 75h72"/>
+            <div class="service-art" aria-hidden="true">
+              <svg class="art-muni" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
+                <!-- Ground line -->
+                <line x1="10" y1="86" x2="150" y2="86" stroke="var(--ink-mute)" stroke-width="0.4" stroke-dasharray="2 2"/>
+                <!-- Building A -->
+                <g class="b-grp a">
+                  <polygon class="b-side" points="38,86 38,52 50,46 50,80"/>
+                  <polygon class="b-top" points="38,52 26,46 38,40 50,46"/>
+                  <rect class="b-face" x="26" y="46" width="12" height="40"/>
+                  <rect class="win" x="28" y="50" width="3" height="3"/>
+                  <rect class="win" x="33" y="50" width="3" height="3"/>
+                  <rect class="win" x="28" y="58" width="3" height="3"/>
+                  <rect class="win" x="33" y="58" width="3" height="3"/>
+                  <rect class="win" x="28" y="66" width="3" height="3"/>
+                  <rect class="win" x="33" y="66" width="3" height="3"/>
+                  <rect class="win" x="28" y="74" width="3" height="3"/>
+                </g>
+                <!-- Building B (tallest, middle) -->
+                <g class="b-grp b">
+                  <polygon class="b-side" points="82,86 82,30 96,22 96,76"/>
+                  <polygon class="b-top" points="82,30 66,22 82,14 96,22"/>
+                  <rect class="b-face" x="66" y="22" width="16" height="64"/>
+                  <rect class="win" x="69" y="28" width="3" height="3"/>
+                  <rect class="win" x="75" y="28" width="3" height="3"/>
+                  <rect class="win" x="69" y="36" width="3" height="3"/>
+                  <rect class="win" x="75" y="36" width="3" height="3"/>
+                  <rect class="win" x="69" y="44" width="3" height="3"/>
+                  <rect class="win" x="75" y="44" width="3" height="3"/>
+                  <rect class="win" x="69" y="52" width="3" height="3"/>
+                  <rect class="win" x="75" y="52" width="3" height="3"/>
+                  <rect class="win" x="69" y="60" width="3" height="3"/>
+                  <rect class="win" x="75" y="60" width="3" height="3"/>
+                  <rect class="win" x="69" y="68" width="3" height="3"/>
+                  <rect class="win" x="75" y="68" width="3" height="3"/>
+                </g>
+                <!-- Building C -->
+                <g class="b-grp c">
+                  <polygon class="b-side" points="122,86 122,60 134,54 134,82"/>
+                  <polygon class="b-top" points="122,60 110,54 122,48 134,54"/>
+                  <rect class="b-face" x="110" y="54" width="12" height="32"/>
+                  <rect class="win" x="112" y="58" width="3" height="3"/>
+                  <rect class="win" x="117" y="58" width="3" height="3"/>
+                  <rect class="win" x="112" y="66" width="3" height="3"/>
+                  <rect class="win" x="117" y="66" width="3" height="3"/>
+                  <rect class="win" x="112" y="74" width="3" height="3"/>
+                  <rect class="win" x="117" y="74" width="3" height="3"/>
+                </g>
               </svg>
             </div>
             <h3>Municipal <em>Management</em></h3>
@@ -155,11 +226,56 @@
 
           <article class="service-card">
             <span class="idx">S / 03</span>
-            <div class="ico-3d" aria-hidden="true">
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
-                <circle cx="50" cy="50" r="14" fill="currentColor"/>
-                <circle cx="50" cy="50" r="30"/>
-                <path d="M50 14v8M50 78v8M14 50h8M78 50h8M24 24l6 6M70 70l6 6M24 76l6-6M70 30l6-6"/>
+            <div class="service-art" aria-hidden="true">
+              <svg class="art-ai" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
+                <!-- Layers: input(3) hidden(5) output(2) -->
+                <g class="nn-line">
+                  <!-- input to hidden -->
+                  <line x1="34" y1="30" x2="80" y2="18"/>
+                  <line x1="34" y1="30" x2="80" y2="36"/>
+                  <line x1="34" y1="30" x2="80" y2="50"/>
+                  <line x1="34" y1="30" x2="80" y2="64"/>
+                  <line x1="34" y1="30" x2="80" y2="82"/>
+                  <line x1="34" y1="50" x2="80" y2="18"/>
+                  <line x1="34" y1="50" x2="80" y2="36"/>
+                  <line x1="34" y1="50" x2="80" y2="50"/>
+                  <line x1="34" y1="50" x2="80" y2="64"/>
+                  <line x1="34" y1="50" x2="80" y2="82"/>
+                  <line x1="34" y1="70" x2="80" y2="18"/>
+                  <line x1="34" y1="70" x2="80" y2="36"/>
+                  <line x1="34" y1="70" x2="80" y2="50"/>
+                  <line x1="34" y1="70" x2="80" y2="64"/>
+                  <line x1="34" y1="70" x2="80" y2="82"/>
+                  <!-- hidden to output -->
+                  <line x1="80" y1="18" x2="126" y2="40"/>
+                  <line x1="80" y1="18" x2="126" y2="60"/>
+                  <line x1="80" y1="36" x2="126" y2="40"/>
+                  <line x1="80" y1="36" x2="126" y2="60"/>
+                  <line x1="80" y1="50" x2="126" y2="40"/>
+                  <line x1="80" y1="50" x2="126" y2="60"/>
+                  <line x1="80" y1="64" x2="126" y2="40"/>
+                  <line x1="80" y1="64" x2="126" y2="60"/>
+                  <line x1="80" y1="82" x2="126" y2="40"/>
+                  <line x1="80" y1="82" x2="126" y2="60"/>
+                </g>
+                <!-- nodes -->
+                <circle class="nn-node" cx="34" cy="30" r="3"/>
+                <circle class="nn-node" cx="34" cy="50" r="3"/>
+                <circle class="nn-node" cx="34" cy="70" r="3"/>
+                <circle class="nn-node active" cx="80" cy="18" r="3"/>
+                <circle class="nn-node" cx="80" cy="36" r="3"/>
+                <circle class="nn-node active" cx="80" cy="50" r="3"/>
+                <circle class="nn-node" cx="80" cy="64" r="3"/>
+                <circle class="nn-node active" cx="80" cy="82" r="3"/>
+                <circle class="nn-node active" cx="126" cy="40" r="3"/>
+                <circle class="nn-node" cx="126" cy="60" r="3"/>
+                <!-- traveling pulse -->
+                <circle class="nn-pulse" cx="34" cy="50" r="1.8">
+                  <animateMotion dur="2.4s" repeatCount="indefinite" path="M0,0 L46,-32 L92,-10"/>
+                </circle>
+                <circle class="nn-pulse" cx="34" cy="30" r="1.8">
+                  <animateMotion dur="2.6s" repeatCount="indefinite" begin="0.8s" path="M0,0 L46,20 L92,30"/>
+                </circle>
               </svg>
             </div>
             <h3>AI & Machine <em>Learning</em></h3>
@@ -169,14 +285,33 @@
 
           <article class="service-card">
             <span class="idx">S / 04</span>
-            <div class="ico-3d" aria-hidden="true">
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
-                <path d="M14 14v72h72"/>
-                <path d="M26 70l16-18 14 12 16-28"/>
-                <circle cx="26" cy="70" r="3" fill="currentColor"/>
-                <circle cx="42" cy="52" r="3" fill="currentColor"/>
-                <circle cx="56" cy="64" r="3" fill="currentColor"/>
-                <circle cx="72" cy="36" r="3" fill="currentColor"/>
+            <div class="service-art" aria-hidden="true">
+              <svg class="art-data" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
+                <!-- axes -->
+                <line class="axis" x1="16" y1="84" x2="148" y2="84"/>
+                <line class="axis" x1="16" y1="12" x2="16" y2="84"/>
+                <line class="axis" x1="16" y1="68" x2="148" y2="68" stroke-dasharray="2 3" opacity=".3"/>
+                <line class="axis" x1="16" y1="50" x2="148" y2="50" stroke-dasharray="2 3" opacity=".3"/>
+                <line class="axis" x1="16" y1="32" x2="148" y2="32" stroke-dasharray="2 3" opacity=".3"/>
+                <!-- bars -->
+                <rect class="bar" x="24" y="58" width="10" height="26"/>
+                <rect class="bar" x="40" y="46" width="10" height="38"/>
+                <rect class="bar" x="56" y="52" width="10" height="32"/>
+                <rect class="bar" x="72" y="36" width="10" height="48"/>
+                <rect class="bar" x="88" y="42" width="10" height="42"/>
+                <rect class="bar" x="104" y="30" width="10" height="54"/>
+                <rect class="bar" x="120" y="24" width="10" height="60"/>
+                <rect class="bar" x="136" y="18" width="10" height="66"/>
+                <!-- line + points -->
+                <polyline class="line" points="29,56 45,42 61,48 77,32 93,38 109,26 125,20 141,14"/>
+                <circle class="pt" cx="29" cy="56" r="2"/>
+                <circle class="pt" cx="45" cy="42" r="2"/>
+                <circle class="pt" cx="61" cy="48" r="2"/>
+                <circle class="pt" cx="77" cy="32" r="2"/>
+                <circle class="pt" cx="93" cy="38" r="2"/>
+                <circle class="pt" cx="109" cy="26" r="2"/>
+                <circle class="pt" cx="125" cy="20" r="2"/>
+                <circle class="pt" cx="141" cy="14" r="2"/>
               </svg>
             </div>
             <h3>Data <em>Visualization</em></h3>
@@ -186,9 +321,31 @@
 
           <article class="service-card">
             <span class="idx">S / 05</span>
-            <div class="ico-3d" aria-hidden="true">
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
-                <path d="M30 24L14 50l16 26M70 24l16 26-16 26M58 16L42 84"/>
+            <div class="service-art" aria-hidden="true">
+              <svg class="art-web" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
+                <!-- Browser window -->
+                <rect class="wnd" x="10" y="14" width="108" height="72" rx="3"/>
+                <rect class="wnd-bar" x="10" y="14" width="108" height="10" rx="3"/>
+                <circle class="wnd-dot" cx="16" cy="19" r="1.2"/>
+                <circle class="wnd-dot" cx="20" cy="19" r="1.2"/>
+                <circle class="wnd-dot" cx="24" cy="19" r="1.2"/>
+                <rect class="wnd-dot" x="32" y="17" width="40" height="4" rx="2" opacity=".5"/>
+                <!-- Page blocks -->
+                <rect class="blk accent" x="18" y="30" width="36" height="6" rx="1"/>
+                <rect class="blk" x="18" y="40" width="68" height="3" rx="1"/>
+                <rect class="blk" x="18" y="46" width="58" height="3" rx="1"/>
+                <rect class="blk" x="18" y="52" width="42" height="3" rx="1"/>
+                <rect class="blk" x="18" y="62" width="22" height="18" rx="2"/>
+                <rect class="blk" x="44" y="62" width="22" height="18" rx="2"/>
+                <rect class="blk" x="70" y="62" width="22" height="18" rx="2"/>
+                <rect class="blk" x="96" y="62" width="16" height="18" rx="2"/>
+                <!-- Phone -->
+                <rect class="phone" x="122" y="22" width="30" height="60" rx="5"/>
+                <rect class="phone-screen" x="125" y="30" width="24" height="42"/>
+                <rect class="phone-bar" x="127" y="36" width="18" height="3" rx="1"/>
+                <rect class="phone-bar" x="127" y="42" width="13" height="3" rx="1" opacity=".6"/>
+                <rect class="phone-bar" x="127" y="54" width="18" height="14" rx="2" opacity=".25"/>
+                <circle class="wnd-dot" cx="137" cy="77" r="1.5"/>
               </svg>
             </div>
             <h3>Web & App <em>Development</em></h3>
@@ -198,10 +355,38 @@
 
           <article class="service-card">
             <span class="idx">S / 06</span>
-            <div class="ico-3d" aria-hidden="true">
-              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.2">
-                <rect x="14" y="22" width="72" height="56" rx="3"/>
-                <path d="M14 36h72M26 50h18M52 50h12M26 60h36M26 68h22"/>
+            <div class="service-art" aria-hidden="true">
+              <svg class="art-dash" viewBox="0 0 160 100" preserveAspectRatio="xMidYMid meet">
+                <!-- KPI card 1 -->
+                <rect class="card" x="10" y="12" width="44" height="30" rx="3"/>
+                <text class="kpi-lbl" x="14" y="20">Active Users</text>
+                <text class="kpi" x="14" y="32">12,480</text>
+                <text class="kpi-lbl" x="14" y="38" fill="var(--accent)">+12.4%</text>
+                <!-- KPI card 2 -->
+                <rect class="card" x="58" y="12" width="44" height="30" rx="3"/>
+                <text class="kpi-lbl" x="62" y="20">Revenue</text>
+                <text class="kpi" x="62" y="32">$48.2K</text>
+                <polyline class="spark" points="62,38 68,36 74,37 80,32 86,33 92,28 98,30"/>
+                <!-- Donut card -->
+                <rect class="card" x="106" y="12" width="44" height="30" rx="3"/>
+                <text class="kpi-lbl" x="110" y="20">Conversion</text>
+                <circle class="donut-base" cx="122" cy="32" r="6"/>
+                <circle class="donut-arc" cx="122" cy="32" r="6"/>
+                <text class="kpi" x="134" y="34">68%</text>
+                <!-- Large chart -->
+                <rect class="card" x="10" y="46" width="92" height="42" rx="3"/>
+                <text class="kpi-lbl" x="14" y="54">Sessions · 7 days</text>
+                <polyline class="spark-fill" points="14,80 22,74 30,76 38,68 46,70 54,62 62,64 70,56 78,58 86,50 94,52 98,80 14,80" stroke="none"/>
+                <polyline class="spark" points="14,80 22,74 30,76 38,68 46,70 54,62 62,64 70,56 78,58 86,50 94,52 98,52" stroke-width="1"/>
+                <!-- Activity feed -->
+                <rect class="card" x="106" y="46" width="44" height="42" rx="3"/>
+                <text class="kpi-lbl" x="110" y="54">Live</text>
+                <circle cx="112" cy="62" r="1.6" fill="var(--accent)"/>
+                <text class="kpi-lbl" x="116" y="64" fill="var(--ink-soft)">survey · 12s</text>
+                <circle cx="112" cy="72" r="1.6" fill="var(--ink-mute)"/>
+                <text class="kpi-lbl" x="116" y="74" fill="var(--ink-soft)">user · 48s</text>
+                <circle cx="112" cy="82" r="1.6" fill="var(--ink-mute)"/>
+                <text class="kpi-lbl" x="116" y="84" fill="var(--ink-soft)">map · 2m</text>
               </svg>
             </div>
             <h3>Dashboards & <em>Reporting</em></h3>
@@ -400,26 +585,138 @@
   </div>
 </section>
 
-<!-- ============ CTA — invite block ============ -->
-<section class="cta" id="contact">
-  <div class="cta-inner">
+<!-- ============ HIRING ============ -->
+<section class="hiring" id="hiring">
+  <div class="hiring-card reveal-up">
     <div>
-      <span class="cta-eyebrow">Got an idea? · Let's build it</span>
-      <h2>Have a <em>project</em>?</h2>
-      <p>
-        We work with governments, enterprises, and ambitious startups — across Nepal and beyond. Tell us what you're building. We'll get back within one business day.
+      <span class="hiring-badge">
+        <span class="dot"></span>
+        We're Hiring · Open Role
+      </span>
+
+      <h2>Business <em>Developer</em>.</h2>
+
+      <div class="hiring-meta">
+        <span>📍 Kathmandu / Hybrid</span>
+        <span>Full-time</span>
+        <span>1 position</span>
+      </div>
+
+      <p class="hiring-desc">
+        Help us grow Thimi Tech's in-house products — <strong style="color:var(--ink); font-weight:500;">PlanMyNepal</strong>, <strong style="color:var(--ink); font-weight:500;">Survey</strong>, <strong style="color:var(--ink); font-weight:500;">AI</strong>, and partnerships around the <strong style="color:var(--ink); font-weight:500;">Bagmati Geospatial Data Center</strong>. You'll own outreach, partnerships, and pipeline across government and enterprise.
       </p>
-      <div class="cta-actions">
-        <a href="mailto:info@thimitech.com" class="btn-primary">
-          <span>info@thimitech.com</span>
+
+      <ul class="hiring-list">
+        <li>Lead go-to-market for our product suite</li>
+        <li>Build partnerships with government &amp; enterprise teams</li>
+        <li>Shape positioning, pricing, and brand voice</li>
+        <li>Work directly with founders on roadmap and growth</li>
+      </ul>
+
+      <div class="hiring-actions">
+        <a href="mailto:info@thimitech.com?subject=Application%3A%20Business%20Developer&body=Hi%20Thimi%20Tech%20team%2C%0A%0AI%27d%20love%20to%20apply%20for%20the%20Business%20Developer%20role.%20Here%27s%20a%20bit%20about%20me%3A%0A%0A%E2%80%94%20Name%3A%0A%E2%80%94%20Background%3A%0A%E2%80%94%20Why%20this%20role%3A%0A%0AThanks%21" class="btn-primary">
+          <span>Apply now</span>
           <span class="ico" aria-hidden="true">→</span>
         </a>
-        <a href="https://www.linkedin.com/company/thimitech" target="_blank" rel="noopener" class="btn-ghost">
-          <span>LinkedIn ↗</span>
+        <a href="mailto:info@thimitech.com?subject=Referral%3A%20Business%20Developer" class="btn-ghost">
+          <span>Refer someone</span>
         </a>
       </div>
     </div>
-    <div class="cta-orb" id="cta-orb"></div>
+
+    <!-- Job-ticket visual -->
+    <div class="hiring-art" aria-hidden="true">
+      <div class="ticket-top">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z" fill="currentColor"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z" fill="currentColor"/>
+        </svg>
+        <span>Job No.<br/>#TT-2026-01</span>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <div class="ticket-role">Business <em>Developer</em></div>
+        <div class="ticket-bar"></div>
+        <div class="ticket-tags">
+          <span>BizDev</span>
+          <span>GTM</span>
+          <span>Sales</span>
+          <span>Partnerships</span>
+          <span>GovTech</span>
+        </div>
+      </div>
+
+      <div class="ticket-perf"></div>
+
+      <div class="ticket-foot">
+        <span>Posted<br/><strong style="color:var(--ink);">2026</strong></span>
+        <span style="text-align:right;">Apply by<br/><strong style="color:var(--ink);">Rolling</strong></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA — idea bucket ============ -->
+<section class="cta" id="contact">
+  <div class="cta-head">
+    <span class="cta-eyebrow">Got an idea? · Let's build it</span>
+    <h2>Have a <em>project</em>?</h2>
+    <p>Sketch it on the whiteboard or just type a few words. Drop it in our bucket and we'll get back within one business day.</p>
+  </div>
+
+  <div class="idea-stage">
+    <!-- Whiteboard input -->
+    <div class="whiteboard">
+      <div class="wb-tabs">
+        <button class="wb-tab active" data-tab="draw" type="button">✎ Draw</button>
+        <button class="wb-tab" data-tab="write" type="button">⌫ Write</button>
+      </div>
+
+      <div class="wb-pane wb-draw">
+        <canvas id="wb-canvas"></canvas>
+      </div>
+      <div class="wb-pane wb-write" hidden>
+        <textarea id="wb-text" placeholder="Tell us about your project idea… a sentence is enough."></textarea>
+      </div>
+
+      <div class="wb-tools">
+        <div class="wb-colors" aria-label="Pen color">
+          <button class="wb-color active" data-color="#15140f" aria-label="Ink" type="button"></button>
+          <button class="wb-color" data-color="#c77b2c" aria-label="Amber" type="button"></button>
+          <button class="wb-color" data-color="#3b6fde" aria-label="Blue" type="button"></button>
+        </div>
+        <button class="wb-clear" id="wb-clear" type="button">Clear</button>
+      </div>
+
+      <button class="wb-submit" id="wb-submit" type="button">
+        <span>Drop in bucket</span>
+        <span class="ico" aria-hidden="true">↓</span>
+      </button>
+    </div>
+
+    <!-- 3D Bucket -->
+    <div class="bucket-wrap">
+      <div class="bucket-header">
+        <span>Idea Bucket / <strong>Live</strong></span>
+        <span>Updates in real-time</span>
+      </div>
+      <div class="bucket-3d" id="bucket3d"></div>
+      <div class="bucket-stats">
+        <span class="bucket-count" id="bucket-count">00</span>
+        <span class="lbl">ideas collected<br/>so far this week</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-foot">
+    <p>Prefer the classic way? —</p>
+    <a href="mailto:info@thimitech.com" class="btn-primary">
+      <span>info@thimitech.com</span>
+      <span class="ico" aria-hidden="true">→</span>
+    </a>
+    <a href="https://www.linkedin.com/company/thimitech" target="_blank" rel="noopener" class="btn-ghost" style="color: var(--bg); border-color: rgba(244,241,234,0.2);">
+      <span>LinkedIn ↗</span>
+    </a>
   </div>
 </section>
 
@@ -470,8 +767,11 @@
   </div>
 </footer>
 
-<!-- Three.js for hero globe + CTA orb -->
+<!-- Three.js for globe, controller, bucket -->
 <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="globe.js"></script>
+<script src="controller3d.js"></script>
+<script src="bucket3d.js"></script>
 <script src="scroll.js"></script>
 </body>
 </html>
