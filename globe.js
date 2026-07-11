@@ -383,6 +383,7 @@
   let t = 0;
   const animate = () => {
     requestAnimationFrame(animate);
+    if (window.ThimiViz && window.ThimiViz.hidden.has('globe')) return;
     t += 0.016;
 
     readGamepad();

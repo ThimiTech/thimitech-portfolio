@@ -510,6 +510,7 @@
 
   const animate = () => {
     requestAnimationFrame(animate);
+    if (window.ThimiViz && window.ThimiViz.hidden.has('bucket3d')) return;
     t += 0.016;
     curRotY += (targetRotY - curRotY) * 0.05;
     scene.rotation.y = curRotY + Math.sin(t * 0.3) * 0.02;

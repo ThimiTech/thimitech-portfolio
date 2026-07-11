@@ -137,6 +137,7 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
 @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:.25} }
 
 .nav-center{
+  position: relative;
   display:flex; gap: 4px;
   background: rgba(21,20,15,0.04);
   border: 1px solid var(--line);
@@ -144,12 +145,27 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
   padding: 5px;
 }
 .nav-center a{
+  position: relative;
+  z-index: 1;
   padding: 9px 18px;
   font-size: 13px;
   border-radius: 999px;
   transition: background .3s, color .3s;
 }
 .nav-center a:hover{ background: var(--ink); color: var(--bg); }
+.nav-center a.active{ color: var(--bg); }
+.nav-center:hover a.active:not(:hover){ color: var(--ink); }
+.nav-active-pill{
+  position: absolute;
+  top: 5px; left: 0;
+  height: calc(100% - 10px);
+  border-radius: 999px;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.nav-center:hover .nav-active-pill{ opacity: 0 !important; }
 
 .nav-right{ display:flex; justify-content:flex-end; align-items:center; }
 .nav-cta{
@@ -221,10 +237,12 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
 .hero-title .word{
   display: inline-block;
   transform: translateY(110%);
-  animation: rise 1.1s var(--ease-out) forwards;
 }
-.hero-title .row:nth-child(2) .word{ animation-delay: .12s; }
-.hero-title .row:nth-child(3) .word{ animation-delay: .22s; }
+/* No-JS / GSAP-failed-to-load fallback so the title still appears */
+.no-motion .hero-title .word{
+  transform: translateY(0);
+  animation: rise .9s var(--ease-out) forwards;
+}
 .hero-title em{
   font-family: var(--serif);
   font-style: italic;
@@ -349,6 +367,9 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
   .hero{ grid-template-columns: 1fr; padding-top: 100px; }
   .hero-globe-wrap{ order: -1; min-height: 360px; }
   .hero-text{ padding: 0; }
+  /* The controller hints below already spell out the interactions */
+  .globe-hint{ display: none; }
+  .globe-label.tl{ left: 2%; }
 }
 
 /* ---------- FLICKER (replaces marquee) ---------- */
@@ -669,9 +690,9 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
 @media (max-width: 880px){
   .services-rail{ height: auto; }
   .services-sticky{ position: relative; height: auto; }
-  .services-stage{ padding: 24px var(--pad-x); }
-  .services-track{ flex-direction: column; transform: none !important; }
-  .service-card{ width: 100%; height: auto; min-height: 0; }
+  .services-stage{ padding: 24px var(--pad-x); overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .services-track{ flex-direction: row; transform: none !important; }
+  .service-card{ width: 82vw; height: auto; min-height: 0; scroll-snap-align: center; opacity: 1 !important; transform: none !important; }
 }
 
 /* ---------- PROJECTS (4 featured) ---------- */
@@ -706,6 +727,23 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
   content: ""; position: absolute; inset: 0;
   background: linear-gradient(180deg, transparent 60%, rgba(21,20,15,0.15) 100%);
   pointer-events: none;
+}
+.view-pill{
+  position: absolute; top: 0; left: 0;
+  z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 12px 30px -10px rgba(21,20,15,0.35);
 }
 .project .body{
   padding: 24px 28px 28px;
@@ -862,7 +900,10 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
   width: 100%; height: 100%;
   object-fit: cover;
   object-position: center top;
+  filter: grayscale(0.85);
+  transition: filter .6s var(--ease-out), transform .6s var(--ease-out);
 }
+.team-card:hover .team-photo img{ filter: grayscale(0); transform: scale(1.04); }
 .team-photo::after{
   content:""; position: absolute; inset: 0;
   background: repeating-linear-gradient(135deg, transparent 0, transparent 18px, rgba(21,20,15,0.025) 18px, rgba(21,20,15,0.025) 19px);
@@ -1616,9 +1657,27 @@ button{ font: inherit; color: inherit; background:none; border:0; cursor:pointer
   .hiring-art{ max-width: 300px; margin: 0 auto; }
 }
 
+/* ---------- FOCUS STATES ---------- */
+a:focus-visible,
+button:focus-visible,
+.wb-tab:focus-visible,
+.wb-color:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.nav-cta:focus-visible,
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible,
+.globe-controls button:focus-visible{
+  outline-offset: 4px;
+  border-radius: 999px;
+}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{ animation-duration: .001s !important; transition-duration: .001s !important; }
   .services-rail{ height: auto; }
   .services-sticky{ position: relative; height: auto; }
   .services-track{ flex-direction: column; transform: none !important; }
+  .hero-title .word{ transform: translateY(0) !important; }
 }

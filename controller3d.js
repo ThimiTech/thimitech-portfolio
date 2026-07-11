@@ -379,6 +379,7 @@
   /* Hint glow on hover */
   const animate = () => {
     requestAnimationFrame(animate);
+    if (window.ThimiViz && window.ThimiViz.hidden.has('controller3d')) return;
     t += 0.016;
 
     /* Subtle breathing */
