@@ -1,21 +1,24 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from .models import Service, Project
-from .serializers import ServiceSerializer, ProjectSerializer
+from .models import Service
+from .serializers import ServiceSerializer
+from .permissions import IsAdminOrReadOnly
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@api_view(['GET', 'POST'])
+@permission_classes([IsAdminOrReadOnly])
 def service_list(request):
-    services = Service.objects.all()
-    serializer = ServiceSerializer(services, many=True)
 
-    return Response(serializer.data)
+    if request.method == 'GET':
+        services = Service.objects.all()
+        serializer = ServiceSerializer(services, many=True)
+        return Response(serializer.data)
 
-@api_view(['GET'])
-def project_list(request):
-    projects = Project.objects.all()
-    serializer = ProjectSerializer(projects, many=True)
+    if request.method == 'POST':
+        serializer = ServiceSerializer(data=request.data)
 
-    return Response(serializer.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)

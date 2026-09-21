@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Service, Technology, Project
+from .models import Service, Technology
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -13,14 +13,3 @@ class TechnologySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Project
-        fields = [
-            'id',
-            'name',
-            'subtitle',
-            'description',
-            'image',
-            'url',
-        ]    

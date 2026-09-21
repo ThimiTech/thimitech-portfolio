@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import NormalUser, NormalUserProfile, Project, Service, Category, Courses, Technology
+from .models import NormalUser, NormalUserProfile, Service, Category, Courses, Technology
 
 
 class ServiceAdmin(admin.ModelAdmin):
@@ -34,10 +34,7 @@ class TechnologyAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('name',)
 
-class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'subtitle',)
-    search_fields = ('name',)
-    list_filter = ('name',)           
+      
     
 admin.site.register(Service, ServiceAdmin)    
 admin.site.register(Category, CategoryAdmin)
@@ -45,4 +42,4 @@ admin.site.register(Courses, CoursesAdmin)
 admin.site.register(NormalUser, NormalUserAdmin)
 admin.site.register(NormalUserProfile, NormalUserProfileAdmin)  
 admin.site.register(Technology, TechnologyAdmin)
-admin.site.register(Project, ProjectAdmin)  
+
