@@ -18,7 +18,7 @@ const social = [
 
 <template>
   <footer class="border-t border-paper/10 bg-ink text-paper/70">
-    <div class="mx-auto max-w-6xl px-6 py-14">
+    <div class="px-8 py-14 lg:px-[6vw]">
       <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <div class="flex items-center gap-2 font-display text-lg font-semibold text-paper">

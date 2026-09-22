@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 @import 'tailwindcss';
 
 @theme {
@@ -9,14 +9,58 @@
   --color-contour: #c98a3d;
   --color-flag: #d64545;
 
-  --font-display: 'Space Grotesk', sans-serif;
+  /* ── Global stacking scale (single source of truth) ──
+     nav (100) > cursor dot (60) / ring (59) > hero decor (1–10) > content (auto) */
+  --z-index-nav: 100;
+  --z-index-cursor: 60;
+  --z-index-cursor-ring: 59;
+
+  --font-display: 'Bricolage Grotesque', 'Space Grotesk', sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 4rem;
+  scroll-padding-top: 5rem;
+  overflow-x: clip;
+}
+
+body {
+  overflow-x: clip;
+}
+
+/* ── Scroll reveal (paired with useReveal composable) ────────────────
+   Entrance styles apply ONLY before .is-visible, so they never fight
+   Tailwind hover transitions on the same element. */
+[data-reveal]:not(.is-visible) {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal].is-visible {
+  will-change: auto;
+}
+
+/* Hairline variant: grows in via scaleX instead of fading up. */
+[data-reveal='line']:not(.is-visible) {
+  opacity: 1;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal]:not(.is-visible) {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    will-change: auto;
+  }
 }
 
 body {

@@ -8,8 +8,8 @@ const facts = [
 </script>
 
 <template>
-  <section id="about" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1.2fr_1fr]">
+  <section id="about" class="border-t border-ink/10 py-24">
+    <div class="grid gap-12 px-6 lg:grid-cols-[1.2fr_1fr]">
       <div>
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">Built by people who read maps for a living.</h2>
         <p class="mt-6 max-w-xl text-ink/70">

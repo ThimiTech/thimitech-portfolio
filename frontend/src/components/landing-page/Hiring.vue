@@ -7,8 +7,8 @@ const email = 'info@thimitech.com'
 </script>
 
 <template>
-  <section id="hiring" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto max-w-6xl px-6">
+  <section id="hiring" class="border-t border-ink/10 py-24">
+    <div class="px-6">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">Join the team</h2>
         <p class="mt-4 text-ink/65">We seek passionate minds who value collaboration,

@@ -1,29 +1,31 @@
 <script setup lang="ts">
-import NavBar from '../components/NavBar.vue'
-import HeroSection from '../components/HeroSection.vue'
-import About from '../components/About.vue'
-import Mission from '../components/Mission.vue'
-import Services from '../components/Services.vue'
-import Projects from '../components/Projects.vue'
-import TechStack from '../components/TechStack.vue'
-import Team from '../components/Team.vue'
-import Hiring from '../components/Hiring.vue'
-import Contact from '../components/Contact.vue'
-import Footer from '../components/Footer.vue'
+import HeroSection from "@/components/landing-page/HeroSection.vue";
+import WhyUs from "@/components/landing-page/WhyUs.vue";
+import About from "@/components/landing-page/About.vue";
+import Mission from "@/components/landing-page/Mission.vue";
+import Services from "@/components/landing-page/Services.vue";
+import Projects from "@/components/landing-page/Projects.vue";
+import CtaSection from "@/components/landing-page/CtaSection.vue";
+import TechStack from "@/components/landing-page/TechStack.vue";
+import Team from "@/components/landing-page/Team.vue";
+import Hiring from "@/components/landing-page/Hiring.vue";
+import Contact from "@/components/landing-page/Contact.vue";
 </script>
 
 <template>
-  <div class="bg-paper font-body text-ink">
-    <NavBar />
+  <div>
     <HeroSection />
-    <About />
-    <Mission />
-    <Services />
-    <Projects />
-    <TechStack />
-    <Team />
-    <Hiring />
-    <Contact />
-    <Footer />
+    <main class="main_layout bg-paper px-8 font-body text-ink lg:px-[6vw]">
+      <WhyUs />
+      <TechStack />
+      <!-- <About /> -->
+      <Projects />
+      <CtaSection />
+      <!-- <Mission />
+      <Services />
+      <Team /> -->
+      <!-- <Hiring /> -->
+      <!-- <Contact /> -->
+    </main>
   </div>
 </template>

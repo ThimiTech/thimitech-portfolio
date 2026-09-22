@@ -8,8 +8,8 @@ const team = [
 </script>
 
 <template>
-  <section id="team" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto max-w-6xl px-6">
+  <section id="team" class="border-t border-ink/10 py-24">
+    <div class="px-6">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">The team</h2>
         <p class="mt-4 text-ink/65">A collective of engineers and innovators,driven by precision and purpose,building geospatial solutions that inspire progress.</p>

@@ -5,7 +5,7 @@ const companyPhone = '+977 1-4123456'
 
 <template>
   <section id="contact" class="bg-ink py-24 text-paper">
-    <div class="mx-auto max-w-6xl px-6">
+    <div class="px-6">
       <div class="max-w-lg">
         <h2 class="font-display text-3xl font-semibold lg:text-4xl">Have a map in mind?</h2>
         <p class="mt-4 text-paper/70">

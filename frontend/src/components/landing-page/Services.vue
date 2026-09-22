@@ -28,8 +28,8 @@ const services = [
 </script>
 
 <template>
-  <section id="services" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto max-w-6xl px-6">
+  <section id="services" class="border-t border-ink/10 py-24">
+    <div class="px-6">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">What we build</h2>
         <p class="mt-4 text-ink/65">A focused set of services, from the first line of data to the finished platform.</p>
