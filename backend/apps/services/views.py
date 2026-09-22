@@ -1,9 +1,15 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
+
 from .models import Service
 from .serializers import ServiceSerializer
 from .permissions import IsAdminOrReadOnly
 
+@extend_schema(
+    request=ServiceSerializer,
+    responses=ServiceSerializer
+)
 
 @api_view(['GET', 'POST'])
 @permission_classes([IsAdminOrReadOnly])

@@ -25,7 +25,7 @@
           <!-- Image -->
           <img
             v-if="project.image"
-            :src="project.image"
+            :src="`http://127.0.0.1:8000${project.image}`"
             :alt="project.name"
             class="w-full h-64 object-cover"
           />

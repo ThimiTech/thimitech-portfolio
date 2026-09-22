@@ -5,7 +5,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=200, default="")
     description = models.TextField(default="")
-    image = models.CharField(max_length=300, blank=True)
+    image = models.ImageField(upload_to='projects/', blank=True)
     url = models.URLField(blank=True)
 
     class Meta:

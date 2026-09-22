@@ -17,3 +17,6 @@ db.sqlite3
 
 # IDE
 .vscode/
+
+# Django media uploads
+media/
