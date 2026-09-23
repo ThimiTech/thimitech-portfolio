@@ -20,11 +20,11 @@
 
       <div class="mt-8 flex justify-center gap-4">
         <button
+          @click="$el.ownerDocument.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })"
           class="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
         >
-          Explore Our Services
-        </button>
-
+        Explore Our Services
+        </button >
         <button
           class="rounded-lg border border-gray-300 px-6 py-3 font-semibold hover:bg-white"
         >

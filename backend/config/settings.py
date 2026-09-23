@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'apps.services',
     'apps.projects',
     'apps.users',
+    'apps.team',
+    'apps.jobs',
 
     "rest_framework",
     'drf_spectacular',
