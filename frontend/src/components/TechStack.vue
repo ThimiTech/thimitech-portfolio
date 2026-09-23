@@ -8,7 +8,7 @@ const stack = [
 
 <template>
   <section id="stack" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto max-w-6xl px-6">
+    <div class="mx-auto w-full px-6">
       <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">Tools we trust</h2>
       <div class="mt-12 grid gap-10 sm:grid-cols-3">
         <div v-for="g in stack" :key="g.group">

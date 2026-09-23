@@ -11,7 +11,7 @@ const places = [
 
 <template>
   <section id="home" class="bg-paper pb-24 pt-16">
-    <div class="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+    <div class="mx-auto grid w-full gap-12 px-6 lg:grid-cols-[1fr_1.1fr] lg:items-center">
       <div>
         <h1 class="font-display text-5xl font-semibold leading-[1.05] text-ink lg:text-6xl">
           We turn Nepal's geography into working software.
