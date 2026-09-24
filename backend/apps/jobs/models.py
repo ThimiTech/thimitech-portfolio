@@ -13,3 +13,20 @@ class Job(models.Model):
 
     def __str__(self):
         return self.title
+
+class Requirement(models.Model):
+    job = models.ForeignKey(
+        Job,
+        on_delete=models.CASCADE,
+        related_name='requirements'
+    )
+
+    text = models.TextField()
+
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order']
+
+    def __str__(self):
+        return self.text    

@@ -1,7 +1,12 @@
 from django.contrib import admin
 
-# Register your models here.
-from .models import TeamMember
+from .models import TeamMember, SocialMedia
+
+
+class SocialMediaInline(admin.TabularInline):
+    model = SocialMedia
+    extra = 1
+
 
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = (
@@ -10,8 +15,15 @@ class TeamMemberAdmin(admin.ModelAdmin):
         'is_active',
         'display_order',
     )
+
     list_filter = ('is_active',)
+
     search_fields = ('name', 'role')
+
     ordering = ('display_order', 'name')
 
-admin.site.register(TeamMember, TeamMemberAdmin)      
+    inlines = [SocialMediaInline]
+
+
+admin.site.register(TeamMember, TeamMemberAdmin)
+admin.site.register(SocialMedia)
