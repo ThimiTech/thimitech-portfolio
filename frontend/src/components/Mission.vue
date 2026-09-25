@@ -7,8 +7,8 @@ const values = [
 </script>
 
 <template>
-  <section id="mission" class="border-t border-ink/10 bg-panel py-24">
-    <div class="mx-auto w-full px-6">
+  <section id="mission" class="border-t border-ink/10 bg-panel py-32">
+    <div class="mx-auto max-w-[1280px] px-6">
       <div class="max-w-2xl">
         <p class="font-mono text-xs uppercase tracking-wide text-river">Our mission</p>
         <h2 class="mt-3 font-display text-3xl font-semibold text-ink lg:text-4xl">

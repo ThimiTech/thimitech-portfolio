@@ -17,8 +17,8 @@ const team = [
 </script>
 
 <template>
-  <section id="team" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto w-full px-6">
+  <section id="team" class="border-t border-ink/10 bg-paper py-32">
+    <div class="mx-auto max-w-[1280px] px-6">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">The team</h2>
         <p class="mt-4 text-ink/65">

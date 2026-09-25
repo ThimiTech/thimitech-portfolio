@@ -8,8 +8,8 @@ const steps = [
 </script>
 
 <template>
-  <section id="process" class="border-t border-ink/10 bg-paper py-24">
-    <div class="mx-auto w-full px-6">
+  <section id="process" class="border-t border-ink/10 bg-paper py-32">
+    <div class="mx-auto max-w-[1280px] px-6">
       <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">How a project runs</h2>
       <ol class="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <li v-for="(s, i) in steps" :key="s.title" class="border-t-2 border-ink pt-4">

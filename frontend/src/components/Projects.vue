@@ -25,7 +25,7 @@ const projects = [
 </script>
 
 <template>
-  <section id="projects" class="border-t border-ink/10 bg-panel py-24">
+  <section id="projects" class="border-t border-ink/10 bg-panel py-32">
     <div class="mx-auto max-w-7xl px-6">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">Current Projects</h2>

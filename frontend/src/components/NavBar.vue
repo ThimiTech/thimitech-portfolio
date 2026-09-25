@@ -14,12 +14,11 @@ const links = [
   { label: "Team", href: "#team" },
   { label: "Hiring", href: "#hiring" },
   { label: "Contact", href: "#contact" },
-  { label: "Footer", href: "#Footer" },
 ];
 </script>
 
 <template>
-  <header class="sticky top-0 z-[9999] border-b border-ink/10 bg-paper shadow-sm">
+  <header class="sticky top-0 z-[9999] border-b border-ink/10 bg-paper">
     <div class="mx-auto flex h-16 w-full items-center justify-between px-6">
       <a href="#home" class="flex items-center gap-2 font-display text-lg font-semibold text-ink">
         <svg viewBox="0 0 24 24" class="h-6 w-6 text-flag">
@@ -40,23 +39,8 @@ const links = [
           >{{ l.label }}</a
         >
 
-        <button
-          aria-label="Log in"
-          class="flex h-9 w-9 items-center justify-center rounded-full border border-ink/15 text-ink/70 transition-colors hover:border-ink hover:text-ink"
-          @click="loginOpen = true"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            class="h-4.5 w-4.5"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M20 21a8 8 0 10-16 0" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+        <button class="text-sm font-medium text-ink/70 hover:text-ink" @click="loginOpen = true">
+          Login
         </button>
 
         <a
@@ -86,25 +70,13 @@ const links = [
         >{{ l.label }}</a
       >
       <button
-        class="flex items-center gap-2 py-2 text-left text-ink/80"
+        class="py-2 text-left text-ink/80"
         @click="
           open = false;
           loginOpen = true;
         "
       >
-        <svg
-          viewBox="0 0 24 24"
-          class="h-4 w-4"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M20 21a8 8 0 10-16 0" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-        Log in
+        Login
       </button>
       <a
         href="#contact"
