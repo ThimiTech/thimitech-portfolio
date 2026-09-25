@@ -8,8 +8,5 @@ class Project(models.Model):
     image = models.ImageField(upload_to='projects/', blank=True)
     url = models.URLField(blank=True)
 
-    class Meta:
-        db_table = 'services_project'
-
     def __str__(self):
         return self.name

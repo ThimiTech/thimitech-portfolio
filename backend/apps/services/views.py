@@ -4,7 +4,7 @@ from drf_spectacular.utils import extend_schema
 
 from .models import Service
 from .serializers import ServiceSerializer
-from .permissions import IsAdminOrReadOnly
+from apps.permissions.permissions import IsAdminOrReadOnly
 
 @extend_schema(
     request=ServiceSerializer,

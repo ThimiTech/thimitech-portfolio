@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Job, Requirement
+from .models import Job, Requirement, JobApplication
 
 
 class RequirementInline(admin.TabularInline):
@@ -27,3 +27,4 @@ class JobAdmin(admin.ModelAdmin):
 
 admin.site.register(Job, JobAdmin)
 admin.site.register(Requirement)
+admin.site.register(JobApplication)

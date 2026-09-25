@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema, OpenApiRequest
 
 from .models import Project
 from .serializers import ProjectSerializer
-from apps.services.permissions import IsAdminOrReadOnly
+from apps.permissions.permissions import IsAdminOrReadOnly
 
 
 @extend_schema(
