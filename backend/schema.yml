@@ -1,0 +1,614 @@
+openapi: 3.0.3
+info:
+  title: ThimiTech API
+  version: 1.0.0
+  description: API documentation for ThimiTech portfolio
+paths:
+  /api/jobs/:
+    get:
+      operationId: jobs_list
+      description: Returns all currently active job vacancies.
+      summary: List active jobs
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/apply/:
+    post:
+      operationId: jobs_apply_create
+      description: Allows an authenticated user to submit a job application. The applicant
+        is automatically taken from the authenticated user.
+      summary: Apply for a job
+      tags:
+      - Jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobApplicationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobApplicationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobApplicationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobApplication'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Invalid application data.
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                description: Authentication credentials were not provided.
+          description: ''
+  /api/projects/:
+    get:
+      operationId: projects_list
+      description: Returns all projects.
+      summary: List projects
+      tags:
+      - Projects
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+          description: ''
+    post:
+      operationId: projects_create
+      description: Allows staff users to create a new project.
+      summary: Create a project
+      tags:
+      - Projects
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+            encoding:
+              image:
+                contentType: image/*
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+            encoding:
+              image:
+                contentType: image/*
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Invalid project data.
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                description: Only staff users can create projects.
+          description: ''
+  /api/register/:
+    post:
+      operationId: register_create
+      description: Creates a new user account using an email address and password.
+        Username is optional; if it is not provided, it is generated from the email
+        address.
+      summary: Register a new user
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                description: User registered successfully.
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Invalid registration data.
+          description: ''
+  /api/services/:
+    get:
+      operationId: services_list
+      description: Returns all services.
+      summary: List services
+      tags:
+      - Services
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+          description: ''
+    post:
+      operationId: services_create
+      description: Allows staff users to create a new service.
+      summary: Create a service
+      tags:
+      - Services
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ServiceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ServiceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Invalid service data.
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                description: Only staff users can create services.
+          description: ''
+  /api/team/:
+    get:
+      operationId: team_list
+      description: Returns all active team members, including their social media links.
+      summary: List active team members
+      tags:
+      - Team
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamMember'
+          description: ''
+  /api/token/:
+    post:
+      operationId: token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+components:
+  schemas:
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        employment_type:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/Requirement'
+          readOnly: true
+        is_active:
+          type: boolean
+        display_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - description
+      - employment_type
+      - id
+      - requirements
+      - title
+    JobApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        job:
+          type: integer
+        cover_letter:
+          type: string
+        cv:
+          type: string
+          format: uri
+        applied_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - applied_at
+      - cv
+      - id
+      - job
+    JobApplicationRequest:
+      type: object
+      properties:
+        job:
+          type: integer
+        cover_letter:
+          type: string
+        cv:
+          type: string
+          format: binary
+      required:
+      - cv
+      - job
+    PlatformEnum:
+      enum:
+      - linkedin
+      - github
+      - instagram
+      - facebook
+      - twitter
+      type: string
+      description: |-
+        * `linkedin` - LinkedIn
+        * `github` - GitHub
+        * `instagram` - Instagram
+        * `facebook` - Facebook
+        * `twitter` - X (Twitter)
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        subtitle:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        image:
+          type: string
+          format: uri
+          nullable: true
+        url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+      required:
+      - id
+      - name
+    ProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        subtitle:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+        image:
+          type: string
+          format: binary
+        url:
+          oneOf:
+          - type: string
+            format: uri
+            maxLength: 200
+          - type: string
+            maxLength: 0
+      required:
+      - name
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+      required:
+      - email
+      - password
+    Requirement:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        text:
+          type: string
+        display_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - id
+      - text
+    Service:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+      required:
+      - description
+      - id
+      - title
+    ServiceRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          minLength: 1
+      required:
+      - description
+      - title
+    SocialMedia:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+      required:
+      - id
+      - platform
+      - url
+    TeamMember:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        role:
+          type: string
+          maxLength: 200
+        initials:
+          type: string
+          maxLength: 10
+        image:
+          type: string
+          format: uri
+          nullable: true
+        email:
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        social_media:
+          type: array
+          items:
+            $ref: '#/components/schemas/SocialMedia'
+          readOnly: true
+        is_active:
+          type: boolean
+        display_order:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+      required:
+      - id
+      - initials
+      - name
+      - role
+      - social_media
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

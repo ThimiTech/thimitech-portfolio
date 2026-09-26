@@ -8,9 +8,15 @@ from .serializers import TeamMemberSerializer
 from drf_spectacular.utils import extend_schema
 
 @extend_schema(
-    summary="List active team members",
-    description="Returns all active team members.",
-    responses=TeamMemberSerializer(many=True),
+    tags=['Team'],
+    summary='List active team members',
+    description=(
+        'Returns all active team members, including their '
+        'social media links.'
+    ),
+    responses={
+        200: TeamMemberSerializer(many=True),
+    },
 )
 
 @api_view(['GET'])
