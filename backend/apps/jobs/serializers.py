@@ -37,8 +37,15 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'job',
+            'phone',
+            'address',
             'cover_letter',
             'cv',
+            'status',
             'applied_at',
         ]
-        read_only_fields = ['id', 'applied_at']        
+        read_only_fields = [
+            'id',
+            'status',
+            'applied_at',
+        ]

@@ -25,6 +25,42 @@ class JobAdmin(admin.ModelAdmin):
     inlines = [RequirementInline]
 
 
+class JobApplicationAdmin(admin.ModelAdmin):
+    list_display = (
+    'applicant_email',
+    'job',
+    'phone',
+    'address',
+    'status',
+    'cv',
+    'cover_letter',
+    'applied_at',
+)
+
+    list_filter = (
+    'status',
+    'job',
+    'applied_at',
+)
+
+    search_fields = (
+        'applicant__email',
+        'applicant__username',
+        'job__title',
+    )
+
+    readonly_fields = (
+        'applicant',
+        'applied_at',
+    )
+
+    ordering = ('-applied_at',)
+
+    @admin.display(description='Applicant Email')
+    def applicant_email(self, obj):
+        return obj.applicant.email
+
+
 admin.site.register(Job, JobAdmin)
 admin.site.register(Requirement)
-admin.site.register(JobApplication)
+admin.site.register(JobApplication, JobApplicationAdmin)

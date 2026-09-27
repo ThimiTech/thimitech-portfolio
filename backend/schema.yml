@@ -344,33 +344,56 @@ components:
           readOnly: true
         job:
           type: integer
+        phone:
+          type: string
+          maxLength: 20
+        address:
+          type: string
+          maxLength: 255
         cover_letter:
           type: string
         cv:
           type: string
           format: uri
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
         applied_at:
           type: string
           format: date-time
           readOnly: true
       required:
+      - address
       - applied_at
       - cv
       - id
       - job
+      - phone
+      - status
     JobApplicationRequest:
       type: object
       properties:
         job:
           type: integer
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
         cover_letter:
           type: string
         cv:
           type: string
           format: binary
       required:
+      - address
       - cv
       - job
+      - phone
     PlatformEnum:
       enum:
       - linkedin
@@ -521,6 +544,20 @@ components:
       - id
       - platform
       - url
+    StatusEnum:
+      enum:
+      - pending
+      - shortlisted
+      - interview
+      - selected
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `shortlisted` - Shortlisted
+        * `interview` - Interview
+        * `selected` - Selected
+        * `rejected` - Rejected
     TeamMember:
       type: object
       properties:

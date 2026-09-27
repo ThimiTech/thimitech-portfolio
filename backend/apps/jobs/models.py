@@ -33,6 +33,14 @@ class Requirement(models.Model):
         return self.text    
     
 class JobApplication(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('shortlisted', 'Shortlisted'),
+        ('interview', 'Interview'),
+        ('selected', 'Selected'),
+        ('rejected', 'Rejected'),
+    ]
+
     job = models.ForeignKey(
         Job,
         on_delete=models.CASCADE,
@@ -45,15 +53,19 @@ class JobApplication(models.Model):
         related_name='job_applications'
     )
 
+    phone = models.CharField(max_length=20)
+    address = models.CharField(max_length=255)
     cover_letter = models.TextField(blank=True)
+    cv = models.FileField(upload_to='applications/cv/')
 
-    cv = models.FileField(
-        upload_to='applications/cv/'
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending'
     )
 
-    applied_at = models.DateTimeField(
-        auto_now_add=True
-    )
+
+    applied_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-applied_at']
