@@ -113,7 +113,8 @@ paths:
           content:
             application/json:
               schema:
-                description: Invalid application data.
+                description: Invalid application data or the user has already applied
+                  for this job.
           description: ''
         '401':
           content:

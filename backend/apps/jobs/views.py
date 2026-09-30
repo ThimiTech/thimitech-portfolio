@@ -53,11 +53,18 @@ def job_detail(request, pk):
         "The applicant is automatically taken from the authenticated user."
     ),
     request=JobApplicationSerializer,
-    responses={
-        201: JobApplicationSerializer,
-        400: {"description": "Invalid application data."},
-        401: {"description": "Authentication credentials were not provided."},
+   responses={
+    201: JobApplicationSerializer,
+    400: {
+        "description": (
+            "Invalid application data or the user has already "
+            "applied for this job."
+        )
     },
+    401: {
+        "description": "Authentication credentials were not provided."
+    },
+},
 )
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -65,6 +72,17 @@ def apply_for_job(request):
     serializer = JobApplicationSerializer(data=request.data)
 
     if serializer.is_valid():
+
+        # Check if the user has already applied for this job
+        if JobApplication.objects.filter(
+            job=serializer.validated_data['job'],
+            applicant=request.user
+        ).exists():
+            return Response(
+                {"error": "You have already applied for this job."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer.save(applicant=request.user)
 
         return Response(
