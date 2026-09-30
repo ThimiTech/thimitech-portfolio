@@ -1,8 +1,13 @@
+vue
 <script setup lang="ts">
 import { reactive, ref } from "vue";
+import api from '../api/api'
 
 const props = defineProps<{ open: boolean }>();
-const emit = defineEmits<{ close: [] }>();
+const emit = defineEmits<{
+  close: [];
+  loginSuccess: [];
+}>();
 
 // 'login' | 'signup' | 'verify'
 const mode = ref<"login" | "signup" | "verify">("login");
@@ -11,13 +16,40 @@ const form = reactive({ name: "", email: "", password: "", confirm: "" });
 const code = reactive(["", "", "", ""]);
 const codeInputs = ref<HTMLInputElement[]>([]);
 
-function handleLogin() {
-  alert("Login is not connected to a server yet.");
-  closeAndReset();
+async function handleLogin() {
+  try {
+    const response = await api.post("token/", {
+      email: form.email,
+      password: form.password,
+    });
+
+    localStorage.setItem("access_token", response.data.access);
+    localStorage.setItem("refresh_token", response.data.refresh);
+
+    alert("Login successful!");
+
+    emit("loginSuccess");
+    closeAndReset();
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Invalid email or password.");
+  }
 }
 
-function handleSignup() {
-  mode.value = "verify";
+async function handleSignup() {
+  try {
+    await api.post("register/", {
+      email: form.email,
+      password: form.password,
+    });
+
+    alert("Account created successfully!");
+
+    mode.value = "login";
+  } catch (error) {
+    console.error("Registration failed:", error);
+    alert("Registration failed. Please check your details.");
+  }
 }
 
 function handleVerify() {
@@ -49,18 +81,26 @@ function closeAndReset() {
             mode === "login" ? "Log in" : mode === "signup" ? "Create account" : "Verify your email"
           }}
         </h2>
-        <button aria-label="Close" class="text-ink/50 hover:text-ink" @click="closeAndReset">
+
+        <button
+          aria-label="Close"
+          class="text-ink/50 hover:text-ink"
+          @click="closeAndReset"
+        >
           ✕
         </button>
       </div>
 
       <!-- LOGIN -->
       <template v-if="mode === 'login'">
-        <p class="mt-1 text-sm text-ink/60">Access your Thimitech client dashboard.</p>
+        <p class="mt-1 text-sm text-ink/60">
+          Access your Thimitech client dashboard.
+        </p>
 
         <form class="mt-6 grid gap-4" @submit.prevent="handleLogin">
           <label class="grid gap-1.5 text-sm">
             <span class="text-ink/70">Email</span>
+
             <input
               v-model="form.email"
               type="email"
@@ -68,8 +108,10 @@ function closeAndReset() {
               class="rounded-lg border border-ink/15 px-4 py-2.5 outline-none focus:border-river"
             />
           </label>
+
           <label class="grid gap-1.5 text-sm">
             <span class="text-ink/70">Password</span>
+
             <input
               v-model="form.password"
               type="password"
@@ -77,7 +119,14 @@ function closeAndReset() {
               class="rounded-lg border border-ink/15 px-4 py-2.5 outline-none focus:border-river"
             />
           </label>
-          <a href="#" class="-mt-1 text-xs text-river hover:underline">Forgotten password?</a>
+
+          <a
+            href="#"
+            class="-mt-1 text-xs text-river hover:underline"
+          >
+            Forgotten password?
+          </a>
+
           <button
             type="submit"
             class="mt-2 rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river"
@@ -116,6 +165,7 @@ function closeAndReset() {
             </svg>
             Google
           </button>
+
           <button
             class="flex items-center justify-center gap-2 rounded-lg border border-ink/15 py-2.5 text-sm font-medium text-ink hover:bg-panel"
           >
@@ -127,16 +177,18 @@ function closeAndReset() {
             </svg>
             Microsoft
           </button>
+
           <button
             class="flex items-center justify-center gap-2 rounded-lg border border-ink/15 py-2.5 text-sm font-medium text-ink hover:bg-panel"
           >
             <svg viewBox="0 0 24 24" class="h-4 w-4" fill="#1DA1F2">
               <path
-                d="M23 4.9c-.8.4-1.7.6-2.6.8 1-.6 1.7-1.5 2-2.6-.9.5-1.9.9-3 1.1a4.7 4.7 0 00-8 4.3A13.4 13.4 0 011.7 3.1a4.7 4.7 0 001.5 6.3c-.7 0-1.4-.2-2-.6v.1c0 2.3 1.6 4.2 3.8 4.6-.4.1-.8.2-1.3.2-.3 0-.6 0-.9-.1a4.7 4.7 0 004.4 3.3A9.5 9.5 0 011 19.3 13.4 13.4 0 007.3 21c8.7 0 13.5-7.3 13.5-13.6v-.6c.9-.7 1.7-1.5 2.3-2.5z"
+                d="M23 4.9c-.8.4-1.7.6-2.6.8 1-.6 1.7-1.5 2-2.6-.9.5-1.9.9-3 1.1a4.7 4.7 0 00-8 4.3A13.4 13.4 0 011.7 3.1a4.7 4.7 0 001.5 6.3c-.7 0-1.4-.2-2-.6v.1c0 2.3 1.6 4.2 3.8 4.6-.4.1-.8.2-1.3.2-.3 0-.6-.2-.9-.1a4.7 4.7 0 004.4 3.3A9.5 9.5 0 011 19.3 13.4 13.4 0 007.3 21c8.7 0 13.5-7.3 13.5-13.6v-.6c.9-.7 1.7-1.5 2.3-2.5z"
               />
             </svg>
             Twitter / X
           </button>
+
           <button
             class="flex items-center justify-center gap-2 rounded-lg border border-ink/15 py-2.5 text-sm font-medium text-ink hover:bg-panel"
           >
@@ -151,17 +203,25 @@ function closeAndReset() {
 
         <p class="mt-6 text-center text-xs text-ink/50">
           Don't have an account?
-          <button class="text-river hover:underline" @click="mode = 'signup'">Sign up</button>
+          <button
+            class="text-river hover:underline"
+            @click="mode = 'signup'"
+          >
+            Sign up
+          </button>
         </p>
       </template>
 
       <!-- SIGN UP -->
       <template v-else-if="mode === 'signup'">
-        <p class="mt-1 text-sm text-ink/60">Get started with your free client account.</p>
+        <p class="mt-1 text-sm text-ink/60">
+          Get started with your free client account.
+        </p>
 
         <form class="mt-6 grid gap-4" @submit.prevent="handleSignup">
           <label class="grid gap-1.5 text-sm">
             <span class="text-ink/70">Full name</span>
+
             <input
               v-model="form.name"
               type="text"
@@ -169,8 +229,10 @@ function closeAndReset() {
               class="rounded-lg border border-ink/15 px-4 py-2.5 outline-none focus:border-river"
             />
           </label>
+
           <label class="grid gap-1.5 text-sm">
             <span class="text-ink/70">Email</span>
+
             <input
               v-model="form.email"
               type="email"
@@ -178,8 +240,10 @@ function closeAndReset() {
               class="rounded-lg border border-ink/15 px-4 py-2.5 outline-none focus:border-river"
             />
           </label>
+
           <label class="grid gap-1.5 text-sm">
             <span class="text-ink/70">Password</span>
+
             <input
               v-model="form.password"
               type="password"
@@ -187,6 +251,7 @@ function closeAndReset() {
               class="rounded-lg border border-ink/15 px-4 py-2.5 outline-none focus:border-river"
             />
           </label>
+
           <button
             type="submit"
             class="mt-2 rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river"
@@ -197,13 +262,20 @@ function closeAndReset() {
 
         <p class="mt-6 text-center text-xs text-ink/50">
           Already have an account?
-          <button class="text-river hover:underline" @click="mode = 'login'">Log in</button>
+          <button
+            class="text-river hover:underline"
+            @click="mode = 'login'"
+          >
+            Log in
+          </button>
         </p>
       </template>
 
       <!-- VERIFY CODE -->
       <template v-else>
-        <p class="mt-1 text-sm text-ink/60">We've sent a verification code to your inbox.</p>
+        <p class="mt-1 text-sm text-ink/60">
+          We've sent a verification code to your inbox.
+        </p>
 
         <form class="mt-6" @submit.prevent="handleVerify">
           <div class="flex justify-center gap-3">
@@ -218,6 +290,7 @@ function closeAndReset() {
               @input="onCodeInput(i)"
             />
           </div>
+
           <button
             type="submit"
             class="mt-6 w-full rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river"
@@ -227,7 +300,12 @@ function closeAndReset() {
         </form>
 
         <p class="mt-5 text-center text-xs text-ink/50">
-          <button class="text-river hover:underline" @click="mode = 'signup'">← Back</button>
+          <button
+            class="text-river hover:underline"
+            @click="mode = 'signup'"
+          >
+            ← Back
+          </button>
         </p>
       </template>
     </div>

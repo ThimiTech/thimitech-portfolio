@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouterLink } from 'vue-router'
 import { onMounted, ref } from 'vue'
 import api from '../api/api'
 
@@ -135,12 +136,12 @@ onMounted(getJobs)
               <!-- Apply Button -->
               <div class="mt-6">
 
-                <button
-                  @click="handleApply(job)"
-                  class="w-full rounded-lg bg-ink px-4 py-3 text-sm font-semibold text-paper transition hover:opacity-90"
-                >
-                  Apply for this position →
-                </button>
+               <RouterLink
+               :to="`/apply/${job.id}`"
+               class="block w-full rounded-lg bg-ink px-4 py-3 text-center text-sm font-semibold text-paper transition hover:opacity-90"
+               >
+               Apply for this position →
+               </RouterLink>
 
               </div>
 
@@ -167,13 +168,5 @@ onMounted(getJobs)
       </p>
 
     </div>
-
-    <!-- Login -->
-    <Login
-      :open="showLogin"
-      @close="showLogin = false"
-      @loginSuccess="showLogin = false; showApplicationForm = true"
-    />
-
   </section>
 </template>
