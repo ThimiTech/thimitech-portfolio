@@ -21,9 +21,19 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.utils import extend_schema
 
 from django.conf import settings
 from django.conf.urls.static import static
+
+@extend_schema(tags=['Authentication'])
+class CustomTokenObtainPairView(TokenObtainPairView):
+    pass
+
+
+@extend_schema(tags=['Authentication'])
+class CustomTokenRefreshView(TokenRefreshView):
+    pass
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -34,9 +44,9 @@ urlpatterns = [
     path('api/', include('apps.team.urls')),
     path('api/', include('apps.jobs.urls')),
 
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]

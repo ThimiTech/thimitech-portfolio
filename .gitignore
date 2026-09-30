@@ -1,0 +1,22 @@
+# Environment variables
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node / Vue
+node_modules/
+dist/
+
+# Django
+db.sqlite3
+
+# IDE
+.vscode/
+
+# Django media uploads
+media/

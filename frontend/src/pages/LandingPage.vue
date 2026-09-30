@@ -10,7 +10,7 @@ import Team from '../components/Team.vue'
 import Hiring from '../components/Hiring.vue'
 import Contact from '../components/Contact.vue'
 import Footer from '../components/Footer.vue'
-import PracticeActivity from '../components/PracticeActivity.vue'
+
 </script>
 
 <template>
@@ -21,7 +21,7 @@ import PracticeActivity from '../components/PracticeActivity.vue'
     <Mission />
     <Services />
     <Projects />
-    <PracticeActivity />
+    
     <TechStack />
     <Team />
     <Hiring />
