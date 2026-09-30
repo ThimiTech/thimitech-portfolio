@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Job
+from .models import Job, JobApplication
 from .serializers import JobSerializer, JobApplicationSerializer
 from drf_spectacular.utils import extend_schema
 
@@ -20,6 +20,28 @@ def job_list(request):
     jobs = Job.objects.filter(is_active=True)
     serializer = JobSerializer(jobs, many=True)
 
+    return Response(serializer.data)
+
+@extend_schema(
+    tags=['Jobs'],
+    summary='Get job details',
+    description='Returns details of a single job by ID.',
+    responses={
+        200: JobSerializer,
+        404: {'description': 'Job not found.'},
+    },
+)
+@api_view(['GET'])
+def job_detail(request, pk):
+    try:
+        job = Job.objects.get(pk=pk, is_active=True)
+    except Job.DoesNotExist:
+        return Response(
+            {"error": "Job not found"},
+            status=404
+        )
+
+    serializer = JobSerializer(job)
     return Response(serializer.data)
 
 
@@ -54,3 +76,30 @@ def apply_for_job(request):
         serializer.errors,
         status=status.HTTP_400_BAD_REQUEST
     )
+
+@extend_schema(
+    tags=['Jobs'],
+    summary='List my job applications',
+    description=(
+        'Returns all job applications submitted by the authenticated user.'
+    ),
+    responses={
+        200: JobApplicationSerializer(many=True),
+        401: {
+            'description': 'Authentication credentials were not provided.'
+        },
+    },
+)
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_applications(request):
+    applications = JobApplication.objects.filter(
+        applicant=request.user
+    )
+
+    serializer = JobApplicationSerializer(
+        applications,
+        many=True
+    )
+
+    return Response(serializer.data)

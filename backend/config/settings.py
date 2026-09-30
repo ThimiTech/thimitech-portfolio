@@ -157,6 +157,12 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'ThimiTech API',
     'DESCRIPTION': 'API documentation for ThimiTech portfolio',

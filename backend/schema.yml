@@ -24,6 +24,61 @@ paths:
                 items:
                   $ref: '#/components/schemas/Job'
           description: ''
+  /api/jobs/{id}/:
+    get:
+      operationId: jobs_retrieve
+      description: Returns details of a single job by ID.
+      summary: Get job details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Job not found.
+          description: ''
+  /api/jobs/applications/:
+    get:
+      operationId: jobs_applications_list
+      description: Returns all job applications submitted by the authenticated user.
+      summary: List my job applications
+      tags:
+      - Jobs
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobApplication'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                description: Authentication credentials were not provided.
+          description: ''
   /api/jobs/apply/:
     post:
       operationId: jobs_apply_create
@@ -374,6 +429,12 @@ components:
           readOnly: true
         job:
           type: integer
+        job_title:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
         phone:
           type: string
           maxLength: 20
@@ -399,6 +460,8 @@ components:
       - cv
       - id
       - job
+      - job_title
+      - name
       - phone
       - status
     JobApplicationRequest:
@@ -406,6 +469,10 @@ components:
       properties:
         job:
           type: integer
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
         phone:
           type: string
           minLength: 1
@@ -423,6 +490,7 @@ components:
       - address
       - cv
       - job
+      - name
       - phone
     PlatformEnum:
       enum:
