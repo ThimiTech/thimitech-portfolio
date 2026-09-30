@@ -62,3 +62,30 @@ def project_list(request):
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
+    
+@extend_schema(
+    tags=['Projects'],
+    summary='Get project details',
+    description='Returns details of a single project by ID.',
+    responses={
+        200: ProjectSerializer,
+        404: {
+            'description': 'Project not found.'
+        },
+    },
+)
+
+@api_view(['GET'])
+def project_detail(request, pk):
+
+    try:
+        project = Project.objects.get(pk=pk)
+    except Project.DoesNotExist:
+        return Response(
+            {"error": "Project not found"},
+            status=404
+        )
+
+    serializer = ProjectSerializer(project)
+
+    return Response(serializer.data) 

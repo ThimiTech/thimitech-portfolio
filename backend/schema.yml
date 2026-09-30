@@ -128,6 +128,36 @@ paths:
               schema:
                 description: Only staff users can create projects.
           description: ''
+  /api/projects/{id}/:
+    get:
+      operationId: projects_retrieve
+      description: Returns details of a single project by ID.
+      summary: Get project details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Projects
+      security:
+      - jwtAuth: []
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Project not found.
+          description: ''
   /api/register/:
     post:
       operationId: register_create
