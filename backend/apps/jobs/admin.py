@@ -27,6 +27,7 @@ class JobAdmin(admin.ModelAdmin):
 
 class JobApplicationAdmin(admin.ModelAdmin):
     list_display = (
+    'name',
     'applicant_email',
     'job',
     'phone',

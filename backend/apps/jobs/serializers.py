@@ -32,11 +32,18 @@ class JobSerializer(serializers.ModelSerializer):
         ]
 
 class JobApplicationSerializer(serializers.ModelSerializer):
+    job_title = serializers.CharField(
+        source='job.title',
+        read_only=True
+    )
+
     class Meta:
         model = JobApplication
         fields = [
             'id',
             'job',
+            'job_title',
+            'name', 
             'phone',
             'address',
             'cover_letter',
@@ -46,6 +53,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             'id',
+            'job_title',    
             'status',
             'applied_at',
         ]
