@@ -12,26 +12,10 @@ const places = [
 <template>
   <section id="home" class="bg-paper pb-20 pt-10">
     <div class="mx-auto max-w-[1280px] px-6">
-      <div class="flex items-start justify-between border-b border-ink/10 pb-8">
+      <div class="border-b border-ink/10 pb-8">
         <h1 class="max-w-xl font-body text-6xl font-medium leading-[1.05] text-ink">
           Turning Geographic Data into Digital Solutions. <em class="italic"></em>
         </h1>
-        <a
-          href="#contact"
-          class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-flag text-paper transition-transform hover:-translate-y-0.5 hover:-rotate-45"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            class="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M7 17L17 7M17 7H7M17 7v10" />
-          </svg>
-        </a>
       </div>
 
       <div class="mt-10 grid gap-10 lg:grid-cols-[0.9fr_1.3fr] lg:items-end">

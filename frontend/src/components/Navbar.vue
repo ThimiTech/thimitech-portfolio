@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import Login from "./Login.vue";
+import { useAuth } from "../stores/auth";
+
+const { isLoggedIn, userEmail, loginOpen, openLogin, closeLogin, logout } = useAuth();
 
 const open = ref(false);
-const loginOpen = ref(false);
 
 const links = [
   { label: "Home", href: "#home" },
@@ -39,15 +41,27 @@ const links = [
           >{{ l.label }}</a
         >
 
-        <button class="text-sm font-medium text-ink/70 hover:text-ink" @click="loginOpen = true">
+        <!-- Logged out -->
+        <button
+          v-if="!isLoggedIn"
+          class="text-sm font-medium text-ink/70 hover:text-ink"
+          @click="openLogin"
+        >
           Login
         </button>
 
-        <a
-          href="#contact"
-          class="rounded-full bg-ink px-5 py-2 text-sm font-medium text-paper transition-colors hover:bg-river"
-          >Start a project</a
-        >
+        <!-- Logged in -->
+        <div v-else class="flex items-center gap-3">
+          <span
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-river text-sm font-semibold uppercase text-paper"
+            :title="userEmail ?? ''"
+          >
+            {{ userEmail?.[0] ?? "U" }}
+          </span>
+          <button class="text-sm font-medium text-ink/70 hover:text-ink" @click="logout">
+            Logout
+          </button>
+        </div>
       </nav>
 
       <button class="lg:hidden" aria-label="Menu" @click="open = !open">
@@ -69,23 +83,39 @@ const links = [
         @click="open = false"
         >{{ l.label }}</a
       >
+
       <button
+        v-if="!isLoggedIn"
         class="py-2 text-left text-ink/80"
         @click="
           open = false;
-          loginOpen = true;
+          openLogin();
         "
       >
         Login
       </button>
-      <a
-        href="#contact"
-        class="mt-2 rounded-full bg-ink px-5 py-2 text-center text-paper"
-        @click="open = false"
-        >Start a project</a
-      >
+
+      <div v-else class="flex items-center justify-between py-2">
+        <span class="flex items-center gap-2 text-ink/80">
+          <span
+            class="flex h-8 w-8 items-center justify-center rounded-full bg-river text-sm font-semibold uppercase text-paper"
+          >
+            {{ userEmail?.[0] ?? "U" }}
+          </span>
+          {{ userEmail }}
+        </span>
+        <button
+          class="text-sm text-ink/60"
+          @click="
+            open = false;
+            logout();
+          "
+        >
+          Logout
+        </button>
+      </div>
     </div>
   </header>
 
-  <Login :open="loginOpen" @close="loginOpen = false" />
+  <Login :open="loginOpen" @close="closeLogin" />
 </template>

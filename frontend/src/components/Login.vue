@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import api from '../api/api'
+import api from "../api/api";
+import { useAuth } from "../stores/auth";
 
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{
   close: [];
   loginSuccess: [];
 }>();
+
+const { setSession } = useAuth();
 
 // 'login' | 'signup' | 'verify'
 const mode = ref<"login" | "signup" | "verify">("login");
@@ -15,54 +18,81 @@ const form = reactive({ name: "", email: "", password: "", confirm: "" });
 const code = reactive(["", "", "", ""]);
 const codeInputs = ref<HTMLInputElement[]>([]);
 
+const error = ref("");
+const info = ref("");
+const loading = ref(false);
+
 async function handleLogin() {
+  error.value = "";
+  info.value = "";
+  loading.value = true;
   try {
-    const response = await api.post("token/", {
+    const { data } = await api.post("token/", {
       email: form.email,
       password: form.password,
     });
 
-    localStorage.setItem("access_token", response.data.access);
-    localStorage.setItem("refresh_token", response.data.refresh);
-
-    alert("Login successful!");
+    // saves access_token + refresh_token in localStorage and updates the navbar
+    setSession(data.access, data.refresh, form.email);
 
     emit("loginSuccess");
     closeAndReset();
-  } catch (error) {
-    console.error("Login failed:", error);
-    alert("Invalid email or password.");
+  } catch (e) {
+    console.error("Login failed:", e);
+    error.value = "Invalid email or password.";
+  } finally {
+    loading.value = false;
   }
 }
 
 async function handleSignup() {
+  error.value = "";
+  info.value = "";
+  loading.value = true;
   try {
     await api.post("register/", {
       email: form.email,
       password: form.password,
     });
 
-    alert("Account created successfully!");
-
     mode.value = "login";
-  } catch (error) {
-    console.error("Registration failed:", error);
-    alert("Registration failed. Please check your details.");
+    form.password = "";
+    info.value = "Account created. Please log in.";
+  } catch (e: any) {
+    console.error("Registration failed:", e);
+    const data = e?.response?.data;
+    error.value =
+      data && typeof data === "object"
+        ? Object.values(data).flat().join(" ")
+        : "Registration failed. Please check your details.";
+  } finally {
+    loading.value = false;
   }
 }
 
 function handleVerify() {
-  alert("Account created — not connected to a server yet.");
-  closeAndReset();
+  info.value = "Verification is not connected to a server yet.";
 }
 
 function onCodeInput(i: number) {
   if (code[i] && i < 3) codeInputs.value[i + 1]?.focus();
 }
 
+function switchMode(next: "login" | "signup" | "verify") {
+  error.value = "";
+  info.value = "";
+  mode.value = next;
+}
+
 function closeAndReset() {
   emit("close");
   mode.value = "login";
+  error.value = "";
+  info.value = "";
+  form.name = "";
+  form.email = "";
+  form.password = "";
+  form.confirm = "";
   code.forEach((_, i) => (code[i] = ""));
 }
 </script>
@@ -81,20 +111,14 @@ function closeAndReset() {
           }}
         </h2>
 
-        <button
-          aria-label="Close"
-          class="text-ink/50 hover:text-ink"
-          @click="closeAndReset"
-        >
+        <button aria-label="Close" class="text-ink/50 hover:text-ink" @click="closeAndReset">
           ✕
         </button>
       </div>
 
       <!-- LOGIN -->
       <template v-if="mode === 'login'">
-        <p class="mt-1 text-sm text-ink/60">
-          Access your Thimitech client dashboard.
-        </p>
+        <p class="mt-1 text-sm text-ink/60">Access your Thimitech client dashboard.</p>
 
         <form class="mt-6 grid gap-4" @submit.prevent="handleLogin">
           <label class="grid gap-1.5 text-sm">
@@ -119,18 +143,17 @@ function closeAndReset() {
             />
           </label>
 
-          <a
-            href="#"
-            class="-mt-1 text-xs text-river hover:underline"
-          >
-            Forgotten password?
-          </a>
+          <a href="#" class="-mt-1 text-xs text-river hover:underline"> Forgotten password? </a>
+
+          <p v-if="info" class="text-sm text-green-700">{{ info }}</p>
+          <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
 
           <button
             type="submit"
-            class="mt-2 rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river"
+            :disabled="loading"
+            class="mt-2 rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river disabled:opacity-60"
           >
-            Log in
+            {{ loading ? "Logging in..." : "Log in" }}
           </button>
         </form>
 
@@ -141,6 +164,7 @@ function closeAndReset() {
         </div>
 
         <button
+          type="button"
           class="mt-4 flex w-full items-center justify-center gap-3 rounded-lg border border-ink/15 py-3 text-sm font-medium text-ink transition-colors hover:border-ink/30 hover:bg-panel"
         >
           <svg viewBox="0 0 24 24" class="h-5 w-5">
@@ -166,10 +190,7 @@ function closeAndReset() {
 
         <p class="mt-6 text-center text-xs text-ink/50">
           Don't have an account?
-          <button
-            class="text-river hover:underline"
-            @click="mode = 'signup'"
-          >
+          <button type="button" class="text-river hover:underline" @click="switchMode('signup')">
             Sign up
           </button>
         </p>
@@ -177,9 +198,7 @@ function closeAndReset() {
 
       <!-- SIGN UP -->
       <template v-else-if="mode === 'signup'">
-        <p class="mt-1 text-sm text-ink/60">
-          Get started with your free client account.
-        </p>
+        <p class="mt-1 text-sm text-ink/60">Get started with your free client account.</p>
 
         <form class="mt-6 grid gap-4" @submit.prevent="handleSignup">
           <label class="grid gap-1.5 text-sm">
@@ -215,20 +234,20 @@ function closeAndReset() {
             />
           </label>
 
+          <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+
           <button
             type="submit"
-            class="mt-2 rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river"
+            :disabled="loading"
+            class="mt-2 rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river disabled:opacity-60"
           >
-            Create account
+            {{ loading ? "Creating account..." : "Create account" }}
           </button>
         </form>
 
         <p class="mt-6 text-center text-xs text-ink/50">
           Already have an account?
-          <button
-            class="text-river hover:underline"
-            @click="mode = 'login'"
-          >
+          <button type="button" class="text-river hover:underline" @click="switchMode('login')">
             Log in
           </button>
         </p>
@@ -236,9 +255,7 @@ function closeAndReset() {
 
       <!-- VERIFY CODE -->
       <template v-else>
-        <p class="mt-1 text-sm text-ink/60">
-          We've sent a verification code to your inbox.
-        </p>
+        <p class="mt-1 text-sm text-ink/60">We've sent a verification code to your inbox.</p>
 
         <form class="mt-6" @submit.prevent="handleVerify">
           <div class="flex justify-center gap-3">
@@ -254,6 +271,8 @@ function closeAndReset() {
             />
           </div>
 
+          <p v-if="info" class="mt-4 text-center text-sm text-ink/60">{{ info }}</p>
+
           <button
             type="submit"
             class="mt-6 w-full rounded-full bg-ink px-6 py-2.5 font-medium text-paper transition-colors hover:bg-river"
@@ -263,10 +282,7 @@ function closeAndReset() {
         </form>
 
         <p class="mt-5 text-center text-xs text-ink/50">
-          <button
-            class="text-river hover:underline"
-            @click="mode = 'signup'"
-          >
+          <button type="button" class="text-river hover:underline" @click="switchMode('signup')">
             ← Back
           </button>
         </p>

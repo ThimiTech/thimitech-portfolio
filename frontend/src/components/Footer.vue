@@ -14,6 +14,10 @@ const social = [
   { label: "Instagram", href: "https://www.instagram.com/thimitech/" },
   { label: "Facebook", href: "https://www.facebook.com/profile.php?id=61585729408478" },
 ];
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 </script>
 
 <template>
@@ -54,7 +58,9 @@ const social = [
             <p class="text-xs font-semibold uppercase tracking-wide text-paper/40">Sitemap</p>
             <ul class="mt-4 space-y-2.5 text-sm">
               <li v-for="l in sitemap" :key="l.href">
-                <a :href="l.href" class="transition-colors duration-150 hover:text-flag">{{ l.label }}</a>
+                <a :href="l.href" class="transition-colors duration-150 hover:text-flag">{{
+                  l.label
+                }}</a>
               </li>
             </ul>
           </div>
@@ -91,6 +97,28 @@ const social = [
             </ul>
           </div>
         </div>
+      </div>
+
+      <!-- Arrow button -->
+      <div class="mt-8 flex justify-end">
+        <button
+          type="button"
+          aria-label="Back to top"
+          class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-flag text-paper transition-transform hover:-translate-y-1"
+          @click="scrollToTop"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 19V5M5 12l7-7 7 7" />
+          </svg>
+        </button>
       </div>
 
       <div
