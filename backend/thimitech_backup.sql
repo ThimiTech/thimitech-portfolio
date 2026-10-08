@@ -680,7 +680,7 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 5	admin	0003_logentry_add_action_flag_choices	2026-09-18 01:26:04.975378+05:45
 6	contenttypes	0002_remove_content_type_name	2026-09-18 01:26:04.991483+05:45
 7	auth	0002_alter_permission_name_max_length	2026-09-18 01:26:05.001996+05:45
-8	auth	0003_alter_user_email_max_length	2026-09-18 01:26:05.01077+05:45
+
 9	auth	0004_alter_user_username_opts	2026-09-18 01:26:05.017976+05:45
 10	auth	0005_alter_user_last_login_null	2026-09-18 01:26:05.030593+05:45
 11	auth	0006_require_contenttypes_0002	2026-09-18 01:26:05.036338+05:45
