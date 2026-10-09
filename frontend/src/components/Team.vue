@@ -1,79 +1,87 @@
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import api from '../api/api'
+
+interface Member {
+  id: number
+  name: string
+  role: string
+  photo?: string | null
+}
+
+const team = ref<Member[]>([])
+const loading = ref(true)
+const error = ref('')
+
+const colors = [
+  'from-river to-emerald-500',
+  'from-ink to-river',
+  'from-contour to-flag',
+]
+
+const initials = (name: string) =>
+  name
+    .split(' ')
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+
+const getTeam = async () => {
+  try {
+    const res = await api.get('team/')
+    team.value = res.data
+  } catch (err) {
+    error.value = 'Could not load the team right now.'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(getTeam)
+</script>
+
 <template>
-  <section id="team" class="px-8 py-20 bg-gray-50">
-    <div class="max-w-6xl mx-auto">
-
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold">
-          OUR TEAM
-        </h2>
-
-        <p class="text-gray-500 mt-4 max-w-2xl mx-auto">
-          Meet the people behind our technology and geospatial solutions.
+  <section id="team" class="border-t border-ink/10 bg-paper px-10 py-10">
+    <div class="mx-auto max-w-none">
+      <div class="max-w-xl">
+        <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">The team</h2>
+        <p class="mt-4 text-ink/65">
+          A collective of engineers and innovators, driven by precision and purpose,
+          building geospatial solutions that inspire progress.
         </p>
       </div>
 
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="mt-16">
+        <p v-if="loading" class="text-sm text-ink/50">Loading team…</p>
+        <p v-else-if="error" class="text-sm text-flag">{{ error }}</p>
+        <p v-else-if="team.length === 0" class="text-sm text-ink/50">No team members added yet.</p>
 
-        <article
-          v-for="member in team"
-          :key="member.id"
-          class="rounded-xl border bg-white p-6 text-center hover:shadow-xl transition"
-        >
-
-          <img
-            v-if="member.image"
-            :src="`http://127.0.0.1:8000${member.image}`"
-            :alt="member.name"
-            class="mx-auto h-32 w-32 rounded-full object-cover"
-          />
-
+        <div v-else class="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <div
-            v-else
-            class="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-gray-200 text-2xl font-bold"
+            v-for="(m, i) in team"
+            :key="m.id"
+            class="flex flex-col items-center rounded-3xl border border-ink/10 bg-panel px-6 py-16 text-center shadow-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-river/40 hover:shadow-xl"
           >
-            {{ member.initials }}
-          </div>
-
-          <h3 class="text-xl font-bold mt-5">
-            {{ member.name }}
-          </h3>
-
-          <p class="text-gray-500 mt-1">
-            {{ member.role }}
-          </p>
-
-          <div
-            v-if="member.social_media.length"
-            class="flex justify-center gap-4 mt-5"
-          >
-            <a
-              v-for="social in member.social_media"
-              :key="social.id"
-              :href="social.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-gray-500 hover:text-blue-600"
+            <img
+              v-if="m.photo"
+              :src="m.photo"
+              :alt="m.name"
+              class="h-36 w-36 rounded-full object-cover"
+            />
+            <div
+              v-else
+              :class="colors[i % colors.length]"
+              class="flex h-36 w-36 items-center justify-center rounded-full bg-gradient-to-br font-display text-5xl font-semibold text-paper"
             >
-              {{ social.platform }}
-            </a>
+              {{ initials(m.name) }}
+            </div>
+            <h3 class="mt-8 font-display text-2xl font-medium text-ink">{{ m.name }}</h3>
+            <p class="mt-2 font-mono text-sm tracking-wide text-ink/60">{{ m.role }}</p>
           </div>
-
-        </article>
-
+        </div>
       </div>
-
     </div>
   </section>
 </template>
-
-<script setup>
-import api from '../api'
-import { onMounted, ref } from 'vue'
-
-const team = ref([])
-
-onMounted(async () => {
-  const response = await api.get('team/')
-  team.value = response.data
-})
-</script>

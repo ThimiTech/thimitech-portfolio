@@ -1,17 +1,92 @@
-<template>
-  <nav class="sticky top-0 z-50 flex items-center justify-between px-8 py-5 bg-white shadow">
-    <h1 class="text-2xl font-bold">
-      ThimiTech
-    </h1>
+<script setup lang="ts">
+import { ref } from "vue";
+import Login from "./Login.vue";
 
-    <div class="flex gap-6">
-      <a href="" class="hover:text-blue-600">Home</a>
-      <a href="#about" class="hover:text-blue-600">About</a>
-      <a href="#services" class="hover:text-blue-600">Services</a>
-      <a href="#projects" class="hover:text-blue-600">Projects</a>
-      <a href="#team" class="hover:text-blue-600">Team</a>
-      <a href="#hiring" class="hover:text-blue-600">Hiring</a>
-      <a href="#contact" class="hover:text-blue-600">Contact</a>
+const open = ref(false);
+const loginOpen = ref(false);
+
+const links = [
+  { label: "Home", href: "#home" },
+  { label: "About Us", href: "#about" },
+  { label: "Mission", href: "#mission" },
+  { label: "Services", href: "#services" },
+  { label: "Projects", href: "#projects" },
+  { label: "Team", href: "#team" },
+  { label: "Hiring", href: "#hiring" },
+  { label: "Contact", href: "#contact" },
+];
+</script>
+
+<template>
+  <header class="sticky top-0 z-[9999] border-b border-ink/10 bg-paper">
+    <div class="mx-auto flex h-16 w-full items-center justify-between px-6">
+      <a
+        href="#home"
+        class="flex items-center gap-3 font-display text-2xl font-bold text-ink">
+        <svg viewBox="0 0 24 24" class="h-8 w-8 text-flag">
+          <path
+            fill="currentColor"
+            d="M12 2C8 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/>
+        </svg>
+      Thimitech
+      </a>
+
+      <nav class="hidden items-center gap-6 lg:flex">
+        <a
+          v-for="l in links"
+          :key="l.href"
+          :href="l.href"
+          class="text-sm font-medium text-ink/70 hover:text-ink"
+          >{{ l.label }}</a
+        >
+
+        <button class="text-sm font-medium text-ink/70 hover:text-ink" @click="loginOpen = true">
+          Login
+        </button>
+
+        <a
+          href="#contact"
+          class="rounded-full bg-ink px-5 py-2 text-sm font-medium text-paper transition-colors hover:bg-river"
+          >Start a project</a
+        >
+      </nav>
+
+      <button class="lg:hidden" aria-label="Menu" @click="open = !open">
+        <span class="mb-1.5 block h-0.5 w-6 bg-ink"></span>
+        <span class="mb-1.5 block h-0.5 w-6 bg-ink"></span>
+        <span class="block h-0.5 w-6 bg-ink"></span>
+      </button>
     </div>
-  </nav>
+
+    <div
+      v-if="open"
+      class="flex flex-col gap-1 border-t border-ink/10 bg-paper px-6 py-4 lg:hidden"
+    >
+      <a
+        v-for="l in links"
+        :key="l.href"
+        :href="l.href"
+        class="py-2 text-ink/80"
+        @click="open = false"
+        >{{ l.label }}</a
+      >
+      <button
+        class="py-2 text-left text-ink/80"
+        @click="
+          open = false;
+          loginOpen = true;
+        "
+      >
+        Login
+      </button>
+      <a
+        href="#contact"
+        class="mt-2 rounded-full bg-ink px-5 py-2 text-center text-paper"
+        @click="open = false"
+        >Start a project</a
+      >
+    </div>
+  </header>
+
+  <Login :open="loginOpen" @close="loginOpen = false" />
 </template>

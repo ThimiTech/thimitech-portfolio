@@ -1,81 +1,128 @@
+<script setup lang="ts">
+// const projects = [
+//   {
+//     title: 'Plan My Nepal',
+//     status: 'In development',
+//     text: 'A trip-planning platform that maps treks, routes and destinations across Nepal.',
+//     tags: ['Travel', 'Route planning', 'Leaflet'],
+//     art: 'bg-gradient-to-br from-flag to-contour',
+//   },
+//   {
+//     title: 'Pure Nepal',
+//     status: 'In development',
+//     text: 'A tourism showcase mapping the culture, nature and heritage sites of Nepal.',
+//     tags: ['Tourism', 'Culture', 'Web map'],
+//     art: 'bg-gradient-to-br from-river to-emerald-500',
+//   },
+//   {
+//     title: 'The Bot Bazar',
+//     status: 'In development',
+//     text: 'A location-aware online marketplace connecting nearby buyers and sellers.',
+//     tags: ['Marketplace', 'Chatbot', 'Geolocation'],
+//     art: 'bg-gradient-to-br from-ink to-river',
+//   },
+// ]
+
+import api from "../api/api";
+import { ref, onMounted } from "vue";
+const projects = ref([]);
+const getProjects = async () => {
+  try {
+    const res = await api.get("projects/");
+    console.log(res.data);
+    projects.value = res.data;
+  } catch {}
+};
+onMounted(() => {
+  getProjects();
+});
+</script>
+
 <template>
-  <section class="px-8 py-20 bg-white " id="projects">
-    <div class="max-w-6xl mx-auto">
+  <section id="projects" class=" border-t border-ink/10 bg-paper px-10 py-10">
+    <!-- Header -->
+    <div class="mx-auto max-w-none">
+      <h2 class="font-display text-3xl font-bold text-ink lg:text-4xl">Current Projects</h2>
 
-      <!-- Heading -->
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold">
-          OUR PROJECTS
-        </h2>
+      <p class="mt-2 text-ink/60">Platforms we're actively building right now.</p>
+    </div>
 
-        <p class="text-gray-600 mt-4 max-w-2xl mx-auto">
-          Focus on scalable, intuitive solutions that drive real-world impact.
-        </p>
-      </div>
-
-      <!-- Projects -->
-      <div class="grid md:grid-cols-2 gap-8">
-
-        <article
-          v-for="project in projects"
-          :key="project.id"
-          class="rounded-xl overflow-hidden border bg-white hover:shadow-xl transition"
-        >
-
-          <!-- Image -->
+    <!-- Projects -->
+    <div
+      class="mx-auto mt-8 grid max-w-none grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3"
+    >
+      <!-- OUTER LOOP -->
+      <article
+        v-for="p in projects"
+        :key="p.id"
+        class="flex h-full flex-col overflow-hidden rounded-2xl bg-panel shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
+        <!-- Project Image -->
+        <div class="relative h-56 shrink-0 overflow-hidden bg-panel">
           <img
-            v-if="project.image"
-            :src="`http://127.0.0.1:8000${project.image}`"
-            :alt="project.name"
-            class="w-full h-64 object-cover"
+            :src="`http://127.0.0.1:8000${p.image}`"
+            :alt="p.name"
+            class="h-full w-full object-cover transition duration-300 hover:scale-105"
           />
 
-          <!-- Content -->
-          <div class="p-6">
+          <!-- Subtitle Badge -->
+          <span
+            class="absolute right-3 top-3 rounded-full bg-paper px-3 py-1 text-xs font-semibold text-ink shadow"
+          >
+            {{ p.subtitle }}
+          </span>
+        </div>
 
-            <h3 class="text-2xl font-bold">
-              {{ project.name }}
-            </h3>
+        <!-- Card Content -->
+        <div class="flex flex-1 flex-col p-5">
+          <!-- Project Name -->
+          <h3 class="line-clamp-1 font-display text-xl font-bold text-ink">
+            {{ p.name }}
+          </h3>
 
-            <p class="text-gray-500 mt-2">
-              {{ project.subtitle }}
-            </p>
+          <!-- Subtitle -->
+          <p class="mt-1 line-clamp-1 font-mono text-xs text-ink/50">
+            {{ p.subtitle }}
+          </p>
 
-            <p class="text-gray-600 mt-4">
-              {{ project.description }}
-            </p>
+          <!-- Description -->
+          <p class="mt-4 line-clamp-3 min-h-[72px] text-sm leading-6 text-ink/65">
+            {{ p.description }}
+          </p>
 
-            <!-- Project link -->
+          <!-- Spacer -->
+          <div class="flex-1"></div>
+
+          <!-- Visit Project -->
+          <!-- Project Actions -->
+          <div class="mt-6 flex flex-col gap-3">
+            <!-- View Details -->
+            <RouterLink
+              :to="{
+                name: 'projects',
+                params: { id: p.id },
+              }"
+              class="flex w-full items-center justify-center rounded-lg bg-river px-4 py-3 font-mono text-xs font-semibold text-paper transition hover:opacity-90 hover:bg-ink hover:text-paper"
+            >
+              View Details →
+            </RouterLink>
+
+            <!-- Visit Project -->
             <a
-              v-if="project.url"
-              :href="project.url"
+              v-if="p.url"
+              :href="p.url"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-block mt-6 font-semibold hover:underline"
+              class="flex w-full items-center justify-center rounded-lg border border-ink/10 bg-paper px-4 py-3 font-mono text-xs font-semibold text-ink transition hover:bg-ink hover:text-paper"
             >
-              View Project →
+              Visit Project ↗
             </a>
-
           </div>
-        </article>
-
-      </div>
-
+        </div>
+      </article>
     </div>
+
+    <!-- Empty State -->
+    <div v-if="projects.length === 0" class="py-20 text-center text-ink/50">No projects found.</div>
   </section>
 </template>
-
-<script setup>
-import api from '../api'
-import { onMounted, ref } from 'vue'
-
-const projects = ref([])
-
-onMounted(async () => {
-  const response = await api.get(
-    'projects/'
-  )
-
-  projects.value = await response.data
-})
-</script>

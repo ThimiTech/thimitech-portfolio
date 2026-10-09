@@ -1,63 +1,121 @@
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import api from '../api/api'
+
+interface Job {
+  id: number
+  title: string
+  location?: string
+  description: string
+}
+
+const jobs = ref<Job[]>([])
+const loading = ref(true)
+const error = ref('')
+const email = 'info@thimitech.com'
+
+const getJobs = async () => {
+  try {
+    const res = await api.get('jobs/')
+    jobs.value = res.data
+  } catch (err) {
+    error.value = 'Could not load open positions right now.'
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(getJobs)
+</script>
 
 <template>
-  <section id="hiring" class="px-8 py-20 bg-gray-50">
-    <div class="max-w-6xl mx-auto">
+  <section
+    id="hiring"
+    class="min-h-screen border-t border-ink/10 bg-paper px-10 py-10"
+  >
+    <div class="mx-auto max-w-none">
 
       <!-- Section Heading -->
-      <div class="text-center mb-12">
-        <h2 class="text-4xl font-bold">
-          JOIN THE TEAM
+      <div class="max-w-xl">
+        <h2 class="font-display text-3xl font-bold text-ink lg:text-4xl">
+          Join the team
         </h2>
 
-        <p class="text-gray-500 mt-4 max-w-2xl mx-auto">
-          Explore opportunities to work with us.
+        <p class="mt-2 text-ink/60">
+          We seek passionate minds who value collaboration,
+          who see maps as tools for meaningful impact,
+          and who aspire to shape the future with us.
         </p>
       </div>
 
-
       <!-- Jobs -->
-      <div class="space-y-6">
+      <div class="mt-8 space-y-6">
 
+        <!-- JOB LOOP -->
         <article
           v-for="job in jobs"
           :key="job.id"
-          class="rounded-xl border bg-white p-6 hover:shadow-lg transition"
-        >
+           class="flex h-full flex-col overflow-hidden rounded-2xl bg-panel shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
 
-          <div class="grid md:grid-cols-2 gap-8">
+          <div class="grid md:grid-cols-2">
 
-            <!-- Left Side -->
-            <div>
-              <h3 class="text-2xl font-bold">
+            <!-- LEFT SIDE -->
+            <div class="p-6 lg:p-7">
+
+              <!-- Job Title -->
+              <h3
+                class="font-display text-xl font-bold text-ink"
+              >
                 {{ job.title }}
               </h3>
 
-              <p class="text-gray-500 mt-2">
+              <!-- Employment Type -->
+              <span
+                class="mt-2 inline-flex rounded-full bg-river/10 px-3 py-1 font-mono text-xs font-medium text-river"
+              >
                 {{ job.employment_type }}
-              </p>
+              </span>
 
-              <p class="text-gray-600 mt-5 leading-7">
+              <!-- Description -->
+              <p
+                class="mt-5 max-w-xl text-sm leading-6 text-ink/65"
+              >
                 {{ job.description }}
               </p>
+
             </div>
 
+            <!-- RIGHT SIDE -->
+            <div
+              class="border-t border-ink/10 p-6 md:border-l md:border-t-0 lg:p-7"
+            >
 
-            <!-- Right Side -->
-            <div class="md:border-l md:pl-8">
-
-              <div v-if="job.requirements.length">
-                <h4 class="text-lg font-semibold">
+              <!-- Requirements -->
+              <div
+                v-if="job.requirements && job.requirements.length"
+              >
+                <h4
+                  class="font-display text-lg font-semibold text-ink"
+                >
                   Requirements
                 </h4>
 
-                <ul class="mt-3 space-y-2 text-gray-600">
+                <ul
+                  class="mt-4 space-y-3"
+                >
 
+                  <!-- REQUIREMENTS LOOP -->
                   <li
                     v-for="requirement in job.requirements"
                     :key="requirement.id"
-                    class="flex gap-2"
+                    class="flex gap-3 text-sm leading-5 text-ink/65"
                   >
-                    <span class="mt-1">•</span>
+                    <span
+                      class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-river"
+                    ></span>
 
                     <span>
                       {{ requirement.text }}
@@ -67,15 +125,23 @@
                 </ul>
               </div>
 
+              <!-- No Requirements -->
+              <p
+                v-else
+                class="text-sm text-ink/50"
+              >
+                No specific requirements listed.
+              </p>
 
               <!-- Apply Button -->
               <div class="mt-6">
 
-                <button
-                  class="rounded-lg border border-gray-300 px-5 py-2 font-semibold hover:bg-gray-100 transition"
-                >
-                  Apply
-                </button>
+               <RouterLink
+               :to="`/apply/${job.id}`"
+               class="block w-full rounded-lg bg-ink px-4 py-3 text-center text-sm font-semibold  bg-river transition hover:opacity-90 hover:bg-ink hover:text-paper"
+               >
+               Apply for this position →
+               </RouterLink>
 
               </div>
 
@@ -87,20 +153,20 @@
 
       </div>
 
+      <!-- General Application -->
+      <p class="mt-8 text-sm text-ink/60">
+        Don't see a fit? Send your CV to
+
+        <a
+          :href="'mailto:' + email"
+          class="font-medium text-river hover:underline"
+        >
+          {{ email }}
+        </a>
+
+        anyway.
+      </p>
+
     </div>
   </section>
 </template>
-
-
-<script setup>
-import api from '../api'
-import { onMounted, ref } from 'vue'
-
-const jobs = ref([])
-
-onMounted(async () => {
-  const response = await api.get('jobs/')
-  jobs.value = response.data
-})
-</script>
-
