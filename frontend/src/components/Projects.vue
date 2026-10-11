@@ -60,7 +60,7 @@ onMounted(() => {
         <!-- Project Image -->
         <div class="relative h-56 shrink-0 overflow-hidden bg-panel">
           <img
-            :src="`http://127.0.0.1:8000${p.image}`"
+            :src="`${p.image}`"
             :alt="p.name"
             class="h-full w-full object-cover transition duration-300 hover:scale-105"
           />

@@ -42,7 +42,7 @@ onMounted(() => {
         <!-- Project Image -->
         <div v-if="project.image" class="overflow-hidden rounded-3xl border border-ink/10 bg-paper">
           <img
-            :src="`http://127.0.0.1:8000${project.image}`"
+            :src="`${project.image}`"
             :alt="project.name"
             class="h-[300px] w-full object-cover sm:h-[450px] lg:h-[550px]"
           />
