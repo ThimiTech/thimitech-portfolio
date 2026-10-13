@@ -29,7 +29,7 @@ const channels = [
 
 <template>
   <section id="contact" class="bg-ink py-32 text-paper">
-    <div class="mx-auto max-w-7xl px-6">
+    <div class="mx-auto max-w-none px-8">
       <div class="grid gap-14 lg:grid-cols-[1fr_1.1fr] lg:items-center">
 
         <div>

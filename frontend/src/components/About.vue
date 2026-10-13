@@ -34,14 +34,15 @@ const stats = [
 </script>
 
 <template>
-  <section id="about" class="border-t border-ink/10 bg-paper py-32">
-    <div class="mx-auto max-w-7xl px-6">
+  <section id="about" class="border-t border-ink/10 bg-paper px-10 py-10">
+    <div class="mx-auto max-w-none">
 
-      <div class="grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:items-start">
+   <div class="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-stretch lg:gap-0">
 
         <div>
-          <p class="font-mono text-xs uppercase tracking-wide text-river">About us</p>
-          <h2 class="mt-3 font-display text-3xl font-semibold leading-snug text-ink lg:text-4xl">
+         
+       <h1 class="font-display text-3xl font-bold text-ink lg:text-4xl">About Us</h1>
+          <h2 class="mt-3 font-display text-2xl font-semibold leading-snug text-ink lg:text-2xl">
             Built by people who read maps for a living.
           </h2>
 
@@ -64,7 +65,7 @@ const stats = [
           </div>
         </div>
 
-        <div class="rounded-2xl border border-ink/10 bg-panel p-8">
+        <div class="h-full rounded-2xl border border-ink/10 bg-panel p-8 sm:p-10 lg:p-12">
           <div class="grid grid-cols-2 gap-8">
             <div v-for="f in facts" :key="f.k">
               <div :class="f.accent" class="flex h-10 w-10 items-center justify-center rounded-lg border">

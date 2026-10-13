@@ -40,11 +40,10 @@ const stack = [
 </script>
 
 <template>
-  <section id="stack" class="border-t border-ink/10 bg-paper py-32">
-    <div class="mx-auto max-w-7xl px-6">
+  <section id="stack" class="border-t border-ink/10 bg-paper px-10 py-10">
+    <div class="mx-auto max-w-none">
 
       <div class="max-w-xl">
-        <p class="font-mono text-xs uppercase tracking-wide text-river">[ Stack ]</p>
         <h2 class="mt-3 font-display text-3xl font-semibold text-ink lg:text-4xl">
           Tools we trust
         </h2>
@@ -58,8 +57,8 @@ const stack = [
         <div
           v-for="g in stack"
           :key="g.group"
-          class="rounded-2xl border border-ink/10 bg-panel p-7"
-        >
+          class="flex h-full flex-col rounded-2xl bg-panel p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
           <div
             :class="g.accent"
             class="flex h-12 w-12 items-center justify-center rounded-xl border"

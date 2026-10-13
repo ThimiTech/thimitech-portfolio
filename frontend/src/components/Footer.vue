@@ -22,7 +22,7 @@ function scrollToTop() {
 
 <template>
   <footer class="border-t border-paper/10 bg-ink text-paper/70">
-    <div class="mx-auto max-w-[1280px] px-6 py-16">
+    <div class="mx-auto max-w-none px-8 py-16">
       <div class="rounded-2xl border border-paper/10 bg-paper/5 p-10">
         <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>

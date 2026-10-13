@@ -39,9 +39,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="projects" class="min-h-screen border-t border-ink/10 bg-panel px-6 py-10">
+  <section id="projects" class=" border-t border-ink/10 bg-paper px-10 py-10">
     <!-- Header -->
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-none">
       <h2 class="font-display text-3xl font-bold text-ink lg:text-4xl">Current Projects</h2>
 
       <p class="mt-2 text-ink/60">Platforms we're actively building right now.</p>
@@ -49,18 +49,18 @@ onMounted(() => {
 
     <!-- Projects -->
     <div
-      class="mx-auto mt-8 grid max-w-7xl grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3"
+      class="mx-auto mt-8 grid max-w-none grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3"
     >
       <!-- OUTER LOOP -->
       <article
         v-for="p in projects"
         :key="p.id"
-        class="flex h-full flex-col overflow-hidden rounded-2xl bg-paper shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+        class="flex h-full flex-col overflow-hidden rounded-2xl bg-panel shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
       >
         <!-- Project Image -->
         <div class="relative h-56 shrink-0 overflow-hidden bg-panel">
           <img
-            :src="`${p.image}`"
+            :src="`http://127.0.0.1:8000${p.image}`"
             :alt="p.name"
             class="h-full w-full object-cover transition duration-300 hover:scale-105"
           />
@@ -102,7 +102,7 @@ onMounted(() => {
                 name: 'projects',
                 params: { id: p.id },
               }"
-              class="flex w-full items-center justify-center rounded-lg bg-river px-4 py-3 font-mono text-xs font-semibold text-paper transition hover:opacity-90"
+              class="flex w-full items-center justify-center rounded-lg bg-river px-4 py-3 font-mono text-xs font-semibold text-paper transition hover:opacity-90 hover:bg-ink hover:text-paper"
             >
               View Details →
             </RouterLink>

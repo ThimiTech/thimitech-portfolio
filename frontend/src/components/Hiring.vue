@@ -33,9 +33,9 @@ onMounted(getJobs)
 <template>
   <section
     id="hiring"
-    class="min-h-screen border-t border-ink/10 bg-paper px-6 py-10"
+    class="min-h-screen border-t border-ink/10 bg-paper px-10 py-10"
   >
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-none">
 
       <!-- Section Heading -->
       <div class="max-w-xl">
@@ -57,8 +57,8 @@ onMounted(getJobs)
         <article
           v-for="job in jobs"
           :key="job.id"
-          class="overflow-hidden rounded-2xl bg-paper shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-        >
+           class="flex h-full flex-col overflow-hidden rounded-2xl bg-panel shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
 
           <div class="grid md:grid-cols-2">
 
@@ -138,7 +138,7 @@ onMounted(getJobs)
 
                <RouterLink
                :to="`/apply/${job.id}`"
-               class="block w-full rounded-lg bg-ink px-4 py-3 text-center text-sm font-semibold text-paper transition hover:opacity-90"
+               class="block w-full rounded-lg bg-ink px-4 py-3 text-center text-sm font-semibold  bg-river transition hover:opacity-90 hover:bg-ink hover:text-paper"
                >
                Apply for this position →
                </RouterLink>

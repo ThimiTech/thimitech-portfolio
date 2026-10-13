@@ -3,7 +3,7 @@ import { reactive, ref } from "vue";
 import { useRoute, RouterLink } from "vue-router";
 import api from "../api/api";
 import { useAuth } from "../stores/auth";
-import NavBar from "../components/NavBar.vue";
+import NavBar from "../components/Navbar.vue";
 import Footer from "../components/Footer.vue";
 
 const route = useRoute();

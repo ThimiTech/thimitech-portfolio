@@ -43,8 +43,8 @@ onMounted(getTeam)
 </script>
 
 <template>
-  <section id="team" class="border-t border-ink/10 bg-paper py-32">
-    <div class="mx-auto max-w-7xl px-6">
+  <section id="team" class="border-t border-ink/10 bg-paper px-10 py-10">
+    <div class="mx-auto max-w-none">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">The team</h2>
         <p class="mt-4 text-ink/65">
@@ -62,7 +62,7 @@ onMounted(getTeam)
           <div
             v-for="(m, i) in team"
             :key="m.id"
-            class="flex flex-col items-center rounded-3xl border border-ink/10 bg-panel px-6 py-16 text-center"
+            class="flex flex-col items-center rounded-3xl border border-ink/10 bg-panel px-6 py-16 text-center shadow-sm transition-all duration-300 ease-out hover:-translate-y-2 hover:border-river/40 hover:shadow-xl"
           >
             <img
               v-if="m.photo"

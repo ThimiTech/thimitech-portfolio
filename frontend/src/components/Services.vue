@@ -87,10 +87,10 @@ onMounted(getServices)
 </script>
 
 <template>
-  <section id="services" class="min-h-screen border-t border-ink/10 bg-paper px-6 py-10">
+  <section id="services" class=" border-t border-ink/10 bg-paper px-10 py-10">
 
     <!-- Header -->
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto max-w-none">
       <h2 class="font-display text-3xl font-bold text-ink lg:text-4xl">
         What we build
       </h2>
@@ -102,14 +102,14 @@ onMounted(getServices)
 
     <!-- Services -->
     <div
-      class="mx-auto mt-8 grid max-w-7xl grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4"
+      class="mx-auto mt-8 grid max-w-none grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3"
     >
 
       <!-- SERVICE LOOP -->
       <article
         v-for="s in services"
         :key="s.id"
-        class="flex h-full flex-col rounded-2xl bg-paper p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+        class="flex h-full flex-col rounded-2xl bg-panel p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
       >
 
         <!-- Icon -->

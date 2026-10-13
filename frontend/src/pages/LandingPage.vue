@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NavBar from '../components/NavBar.vue'
+import NavBar from '../components/Navbar.vue'
 import HeroSection from '../components/HeroSection.vue'
 import About from '../components/About.vue'
 import Mission from '../components/Mission.vue'

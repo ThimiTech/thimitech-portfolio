@@ -40,12 +40,12 @@ const values = [
 </script>
 
 <template>
-  <section id="mission" class="border-t border-ink/10 bg-panel py-32">
-    <div class="mx-auto max-w-7xl px-6">
+  <section id="mission" class="border-t border-ink/10 bg-paper px-10 py-10">
+    <div class="mx-auto max-w-none">
 
       <div class="max-w-2xl">
-        <p class="font-mono text-xs uppercase tracking-wide text-river">Our mission</p>
-        <h2 class="mt-3 font-display text-3xl font-semibold text-ink lg:text-4xl">
+       <h2 class="font-display text-3xl font-bold text-ink lg:text-4xl">Our Mission</h2>
+        <h2 class="mt-3 font-display text-2xl font-semibold text-ink lg:text-2xl">
           Make Nepal's geography easy to see, search and act on.
         </h2>
         <p class="mt-4 text-ink/65">
@@ -58,8 +58,8 @@ const values = [
         <div
           v-for="v in values"
           :key="v.title"
-          class="rounded-2xl border border-ink/10 bg-paper p-7"
-        >
+         class="flex h-full flex-col rounded-2xl bg-panel p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
           <div
             :class="v.accent"
             class="flex h-12 w-12 items-center justify-center rounded-xl border"
