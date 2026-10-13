@@ -31,14 +31,13 @@ onMounted(() => {
       <div>
         <!-- Back Button -->
         <div class="mb-10">
-          <router-link
-            to="/"
+          <a
+            href="/#projects"
             class="inline-flex items-center gap-2 text-sm font-semibold text-river hover:text-ink"
           >
-            ← Back to Projects
-          </router-link>
+           ← Back to Projects
+          </a>
         </div>
-
         <!-- Project Image -->
         <div v-if="project.image" class="overflow-hidden rounded-3xl border border-ink/10 bg-paper">
           <img
@@ -74,11 +73,11 @@ onMounted(() => {
         </div>
 
         <!-- Description -->
-        <div class="mt-14 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_280px]">
+        <div class="mt-6 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_280px]">
           <!-- Main Description -->
           <div>
-            <p class="mb-5 font-mono text-xs uppercase tracking-widest text-river">
-              [ Project Overview ]
+            <p class="mb-3 font-mono text-xs uppercase tracking-widest text-river">
+              Project Overview 
             </p>
 
             <div class="max-w-3xl text-base leading-8 text-ink/70 sm:text-lg">
@@ -88,9 +87,8 @@ onMounted(() => {
 
           <!-- Project Information -->
           <aside class="h-fit rounded-2xl border border-ink/10 bg-paper p-6">
-            <p class="font-mono text-xs uppercase tracking-widest text-river">[ Project Info ]</p>
-
-            <div class="mt-6 space-y-5">
+          
+            <div class=" space-y-5">
               <div>
                 <p class="text-xs uppercase tracking-wide text-ink/40">Project</p>
 
