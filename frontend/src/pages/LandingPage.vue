@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { provideSectionVisibility } from '../composables/useSectionVisibility'
 import NavBar from '../components/NavBar.vue'
 import HeroSection from '../components/HeroSection.vue'
 import About from '../components/About.vue'
@@ -11,6 +12,7 @@ import Hiring from '../components/Hiring.vue'
 import Contact from '../components/Contact.vue'
 import Footer from '../components/Footer.vue'
 
+provideSectionVisibility()
 </script>
 
 <template>

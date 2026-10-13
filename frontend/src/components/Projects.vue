@@ -1,52 +1,26 @@
 <script setup lang="ts">
-// const projects = [
-//   {
-//     title: 'Plan My Nepal',
-//     status: 'In development',
-//     text: 'A trip-planning platform that maps treks, routes and destinations across Nepal.',
-//     tags: ['Travel', 'Route planning', 'Leaflet'],
-//     art: 'bg-gradient-to-br from-flag to-contour',
-//   },
-//   {
-//     title: 'Pure Nepal',
-//     status: 'In development',
-//     text: 'A tourism showcase mapping the culture, nature and heritage sites of Nepal.',
-//     tags: ['Tourism', 'Culture', 'Web map'],
-//     art: 'bg-gradient-to-br from-river to-emerald-500',
-//   },
-//   {
-//     title: 'The Bot Bazar',
-//     status: 'In development',
-//     text: 'A location-aware online marketplace connecting nearby buyers and sellers.',
-//     tags: ['Marketplace', 'Chatbot', 'Geolocation'],
-//     art: 'bg-gradient-to-br from-ink to-river',
-//   },
-// ]
+import { useApiCollection } from '../composables/useApiCollection'
+import { RouterLink } from 'vue-router'
 
-import api from "../api/api";
-import { ref, onMounted } from "vue";
-const projects = ref([]);
-const getProjects = async () => {
-  try {
-    const res = await api.get("projects/");
-    console.log(res.data);
-    projects.value = res.data;
-  } catch {}
-};
-onMounted(() => {
-  getProjects();
-});
+interface Project {
+  id: number
+  name: string
+  image: string
+  subtitle: string
+  description: string
+  url?: string
+}
+const { items: projects, visible } = useApiCollection<Project>('projects/')
 </script>
 
 <template>
-  <section id="projects" class="min-h-screen border-t border-ink/10 bg-panel px-6 py-10">
+  <section v-if="visible" id="projects" class="border-t border-ink/10 bg-panel px-6 py-10">
     <!-- Header -->
     <div class="mx-auto max-w-7xl">
       <h2 class="font-display text-3xl font-bold text-ink lg:text-4xl">Current Projects</h2>
 
       <p class="mt-2 text-ink/60">Platforms we're actively building right now.</p>
     </div>
-
     <!-- Projects -->
     <div
       class="mx-auto mt-8 grid max-w-7xl grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -122,7 +96,6 @@ onMounted(() => {
       </article>
     </div>
 
-    <!-- Empty State -->
-    <div v-if="projects.length === 0" class="py-20 text-center text-ink/50">No projects found.</div>
+
   </section>
 </template>

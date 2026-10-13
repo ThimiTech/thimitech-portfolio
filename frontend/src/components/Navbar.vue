@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import Login from "./Login.vue";
-import { useAuth } from "../stores/auth";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 
-const { isLoggedIn, userEmail, loginOpen, openLogin, closeLogin, logout } = useAuth();
+const SCROLL_TINT_THRESHOLD = 24;
+const NAV_HEIGHT = 64;
 
 const open = ref(false);
-
+const scrolled = ref(false);
+const pastHero = ref(false);
 const links = [
   { label: "Home", href: "#home" },
   { label: "About Us", href: "#about" },
@@ -17,105 +17,124 @@ const links = [
   { label: "Hiring", href: "#hiring" },
   { label: "Contact", href: "#contact" },
 ];
+
+let scrollRaf = 0;
+let heroObserver: IntersectionObserver | null = null;
+
+function readScrolled(): void {
+  scrolled.value = window.scrollY > SCROLL_TINT_THRESHOLD;
+}
+
+function onScroll(): void {
+  if (scrollRaf !== 0) return;
+  scrollRaf = requestAnimationFrame(() => {
+    scrollRaf = 0;
+    readScrolled();
+  });
+}
+
+onMounted(() => {
+  readScrolled();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  const hero = document.getElementById("home");
+  if (hero) {
+    heroObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        pastHero.value = entry ? !entry.isIntersecting : false;
+      },
+      { rootMargin: `-${NAV_HEIGHT}px 0px 0px 0px`, threshold: 0 },
+    );
+    heroObserver.observe(hero);
+  }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("scroll", onScroll);
+  heroObserver?.disconnect();
+  heroObserver = null;
+  if (scrollRaf !== 0) {
+    cancelAnimationFrame(scrollRaf);
+    scrollRaf = 0;
+  }
+});
 </script>
 
 <template>
-  <header class="sticky top-0 z-[9999] border-b border-ink/10 bg-paper">
-    <div class="mx-auto flex h-16 w-full items-center justify-between px-6">
-      <a href="#home" class="flex items-center gap-2 font-display text-lg font-semibold text-ink">
-        <svg viewBox="0 0 24 24" class="h-6 w-6 text-flag">
-          <path
-            fill="currentColor"
-            d="M12 2C8 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"
-          />
-        </svg>
-        Thimitech
+  <header
+    class="fixed inset-x-0 top-0 z-nav border-b text-paper transition duration-200 ease-in-out"
+    :class="
+      pastHero
+        ? 'border-white/10 bg-[#081422]/92 backdrop-blur-md'
+        : scrolled
+          ? 'border-white/10 bg-[#16304a]/45 backdrop-blur-md'
+          : 'border-transparent bg-transparent'
+    "
+  >
+    <div class="flex min-h-16 items-center justify-between gap-6 px-6 py-3 lg:px-16 lg:py-4">
+      <a
+        href="#home"
+        aria-label="Thimitech home"
+        class="flex items-center pl-1 font-display text-xl font-semibold tracking-tight"
+      >
+        <span>thimi</span>
+        <span
+          class="ml-0.5 rounded-md border border-white/10 bg-black px-1.5 py-0.5 text-[0.92em] leading-none"
+          >Tech</span
+        >
       </a>
 
-      <nav class="hidden items-center gap-6 lg:flex">
+      <nav class="hidden items-center gap-7 lg:flex">
         <a
           v-for="l in links"
           :key="l.href"
           :href="l.href"
-          class="text-sm font-medium text-ink/70 hover:text-ink"
+          class="text-base font-medium text-paper/70 transition-colors duration-200 hover:text-paper"
           >{{ l.label }}</a
         >
-
-        <!-- Logged out -->
-        <button
-          v-if="!isLoggedIn"
-          class="text-sm font-medium text-ink/70 hover:text-ink"
-          @click="openLogin"
-        >
-          Login
-        </button>
-
-        <!-- Logged in -->
-        <div v-else class="flex items-center gap-3">
-          <span
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-river text-sm font-semibold uppercase text-paper"
-            :title="userEmail ?? ''"
-          >
-            {{ userEmail?.[0] ?? "U" }}
-          </span>
-          <button class="text-sm font-medium text-ink/70 hover:text-ink" @click="logout">
-            Logout
-          </button>
-        </div>
       </nav>
 
-      <button class="lg:hidden" aria-label="Menu" @click="open = !open">
-        <span class="mb-1.5 block h-0.5 w-6 bg-ink"></span>
-        <span class="mb-1.5 block h-0.5 w-6 bg-ink"></span>
-        <span class="block h-0.5 w-6 bg-ink"></span>
-      </button>
+      <div class="flex items-center gap-4">
+        <a
+          href="#contact"
+          class="hidden rounded-full bg-paper px-5 py-2 text-base font-medium text-ink transition-opacity duration-200 hover:opacity-90 lg:inline-block"
+          >Join Us</a
+        >
+        <button class="lg:hidden" aria-label="Menu" :aria-expanded="open" @click="open = !open">
+          <span class="mb-1.5 block h-0.5 w-6 bg-paper"></span>
+          <span class="mb-1.5 block h-0.5 w-6 bg-paper"></span>
+          <span class="block h-0.5 w-6 bg-paper"></span>
+        </button>
+      </div>
     </div>
 
     <div
       v-if="open"
-      class="flex flex-col gap-1 border-t border-ink/10 bg-paper px-6 py-4 lg:hidden"
+      class="mx-6 flex flex-col gap-1 rounded-2xl bg-[#16304a]/95 px-5 py-4 backdrop-blur-md lg:hidden"
     >
       <a
         v-for="l in links"
         :key="l.href"
         :href="l.href"
-        class="py-2 text-ink/80"
+        class="py-2 text-base text-paper/80 hover:text-paper"
         @click="open = false"
         >{{ l.label }}</a
       >
-
-      <button
-        v-if="!isLoggedIn"
-        class="py-2 text-left text-ink/80"
-        @click="
-          open = false;
-          openLogin();
-        "
+      <a
+        href="#contact"
+        class="mt-2 rounded-full bg-paper px-5 py-2 text-center text-base font-medium text-ink"
+        @click="open = false"
+        >Join Us</a
       >
-        Login
-      </button>
-
-      <div v-else class="flex items-center justify-between py-2">
-        <span class="flex items-center gap-2 text-ink/80">
-          <span
-            class="flex h-8 w-8 items-center justify-center rounded-full bg-river text-sm font-semibold uppercase text-paper"
-          >
-            {{ userEmail?.[0] ?? "U" }}
-          </span>
-          {{ userEmail }}
-        </span>
-        <button
-          class="text-sm text-ink/60"
-          @click="
-            open = false;
-            logout();
-          "
-        >
-          Logout
-        </button>
-      </div>
     </div>
   </header>
-
-  <Login :open="loginOpen" @close="closeLogin" />
 </template>
+
+<style scoped>
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--hero-accent, #ffd9a0);
+  outline-offset: 3px;
+}
+</style>

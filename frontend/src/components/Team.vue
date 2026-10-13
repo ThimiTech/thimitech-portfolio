@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import api from '../api/api'
+import { useApiCollection } from '../composables/useApiCollection'
 
 interface Member {
   id: number
@@ -8,10 +7,7 @@ interface Member {
   role: string
   photo?: string | null
 }
-
-const team = ref<Member[]>([])
-const loading = ref(true)
-const error = ref('')
+const { items: team, visible } = useApiCollection<Member>('team/')
 
 const colors = [
   'from-river to-emerald-500',
@@ -27,23 +23,10 @@ const initials = (name: string) =>
     .join('')
     .toUpperCase()
 
-const getTeam = async () => {
-  try {
-    const res = await api.get('team/')
-    team.value = res.data
-  } catch (err) {
-    error.value = 'Could not load the team right now.'
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(getTeam)
 </script>
 
 <template>
-  <section id="team" class="border-t border-ink/10 bg-paper py-32">
+  <section v-if="visible" id="team" class="border-t border-ink/10 bg-paper py-32">
     <div class="mx-auto max-w-7xl px-6">
       <div class="max-w-xl">
         <h2 class="font-display text-3xl font-semibold text-ink lg:text-4xl">The team</h2>
@@ -54,11 +37,8 @@ onMounted(getTeam)
       </div>
 
       <div class="mt-16">
-        <p v-if="loading" class="text-sm text-ink/50">Loading team…</p>
-        <p v-else-if="error" class="text-sm text-flag">{{ error }}</p>
-        <p v-else-if="team.length === 0" class="text-sm text-ink/50">No team members added yet.</p>
 
-        <div v-else class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
           <div
             v-for="(m, i) in team"
             :key="m.id"

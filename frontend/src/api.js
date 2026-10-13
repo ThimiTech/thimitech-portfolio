@@ -1,7 +1,2 @@
-import axios from 'axios'
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? "/api/"
-})
-
-export default api
+// Compatibility export: all requests use the same configured client.
+export { default } from './api/api'

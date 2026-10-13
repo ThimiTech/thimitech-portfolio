@@ -71,3 +71,9 @@ npm run test:e2e -- --debug
 ```sh
 npm run lint
 ```
+
+### Backend connection
+
+Copy `.env.example` to `.env` and set `VITE_API_URL` (default local backend: `http://localhost:8000/api/`). Restart Vite after changing it. Set this URL to your deployed API before building for production. Vite exposes `VITE_` values to the browser; keep secrets out of them.
+
+Services, projects, team and hiring sections appear only after receiving a non-empty collection. Loading, failed, empty or malformed responses leave the entire section hidden. Both array responses and paginated `results` responses are supported through `useApiCollection`.

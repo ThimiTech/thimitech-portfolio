@@ -1,39 +1,23 @@
 <script setup lang="ts">
+import { useApiCollection } from '../composables/useApiCollection'
 import { RouterLink } from 'vue-router'
-import { onMounted, ref } from 'vue'
-import api from '../api/api'
 
 interface Job {
   id: number
   title: string
   location?: string
+  employment_type?: string
+  requirements?: { id: number; text: string }[]
   description: string
 }
-
-const jobs = ref<Job[]>([])
-const loading = ref(true)
-const error = ref('')
+const { items: jobs, visible } = useApiCollection<Job>('jobs/')
 const email = 'info@thimitech.com'
-
-const getJobs = async () => {
-  try {
-    const res = await api.get('jobs/')
-    jobs.value = res.data
-  } catch (err) {
-    error.value = 'Could not load open positions right now.'
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(getJobs)
 </script>
 
 <template>
-  <section
+  <section v-if="visible"
     id="hiring"
-    class="min-h-screen border-t border-ink/10 bg-paper px-6 py-10"
+    class="border-t border-ink/10 bg-paper px-6 py-10"
   >
     <div class="mx-auto max-w-7xl">
 
@@ -49,7 +33,6 @@ onMounted(getJobs)
           and who aspire to shape the future with us.
         </p>
       </div>
-
       <!-- Jobs -->
       <div class="mt-8 space-y-6">
 

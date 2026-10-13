@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
+import { dataSections, useSectionVisibility } from '../composables/useSectionVisibility';
 import Login from "./Login.vue";
 
 const open = ref(false);
 const loginOpen = ref(false);
 
-const links = [
+const visibility = useSectionVisibility();
+const dynamicLinks = new Set<string>(Object.values(dataSections));
+const allLinks = [
   { label: "Home", href: "#home" },
   { label: "About Us", href: "#about" },
   { label: "Mission", href: "#mission" },
@@ -15,6 +18,9 @@ const links = [
   { label: "Hiring", href: "#hiring" },
   { label: "Contact", href: "#contact" },
 ];
+const links = computed(() => allLinks.filter(
+  (link) => !dynamicLinks.has(link.href) || visibility[link.href],
+));
 </script>
 
 <template>
