@@ -1,6 +1,10 @@
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
 from .models import Job, Requirement, JobApplication
+
+MAX_CV_BYTES = 5 * 1024 * 1024
+CV_EXTENSIONS = ['pdf', 'doc', 'docx']
 
 
 class RequirementSerializer(serializers.ModelSerializer):
@@ -36,6 +40,13 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         source='job.title',
         read_only=True
     )
+    job = serializers.PrimaryKeyRelatedField(queryset=Job.objects.filter(is_active=True))
+    cv = serializers.FileField(validators=[FileExtensionValidator(CV_EXTENSIONS)])
+
+    def validate_cv(self, f):
+        if f.size > MAX_CV_BYTES:
+            raise serializers.ValidationError('CV must be 5 MB or smaller.')
+        return f
 
     class Meta:
         model = JobApplication

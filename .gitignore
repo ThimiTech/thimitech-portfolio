@@ -20,3 +20,9 @@ db.sqlite3
 
 # Django media uploads
 media/
+
+# Committed env template
+!.env.example
+
+# Celery beat state
+celerybeat-schedule*

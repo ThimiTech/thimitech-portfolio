@@ -1,5 +1,13 @@
+import os
+import uuid
+
 from django.conf import settings
 from django.db import models
+
+
+def cv_path(instance, filename):
+    # Unguessable dir: CVs are personal data and /media is publicly served.
+    return f'applications/cv/{uuid.uuid4().hex}/{os.path.basename(filename)}'
 
 
 class Job(models.Model):
@@ -56,7 +64,7 @@ class JobApplication(models.Model):
     phone = models.CharField(max_length=20)
     address = models.CharField(max_length=255)
     cover_letter = models.TextField(blank=True)
-    cv = models.FileField(upload_to='applications/cv/')
+    cv = models.FileField(upload_to=cv_path)
 
     status = models.CharField(
         max_length=20,

@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
     TokenObtainPairView,
     TokenRefreshView,
 )
@@ -26,13 +27,24 @@ from drf_spectacular.utils import extend_schema
 from django.conf import settings
 from django.conf.urls.static import static
 
+from apps.org.dashboard import DashboardView, NavCountsView
+from apps.audit.views import MonitoringView
+
+from apps.users.throttles import LoginIPThrottle, LoginThrottle, TokenRefreshThrottle
+
+
 @extend_schema(tags=['Authentication'])
 class CustomTokenObtainPairView(TokenObtainPairView):
-    pass
+    throttle_classes = [LoginThrottle, LoginIPThrottle]
 
 
 @extend_schema(tags=['Authentication'])
 class CustomTokenRefreshView(TokenRefreshView):
+    throttle_classes = [TokenRefreshThrottle]
+
+
+@extend_schema(tags=['Authentication'], summary='Log out: blacklist the given refresh token')
+class LogoutView(TokenBlacklistView):
     pass
 
 urlpatterns = [
@@ -43,9 +55,23 @@ urlpatterns = [
     path('api/', include('apps.users.urls')),
     path('api/', include('apps.team.urls')),
     path('api/', include('apps.jobs.urls')),
+    path('api/org/', include('apps.org.urls')),
+    path('api/attendance/', include('apps.attendance.urls')),
+    path('api/leave/', include('apps.leave.urls')),
+    path('api/calendar/', include('apps.calendar_app.urls')),
+    path('api/notices/', include('apps.notices.urls')),
+    path('api/pm/', include('apps.pm.urls')),
+    path('api/finance/', include('apps.finance.urls')),
+    path('api/inventory/', include('apps.inventory.urls')),
+    path('api/audit/', include('apps.audit.urls')),
+    path('api/monitoring/overview/', MonitoringView.as_view(), name='monitoring-overview'),
+    path('api/dashboard/', DashboardView.as_view(), name='dashboard'),
+    path('api/nav-counts/', NavCountsView.as_view(), name='nav-counts'),
+    path('api/notifications/', include('apps.notifications.urls')),
 
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/blacklist/', LogoutView.as_view(), name='token_blacklist'),
     
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

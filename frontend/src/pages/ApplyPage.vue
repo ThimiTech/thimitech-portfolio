@@ -3,7 +3,7 @@ import { reactive, ref } from "vue";
 import { useRoute, RouterLink } from "vue-router";
 import api from "../api/api";
 import { useAuth } from "../stores/auth";
-import NavBar from "../components/NavBar.vue";
+import NavBar from "../components/Navbar.vue";
 import Footer from "../components/Footer.vue";
 
 const route = useRoute();
@@ -71,8 +71,8 @@ async function submitApplication() {
     // No manual Content-Type: axios/browser sets multipart + boundary itself
     await api.post("jobs/apply/", data);
     success.value = true;
-  } catch (err: any) {
-    console.error("Apply failed:", err.response?.status, err.response?.data);
+  } catch (e) {
+    const err = e as { response?: { status?: number; data?: unknown } };
 
     if (err.response?.status === 401) {
       error.value = "Your session has expired. Please log in again.";
@@ -89,7 +89,7 @@ async function submitApplication() {
 </script>
 
 <template>
-  <div class="bg-paper font-body text-ink">
+  <div class="studio bg-paper font-body text-ink">
     <NavBar />
 
     <main class="py-20">

@@ -16,29 +16,47 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// If the access token expired (401), refresh it once and retry
+// One refresh at a time: refresh tokens rotate (the old one is blacklisted on use), so parallel 401s
+// must share a single refresh call or all but the first would fail and log the user out.
+let refreshing: Promise<string> | null = null;
+
+function refreshAccess(refresh: string): Promise<string> {
+  refreshing ??= axios
+    .post(`${BASE_URL}token/refresh/`, { refresh })
+    .then(({ data }) => {
+      const { setAccess } = useAuth();
+      setAccess(data.access, data.refresh);
+      return data.access as string;
+    })
+    .finally(() => {
+      refreshing = null;
+    });
+  return refreshing;
+}
+
+// If the access token expired (401), refresh it once and retry. A second 401 (e.g. the password was
+// changed, which revokes every token) ends the session.
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config;
     const refresh = localStorage.getItem("refresh_token");
+    const status = error.response?.status;
 
-    if (
-      error.response?.status === 401 &&
-      !original._retry &&
-      refresh &&
-      !original.url?.includes("token/")
-    ) {
+    if (status === 401 && original && !original.url?.includes("token/")) {
+      if (original._retry || !refresh) {
+        useAuth().logout();
+        return Promise.reject(error);
+      }
       original._retry = true;
       try {
-        const { data } = await axios.post(`${BASE_URL}token/refresh/`, { refresh });
-        const { setAccess } = useAuth();
-        setAccess(data.access);
-        original.headers.Authorization = `Bearer ${data.access}`;
+        const access = await refreshAccess(refresh);
+        original.headers.Authorization = `Bearer ${access}`;
         return api(original);
-      } catch {
-        const { logout } = useAuth();
-        logout(); // refresh token also expired -> log the user out
+      } catch (e) {
+        // Only a rejected refresh token ends the session; a network blip, 5xx or 429 keeps it.
+        const s = (e as { response?: { status?: number } })?.response?.status;
+        if (s === 400 || s === 401) useAuth().logout();
       }
     }
     return Promise.reject(error);

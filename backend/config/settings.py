@@ -28,6 +28,10 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG') == 'True'
 
+if not DEBUG and (not SECRET_KEY or len(SECRET_KEY) < 40 or SECRET_KEY.startswith(('dev-', 'django-insecure'))):
+    from django.core.exceptions import ImproperlyConfigured
+    raise ImproperlyConfigured('Set a strong, unique SECRET_KEY (50+ random chars) in production.')
+
 ALLOWED_HOSTS = ['thimitech.com', 'www.thimitech.com', '127.0.0.1', 'localhost']
 
 
@@ -46,13 +50,26 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.team',
     'apps.jobs',
+    'apps.org',
+    'apps.calendar_app',
+    'apps.leave',
+    'apps.attendance',
+    'apps.notices',
+    'apps.pm',
+    'apps.finance',
+    'apps.inventory',
+    'apps.audit',
+    'apps.notifications',
+
 
     "rest_framework",
+    'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'users.User'
+AUTHENTICATION_BACKENDS = ['apps.users.backends.EmailBackend']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,6 +78,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'apps.audit.middleware.AuditContextMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -96,6 +114,8 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT'),
+        # Separate test DB names let parallel test runs coexist: DB_TEST_NAME=test_thimi_x
+        'TEST': {'NAME': os.getenv('DB_TEST_NAME') or None},
     }
 }
 
@@ -124,7 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kathmandu'
 
 USE_I18N = True
 
@@ -141,36 +161,73 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Thimi Tech <no-reply@thimitech.com>')
+# Origin of the Vue app, used to build links in emails (password reset).
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173' if DEBUG else 'https://thimitech.com').rstrip('/')
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
     "https://thimitech.com",
     "https://www.thimitech.com",
-]
+] + (["http://localhost:5173", "http://127.0.0.1:5173"] if DEBUG else [])
 
 CSRF_TRUSTED_ORIGINS = [
     "https://thimitech.com",
     "https://www.thimitech.com",
 ]
 
+# nginx must overwrite this header (proxy_set_header X-Forwarded-Proto $scheme), never pass the client's through.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Production transport/cookie hardening (dev runs over plain http, so only when DEBUG is off).
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'True') == 'True'
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
+# Request bodies other than file parts; files stream to disk. Per-field size limits live in serializers.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+
+# Throttle counters must be shared across workers: use Redis when available (CACHE_URL=redis://...).
+if os.getenv('CACHE_URL'):
+    CACHES = {'default': {'BACKEND': 'django.core.cache.backends.redis.RedisCache', 'LOCATION': os.getenv('CACHE_URL')}}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Only views with apps.users.throttles classes are limited (login, register, password change/reset, refresh).
+    'DEFAULT_THROTTLE_RATES': {
+        'login': os.getenv('THROTTLE_LOGIN', '10/min'),        # per IP + email
+        'login_ip': os.getenv('THROTTLE_LOGIN_IP', '60/min'),  # per IP (office NAT shares one)
+        'register': os.getenv('THROTTLE_REGISTER', '10/hour'),
+        'password': os.getenv('THROTTLE_PASSWORD', '5/min'),
+        'password_reset': os.getenv('THROTTLE_PASSWORD_RESET', '5/hour'),  # per IP + email
+        'password_reset_ip': os.getenv('THROTTLE_PASSWORD_RESET_IP', '60/hour'),  # per IP (office NAT)
+        'password_reset_confirm': os.getenv('THROTTLE_PASSWORD_RESET_CONFIRM', '60/hour'),  # token is unguessable
+        'token_refresh': os.getenv('THROTTLE_TOKEN_REFRESH', '60/min'),
+    },
 }
 
 from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    # Each refresh returns a new refresh token and blacklists the old one; logout blacklists explicitly.
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    # Tokens carry a password-hash fingerprint: a password change/reset invalidates every existing token.
+    'CHECK_REVOKE_TOKEN': True,
 }
 
 SPECTACULAR_SETTINGS = {
@@ -178,6 +235,12 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for ThimiTech portfolio',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    # Production: API schema/docs only for Django staff (log in at /admin/ first). Dev: open.
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'] if DEBUG else ['rest_framework.permissions.IsAdminUser'],
+    'SERVE_AUTHENTICATION': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
 
     'COMPONENT_SPLIT_REQUEST': True,
 
@@ -199,3 +262,24 @@ SPECTACULAR_SETTINGS = {
 }
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Celery (broker: Redis). CELERY_TASK_ALWAYS_EAGER=True runs tasks inline (tests / no Redis).
+from celery.schedules import crontab
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', CELERY_BROKER_URL)
+CELERY_TASK_ALWAYS_EAGER = os.getenv('CELERY_TASK_ALWAYS_EAGER') == 'True'
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_TIMEZONE = TIME_ZONE
+# Static schedule below; Celery's default file scheduler persists last-run times here.
+CELERY_BEAT_SCHEDULE_FILENAME = str(BASE_DIR / 'celerybeat-schedule')
+CELERY_BEAT_SCHEDULE = {
+    'attendance-mark-absentees': {
+        'task': 'apps.attendance.tasks.mark_absentees',
+        'schedule': crontab(hour=23, minute=30),
+    },
+    'notices-email-due-urgent': {
+        'task': 'apps.notices.tasks.email_due_urgent_notices',
+        'schedule': crontab(minute='*/5'),
+    },
+}

@@ -13,7 +13,7 @@ interface Place {
 const props = defineProps<{ places: Place[] }>()
 
 const mapEl = ref<HTMLElement | null>(null)
-let map: L.Map | null = null
+let map: any = null
 
 // One colour per province (province codes 1-7)
 const provinceColors: Record<string, string> = {
@@ -37,17 +37,17 @@ onMounted(async () => {
     const data = await res.json()
 
     const districts = L.geoJSON(data, {
-      style: (feature) => ({
+      style: (feature: any) => ({
         color: '#f3f6f5',
         weight: 1,
         fillColor: provinceColors[feature?.properties.province] ?? '#12726f',
         fillOpacity: 0.65,
       }),
-      onEachFeature: (feature, layer) => {
+      onEachFeature: (feature: any, layer: any) => {
         layer.bindTooltip(feature.properties.name, { sticky: true, className: 'district-tip' })
         layer.on({
-          mouseover: (e) => (e.target as L.Path).setStyle({ weight: 2, fillOpacity: 0.9 }),
-          mouseout: (e) => districts.resetStyle(e.target),
+          mouseover: (e: any) => e.target.setStyle({ weight: 2, fillOpacity: 0.9 }),
+          mouseout: (e: any) => districts.resetStyle(e.target),
         })
       },
     }).addTo(map)

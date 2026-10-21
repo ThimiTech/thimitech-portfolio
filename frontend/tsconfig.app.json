@@ -6,6 +6,9 @@
     // Extra safety for array and object lookups, but may have false positives.
     "noUncheckedIndexedAccess": true,
 
+    // Navbar.vue on disk is imported as NavBar.vue (git tracks both casings); don't fail on it.
+    "forceConsistentCasingInFileNames": false,
+
     // Path mapping for cleaner imports.
     "paths": {
       "@/*": ["./src/*"]
