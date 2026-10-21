@@ -1,0 +1,161 @@
+@import '@fontsource-variable/outfit';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import 'tailwindcss';
+
+@theme {
+  --color-ink: #1a1a1a;
+  --color-ink-2: #24221f;       /* raised ink surface (sidebar hover, dark cards) */
+  --color-paper: #f4efe6;
+  --color-sheet: #fbf8f2;       /* lighter paper for panels/inputs on paper */
+  --color-panel: #ece4d6;
+  --color-river: #7a6a52;
+  --color-contour: #b08d5b;
+  --color-flag: #aa4825;
+
+  /* Status inks (earthy, map-legend style) */
+  --color-moss: #5d7a4f;        /* present / approved / success */
+  --color-rust: #b4442a;        /* absent / rejected / danger */
+  --color-sky: #4f6d7a;         /* info / remote / department */
+  --color-contour-ink: #8a6a3c; /* readable text tone of contour (pills, warnings) */
+  --color-scrim: #1a1a1a;       /* modal / drawer backdrop — same in both themes */
+  --color-on-accent: #fbf8f2;   /* text on tinted chips/avatars — same in both themes */
+
+  --font-display: 'Outfit Variable', sans-serif;
+  --font-body: 'Outfit Variable', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem;
+}
+
+body {
+  margin: 0;
+}
+
+/* ── Thimi Tech OS dark theme ──────────────────────────────────────────────
+   AppLayout toggles `html.app-dark` (only while the workspace is mounted, so the
+   public site never inherits it). Every utility reads these tokens, so swapping
+   them re-themes the whole app, teleported modals included. */
+html.app-dark {
+  color-scheme: dark;
+  --color-ink: #ebe5d9;
+  --color-ink-2: #d6cfc1;
+  --color-paper: #151412;
+  --color-sheet: #1d1b18;
+  --color-panel: #2a2722;
+  --color-river: #b9a78b;
+  --color-contour: #c9a46e;
+  --color-contour-ink: #d7b07a;
+  --color-flag: #d4693f;
+  --color-moss: #92b383;
+  --color-rust: #e37f63;
+  --color-sky: #8db3c3;
+}
+/* Surfaces that are dark by design (sidebar, auth brand panel) keep light-theme ink/paper. */
+html.app-dark .keep-ink {
+  --color-ink: #1a1a1a;
+  --color-ink-2: #24221f;
+  --color-paper: #f4efe6;
+  --color-flag: #d4693f;
+}
+
+/* Composable utilities (usable in @apply and in markup) */
+@utility ledger-label {
+  /* Small-caps mono label: section eyebrows, table heads, field labels */
+  @apply font-mono text-[10.5px] font-medium uppercase tracking-[0.14em] text-ink/50;
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+/* ───────────── Thimi Tech OS — "Field Survey Ledger" components ───────────── */
+@layer components {
+  /* Paper sheet card */
+  .panel {
+    @apply rounded-xl border border-ink/10 bg-sheet shadow-[0_1px_0_rgba(26,26,26,0.04)];
+  }
+  .panel-head {
+    @apply flex items-center justify-between gap-3 border-b border-dashed border-ink/15 px-5 py-3.5;
+  }
+  .panel-body {
+    @apply p-5;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply btn bg-flag text-on-accent hover:brightness-110;
+  }
+  .btn-ink {
+    @apply btn bg-ink text-paper hover:bg-river;
+  }
+  .btn-ghost {
+    @apply btn border border-ink/15 text-ink hover:border-ink/30 hover:bg-panel;
+  }
+  .btn-danger {
+    @apply btn border border-rust/30 text-rust hover:bg-rust hover:text-paper;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  /* Form fields */
+  .field {
+    @apply grid gap-1.5;
+  }
+  .input {
+    @apply w-full rounded-lg border border-ink/15 bg-sheet px-3 py-2 text-sm text-ink placeholder:text-ink/35 outline-none transition focus:border-river focus:ring-2 focus:ring-river/15;
+  }
+
+  /* Ledger table */
+  .ledger-table {
+    @apply w-full border-collapse text-sm;
+  }
+  .ledger-table th {
+    @apply ledger-label border-b border-ink/15 px-3 py-2.5 text-left;
+  }
+  .ledger-table td {
+    @apply border-b border-dashed border-ink/10 px-3 py-3 align-middle;
+  }
+  .ledger-table tbody tr:hover td {
+    @apply bg-panel/40;
+  }
+
+  /* Numeric / coordinate-style readouts */
+  .readout {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+
+  /* Topographic contour texture for dark surfaces */
+  .contour-bg {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420' viewBox='0 0 420 420' fill='none' stroke='%23f4efe6' stroke-opacity='0.055' stroke-width='1'%3E%3Cpath d='M210 60c70 0 140 40 150 110s-40 150-120 160S70 300 60 220 140 60 210 60z'/%3E%3Cpath d='M210 95c55 0 110 32 118 88s-32 118-95 126-129-32-137-95S155 95 210 95z'/%3E%3Cpath d='M212 130c40 0 80 24 86 64s-24 86-69 92-94-24-99-69 42-87 82-87z'/%3E%3Cpath d='M214 165c26 0 52 16 56 42s-16 56-45 60-61-16-64-45 27-57 53-57z'/%3E%3Cpath d='M216 198c13 0 26 8 28 21s-8 28-22 30-31-8-32-22 13-29 26-29z'/%3E%3Cpath d='M-20 380c60-30 120-10 170 20s130 40 190 0 100-50 120-40'/%3E%3Cpath d='M-20 20c50 20 90 0 130-30M300 -10c20 40 70 60 140 50'/%3E%3C/svg%3E");
+    background-size: 420px 420px;
+  }
+
+  /* Staggered page entrance */
+  .rise {
+    animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+  .animate-pulse {
+    animation: none;
+  }
+}
