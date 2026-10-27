@@ -15,6 +15,7 @@ class Notification(models.Model):
         ASSET_ISSUE = 'asset_issue', 'Asset issue reported'
         CORRECTION_REQUESTED = 'correction_requested', 'Attendance correction requested'
         CORRECTION_DECIDED = 'correction_decided', 'Attendance correction decided'
+        MEETING = 'meeting', 'Meeting scheduled'
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
     kind = models.CharField(max_length=20, choices=Kind.choices)

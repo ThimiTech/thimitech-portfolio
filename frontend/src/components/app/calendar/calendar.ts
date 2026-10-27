@@ -2,7 +2,7 @@ import { isAxiosError } from "axios";
 
 // ───────────── API payloads (/api/calendar/*) ─────────────
 
-export type FeedKind = "holiday" | "event" | "leave" | "birthday" | "work_anniversary";
+export type FeedKind = "holiday" | "event" | "meeting" | "leave" | "birthday" | "work_anniversary";
 export type Audience = "organization" | "department" | "private";
 
 export interface UserRef {
@@ -32,6 +32,10 @@ export type FeedItem =
         created_by: UserRef | null;
         can_edit: boolean;
       };
+    })
+  | (FeedBase & {
+      kind: "meeting";
+      meta: { project: { id: number; name: string }; location: string; kind: string };
     })
   | (FeedBase & {
       kind: "leave";
@@ -89,6 +93,7 @@ export interface BulkResult {
 export const KIND: Record<FeedKind, { prefix: string; label: string; chip: string; dot: string }> = {
   holiday: { prefix: "HOL", label: "Holiday", chip: "border-rust/30 bg-rust/10 text-rust", dot: "bg-rust" },
   event: { prefix: "EVT", label: "Event", chip: "border-sky/30 bg-sky/10 text-sky", dot: "bg-sky" },
+  meeting: { prefix: "MTG", label: "Project meeting", chip: "border-flag/30 bg-flag/10 text-flag", dot: "bg-flag" },
   leave: { prefix: "LV", label: "Leave", chip: "border-moss/30 bg-moss/10 text-moss", dot: "bg-moss" },
   birthday: { prefix: "BDAY", label: "Birthday", chip: "border-contour/40 bg-contour/15 text-contour-ink", dot: "bg-contour" },
   work_anniversary: { prefix: "ANNV", label: "Work anniversary", chip: "border-river/30 bg-river/10 text-river", dot: "bg-river" },

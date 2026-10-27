@@ -221,6 +221,16 @@ def feed_items(user, start, end):
                               'created_by': user_mini(e.created_by), 'can_edit': can_edit_event(user, e),
                           }))
 
+    from apps.pm.models import Meeting
+    meetings = Meeting.objects.filter(Q(attendees=user) | Q(created_by=user), start__lt=hi, end__gte=lo).exclude(
+        status='cancelled').select_related('project').distinct()
+    for m in meetings:
+        items.append(item('meeting', m.pk, f'{m.project.key} · {m.title}', dt.to_representation(m.start),
+                          dt.to_representation(m.end), False, 'flag', {
+                              'project': {'id': m.project_id, 'name': m.project.name}, 'location': m.location,
+                              'kind': m.kind,
+                          }))
+
     for lv in visible_leaves(user).filter(start_date__lte=end, end_date__gte=start):
         t = lv.leave_type
         items.append(item('leave', lv.pk, f'{lv.user.full_name} · {t.name}', lv.start_date, lv.end_date, True,
@@ -254,7 +264,7 @@ def feed_items(user, start, end):
     return items
 
 
-KIND_ORDER = {'holiday': 0, 'event': 1, 'leave': 2, 'birthday': 3, 'work_anniversary': 4}
+KIND_ORDER = {'holiday': 0, 'event': 1, 'meeting': 1, 'leave': 2, 'birthday': 3, 'work_anniversary': 4}
 
 
 def item(kind, pk, title, start, end, all_day, color, meta):
