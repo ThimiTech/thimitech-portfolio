@@ -28,11 +28,16 @@ defineOptions({ name: 'OriginalProjects' })
 import api from "../../api/api";
 import { ref, onMounted } from "vue";
 interface Project { id: number; name: string; image: string | null; subtitle: string; description: string; url: string }
+interface CaseStudy { slug: string; name: string; tagline: string; cover: string | null; tech: string[] }
 const projects = ref<Project[]>([]);
+const cases = ref<CaseStudy[]>([]);
 const getProjects = async () => {
   try {
     const res = await api.get("projects/");
     projects.value = res.data;
+  } catch {}
+  try {
+    cases.value = (await api.get<CaseStudy[]>("pm/public/")).data; // projects published from the delivery workspace
   } catch {}
 };
 onMounted(() => {
@@ -124,7 +129,28 @@ onMounted(() => {
       </article>
     </div>
 
+    <!-- Published case studies (Delivery → Public profile) -->
+    <div v-if="cases.length" class="mx-auto mt-6 grid max-w-7xl grid-cols-1 items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <RouterLink
+        v-for="c in cases"
+        :key="c.slug"
+        :to="`/work/${c.slug}`"
+        class="flex h-full flex-col overflow-hidden rounded-2xl bg-paper shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+      >
+        <div class="relative h-56 shrink-0 overflow-hidden bg-ink">
+          <img v-if="c.cover" :src="c.cover" :alt="c.name" class="h-full w-full object-cover transition duration-300 hover:scale-105" />
+          <span class="absolute right-3 top-3 rounded-full bg-paper px-3 py-1 text-xs font-semibold text-ink shadow">Case study</span>
+        </div>
+        <div class="flex flex-1 flex-col p-5">
+          <h3 class="line-clamp-1 font-display text-xl font-bold text-ink">{{ c.name }}</h3>
+          <p class="mt-4 line-clamp-3 min-h-[72px] text-sm leading-6 text-ink/65">{{ c.tagline }}</p>
+          <p class="mt-auto pt-4 font-mono text-xs text-ink/50">{{ c.tech.slice(0, 4).join(' · ') }}</p>
+          <span class="mt-4 flex w-full items-center justify-center rounded-lg bg-river px-4 py-3 font-mono text-xs font-semibold text-paper">Read the story →</span>
+        </div>
+      </RouterLink>
+    </div>
+
     <!-- Empty State -->
-    <div v-if="projects.length === 0" class="py-20 text-center text-ink/50">No projects found.</div>
+    <div v-if="projects.length === 0 && cases.length === 0" class="py-20 text-center text-ink/50">No projects found.</div>
   </section>
 </template>

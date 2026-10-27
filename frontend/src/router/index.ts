@@ -19,6 +19,8 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/projects/:id', name: 'projects', component: DetailPage },
+    { path: '/work', name: 'work', component: () => import('../pages/WorkPage.vue'), meta: { title: 'Our work' } },
+    { path: '/work/:slug', name: 'work-detail', component: () => import('../pages/WorkDetailPage.vue') },
     { path: '/', name: 'home', component: LandingPage },
     { path: '/new', name: 'new-home', component: () => import('../pages/NewLandingPage.vue') },
     { path: '/apply/:jobId', name: 'apply', component: ApplyPage },

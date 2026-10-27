@@ -28,8 +28,10 @@ const task: Task = {
   labels: ['GIS'],
   position: 0,
   milestone: null,
+  sprint: null,
   start_date: '2030-01-02',
   due_date: '2030-01-06',
+  completed_at: null,
 }
 describe('Project board', () => {
   it('lets members drag their assigned tasks and opens task details from a button', async () => {

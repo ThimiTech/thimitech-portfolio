@@ -1,14 +1,43 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import api from '@/api/api'
 import { confirmDialog } from '../ui/confirm'
-import { errorMessage, dateLabel, type Project, type Milestone, type ProjectLink } from './pm'
+import { errorMessage, dateLabel, detectLinkKind, linkLabel, LINK_KINDS, type Project, type Milestone, type ProjectLink } from './pm'
 const props = defineProps<{ project: Project; milestones: Milestone[]; links: ProjectLink[] }>()
 const emit = defineEmits<{ saved: [] }>()
 const error = ref('')
 const busy = ref(false)
 const milestone = reactive({ title: '', due_date: '' })
-const link = reactive({ title: '', url: '', kind: 'web' })
+const link = reactive({ title: '', url: '', kind: 'web', public: false })
+const kindTouched = ref(false)
+watch(
+  () => link.url,
+  (url) => {
+    if (!kindTouched.value) link.kind = detectLinkKind(url)
+    if (!link.title && /^https?:\/\/[^/]+/.test(url)) {
+      try {
+        link.title = new URL(url).hostname.replace(/^www\./, '')
+      } catch {
+        /* still typing */
+      }
+    }
+  },
+)
+const grouped = computed(() => {
+  const order = LINK_KINDS.map((k) => k.id)
+  return [...props.links].sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind))
+})
+async function togglePublic(l: ProjectLink) {
+  busy.value = true
+  try {
+    await api.patch(`pm/links/${l.id}/`, { public: !l.public })
+    emit('saved')
+  } catch (e) {
+    error.value = errorMessage(e)
+  } finally {
+    busy.value = false
+  }
+}
 async function add(kind: 'milestones' | 'links') {
   busy.value = true
   error.value = ''
@@ -18,7 +47,10 @@ async function add(kind: 'milestones' | 'links') {
       project: props.project.id,
     })
     if (kind === 'milestones') Object.assign(milestone, { title: '', due_date: '' })
-    else Object.assign(link, { title: '', url: '', kind: 'web' })
+    else {
+      Object.assign(link, { title: '', url: '', kind: 'web', public: false })
+      kindTouched.value = false
+    }
     emit('saved')
   } catch (e) {
     error.value = errorMessage(e)
@@ -119,12 +151,13 @@ async function remove(kind: string, id: number) {
         </div>
       </section>
       <section class="panel">
-        <div class="panel-head"><h3 class="font-medium">Links & repositories</h3></div>
+        <div class="panel-head"><h3 class="font-medium">Links, repositories & socials</h3><span class="readout text-xs text-ink/60">{{ links.length }}</span></div>
         <div class="panel-body">
           <p v-if="!links.length" class="text-sm text-ink/60">
-            Keep repositories, documentation, and project URLs together.
+            Keep repositories, designs, docs, social pages and live URLs together.
           </p>
-          <div v-for="l in links" :key="l.id" class="mb-4 flex items-start gap-3">
+          <div v-for="l in grouped" :key="l.id" class="mb-4 flex items-start gap-3">
+            <span class="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-panel font-mono text-[10px] font-medium uppercase text-ink/70" aria-hidden="true">{{ l.kind.slice(0, 2) }}</span>
             <div class="min-w-0 flex-1">
               <a
                 :href="l.url"
@@ -133,8 +166,19 @@ async function remove(kind: string, id: number) {
                 class="break-words text-sm font-medium hover:text-river"
                 >{{ l.title }} ↗</a
               >
-              <p class="mt-1 font-mono text-[10px] uppercase text-ink/60">{{ l.kind }}</p>
+              <p class="mt-0.5 truncate text-[11px] text-ink/55">{{ linkLabel(l.kind) }} · {{ l.url.replace(/^https?:\/\//, '') }}</p>
             </div>
+            <button
+              v-if="project.can_manage"
+              class="rounded-full border px-2 py-0.5 text-[10px]"
+              :class="l.public ? 'border-moss/40 text-moss' : 'border-ink/15 text-ink/50'"
+              :aria-pressed="l.public"
+              :aria-label="`Show ${l.title} on the public page`"
+              :disabled="busy"
+              @click="togglePublic(l)"
+            >
+              {{ l.public ? 'Public' : 'Internal' }}
+            </button>
             <button
               v-if="project.can_manage"
               class="text-xs text-rust"
@@ -164,12 +208,11 @@ async function remove(kind: string, id: number) {
                 placeholder="https://" /></label
             ><label class="field"
               ><span class="ledger-label">Type</span
-              ><select v-model="link.kind" class="input">
-                <option value="github">GitHub</option>
-                <option value="web">Website</option>
-                <option value="docs">Documentation</option>
-                <option value="youtube">YouTube</option>
+              ><select v-model="link.kind" class="input" @change="kindTouched = true">
+                <option v-for="k in LINK_KINDS" :key="k.id" :value="k.id">{{ k.label }}</option>
               </select></label
+            ><label class="flex items-center gap-2 text-sm"
+              ><input v-model="link.public" type="checkbox" class="accent-ink" /> Show on public project page</label
             ><button class="btn-ghost justify-self-start" :disabled="busy">Add link</button>
           </form>
         </div>

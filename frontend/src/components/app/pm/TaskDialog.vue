@@ -4,14 +4,18 @@ import api from '@/api/api'
 import Modal from '../ui/Modal.vue'
 import { useAuth } from '@/stores/auth'
 import { confirmDialog } from '../ui/confirm'
-import { errorMessage, type Project, type Task, type Milestone, type Comment } from './pm'
-const props = defineProps<{
-  open: boolean
-  project: Project
-  task: Task | null
-  column: number
-  milestones: Milestone[]
-}>()
+import { errorMessage, type Project, type Task, type Milestone, type Comment, type Sprint } from './pm'
+const props = withDefaults(
+  defineProps<{
+    open: boolean
+    project: Project
+    task: Task | null
+    column: number
+    milestones: Milestone[]
+    sprints?: Sprint[]
+  }>(),
+  { sprints: () => [] },
+)
 const emit = defineEmits<{ close: []; saved: [] }>()
 const { user } = useAuth()
 const saving = ref(false)
@@ -30,6 +34,7 @@ const form = reactive({
   estimate: null as number | null,
   labels: '',
   milestone: null as number | null,
+  sprint: null as number | null,
   start_date: '',
   due_date: '',
 })
@@ -69,6 +74,7 @@ watch(
       estimate: t?.estimate ?? null,
       labels: t?.labels.join(', ') || '',
       milestone: t?.milestone ?? null,
+      sprint: t?.sprint ?? null,
       start_date: t?.start_date || '',
       due_date: t?.due_date || '',
     })
@@ -217,13 +223,28 @@ async function remove() {
         ><span class="ledger-label">Labels (comma separated)</span
         ><input v-model="form.labels" class="input" :readonly="!project.can_manage"
       /></label>
-      <label class="field"
-        ><span class="ledger-label">Milestone</span
-        ><select v-model="form.milestone" class="input" :disabled="!project.can_manage">
-          <option :value="null">No milestone</option>
-          <option v-for="m in milestones" :key="m.id" :value="m.id">{{ m.title }}</option>
-        </select></label
-      >
+      <div class="grid grid-cols-2 gap-3">
+        <label class="field"
+          ><span class="ledger-label">Milestone</span
+          ><select v-model="form.milestone" class="input" :disabled="!project.can_manage">
+            <option :value="null">No milestone</option>
+            <option v-for="m in milestones" :key="m.id" :value="m.id">{{ m.title }}</option>
+          </select></label
+        ><label class="field"
+          ><span class="ledger-label">Sprint</span
+          ><select v-model="form.sprint" class="input" :disabled="!project.can_manage">
+            <option :value="null">Backlog</option>
+            <option
+              v-for="s in sprints.filter((x) => x.status !== 'completed' || x.id === form.sprint)"
+              :key="s.id"
+              :value="s.id"
+              :disabled="s.status === 'completed'"
+            >
+              {{ s.name }}{{ s.status === 'active' ? ' (active)' : '' }}
+            </option>
+          </select></label
+        >
+      </div>
       <p v-if="error" role="alert" class="text-sm text-rust">{{ error }}</p>
       <div class="flex justify-between gap-3">
         <button
