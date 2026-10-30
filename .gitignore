@@ -1,28 +1,52 @@
 # Environment variables
 .env
 .env.*
+!.env.example
 
 # Python
 __pycache__/
-*.pyc
-venv/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 .venv/
+venv/
+myenv/
 
 # Node / Vue
 node_modules/
 dist/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+.eslintcache
+playwright-report/
+test-results/
 
 # Django
 db.sqlite3
-
-# IDE
-.vscode/
-
-# Django media uploads
+*.sqlite3
+staticfiles/
 media/
-
-# Committed env template
-!.env.example
-
-# Celery beat state
 celerybeat-schedule*
+
+# Generated / local-only artifacts
+backend/schema.yml
+backend/thimitech_backup.sql
+*.log
+logs/
+*.dump
+*.bak
+*.backup
+backups/
+
+# IDE / OS
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
