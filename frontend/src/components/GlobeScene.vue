@@ -405,6 +405,8 @@ function setInteraction(enabled: boolean) {
 }
 
 function observeResize(container: HTMLElement) {
+  // ResizeObserver is missing in older browsers — the globe then keeps its first size.
+  if (typeof ResizeObserver === 'undefined') return
   resizeObserver = new ResizeObserver(() => {
     if (!globe) return
     const width = Math.round(container.clientWidth)
@@ -560,8 +562,11 @@ function teardown() {
   const current = globe
   globe = null
   if (current) {
+    // `_destructor` is globe.gl's internal teardown. It is private API, so call it
+    // defensively — a patch release without it must not break unmounting.
+    const destroy = (current as GlobeInstance & { _destructor?: () => void })._destructor
     try {
-      current._destructor()
+      destroy?.call(current)
     } catch (error) {
       console.warn('[GlobeScene] Globe teardown reported an issue.', error)
     }
@@ -591,7 +596,7 @@ function nodeColor(kind: NetworkNode['kind']): string {
 }
 
 function labelTextFor(node: NetworkNode): string {
-  return node.kind === 'hq' ? 'Kathmandu · HQ' : node.city
+  return node.kind === 'hq' ? 'Bhaktapur · HQ' : node.city
 }
 
 function labelColorFor(node: NetworkNode): string {

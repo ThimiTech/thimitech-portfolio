@@ -29,9 +29,12 @@ for name, subtitle, desc in PROJECTS:
     Project.objects.get_or_create(name=name, defaults={"subtitle": subtitle, "description": desc})
 
 TEAM = [
-    ("Ravi Shrestha", "Founder & CEO", "RS", "ravi@thimitech.com", 1),
+    ("Ravi Prajapati", "Founder", "RP", "ravi@thimitech.com", 1),
     ("Prateek Sharma", "Lead Engineer", "PS", "", 2),
-    ("Aayush Thapa", "Geospatial Developer", "AT", "", 3),
+    ("Kshitiz Chaudhary", "Full-Stack Developer", "KC", "", 3),
+    ("Suresh Rokaya", "Full-Stack Developer", "SR", "", 4),
+    ("Aayush Thapa", "Geospatial Developer", "AT", "", 5),
+    ("Maya Gurung", "GIS Analyst", "MG", "", 6),
 ]
 for name, role, initials, email, order in TEAM:
     TeamMember.objects.get_or_create(name=name, defaults={

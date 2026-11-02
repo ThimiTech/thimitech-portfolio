@@ -82,7 +82,6 @@ const services: Service[] = [
         <div class="service-body">
           <h3>{{ service.title }}</h3>
           <p>{{ service.description }}</p>
-          <p class="service-tag"><span aria-hidden="true">●</span> Our service</p>
         </div>
       </article>
     </div>
@@ -113,31 +112,13 @@ const services: Service[] = [
   flex: 1;
   flex-direction: column;
   gap: 12px;
-  padding: clamp(20px, 2vw, 26px);
+  padding: clamp(22px, 2.2vw, 30px);
 }
 
 .service-body p {
   font-size: 18px;
   line-height: 1.66;
   color: #000000;
-}
-
-.service-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  /* pinned to the bottom so every card's footer lines up */
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid rgb(10 10 10 / 0.1);
-  font: 500 12px/1.4 var(--font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #000000 !important;
-}
-
-.service-tag span {
-  font-size: 9px;
 }
 
 @media (max-width: 1023px) {

@@ -368,7 +368,7 @@ function signOut() {
 .mobile-nav__inner {
   display: flex;
   flex-direction: column;
-  width: min(100% - 40px, 1400px);
+  width: min(100% - 56px, 1400px);
   margin-inline: auto;
   padding-block: 14px 28px;
 }
@@ -514,9 +514,19 @@ function signOut() {
   }
 }
 
+@media (max-width: 1023px) {
+  .public-nav__inner {
+    width: calc(100% - 48px);
+  }
+}
+
 @media (max-width: 767px) {
   .public-nav__inner {
-    width: calc(100% - 32px);
+    width: calc(100% - 40px);
+  }
+
+  .mobile-nav__inner {
+    width: calc(100% - 40px);
   }
 
   .brand {
@@ -531,6 +541,16 @@ function signOut() {
     align-items: flex-start;
     padding: 12px 16px;
     font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .public-nav__inner {
+    width: calc(100% - 32px);
+  }
+
+  .mobile-nav__inner {
+    width: calc(100% - 32px);
   }
 }
 

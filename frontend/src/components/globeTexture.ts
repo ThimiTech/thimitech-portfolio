@@ -127,7 +127,18 @@ export async function buildGlobeSurface(nodes: NetworkNode[]): Promise<GlobeSurf
       }),
     })
 
-    const countries = await loadCountries()
+    // A missing world dataset must not cost us the whole globe: the ocean,
+    // graticule and network markers are still drawn underneath.
+    let countries: CountryFeature[] = []
+    try {
+      countries = await loadCountries()
+    } catch (error) {
+      console.warn(
+        '[globeTexture] Country boundaries unavailable — drawing the base map only.',
+        error,
+      )
+    }
+
     if (countries.length) {
       const collection: FeatureCollection<Geometry, CountryProperties> = {
         type: 'FeatureCollection',

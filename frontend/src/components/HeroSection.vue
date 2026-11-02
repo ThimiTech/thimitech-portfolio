@@ -13,7 +13,7 @@ const headlineAccent = computed(() => (isNew.value ? 'possibility.' : 'Digital S
 
 const description = computed(() =>
   isNew.value
-    ? 'From Kathmandu to the world: we build web GIS platforms, software and AI that turn location data into tools people actually use. Municipalities, tourism boards and startups come to us with a map nobody can read — and leave with a platform their teams open every morning.'
+    ? 'From Nepal to the world: we build web GIS platforms, software and AI that turn location data into tools people actually use. Municipalities, tourism boards and startups come to us with a map nobody can read — and leave with a platform their teams open every morning.'
     : 'Thimi Tech designs and develops modern web GIS platforms that turn complex spatial data into simple, interactive experiences — helping organisations visualise, manage and analyse location-based data with confidence. We cover the whole path: field survey, data pipelines, the map itself, and the software around it.',
 )
 
@@ -21,12 +21,15 @@ const primaryLabel = computed(() => (isNew.value ? 'Explore our work' : 'See our
 const projectHref = computed(() => (isNew.value ? '/new#projects' : '#projects'))
 const contactHref = computed(() => (isNew.value ? '/new#contact' : '#contact'))
 
-/** Geographic footprint — the studio's track record lives in the About section. */
-const stats = [
-  { value: '08', label: 'Cities' },
-  { value: '05', label: 'Regions' },
-  { value: '07', label: 'Countries' },
-  { value: '77', label: 'Districts' },
+/**
+ * What the studio actually does — the four areas from the services list. Real
+ * capabilities instead of invented statistics.
+ */
+const capabilities = [
+  { title: 'Web GIS platforms', text: 'Interactive maps for spatial data' },
+  { title: 'Custom software', text: 'Web apps, APIs and dashboards' },
+  { title: 'Field & mobile', text: 'Offline-first data collection' },
+  { title: 'Earth observation', text: 'Satellite and remote sensing' },
 ]
 </script>
 
@@ -52,12 +55,12 @@ const stats = [
             <a :href="contactHref" class="studio-button studio-button--ghost">Talk to us</a>
           </div>
 
-          <dl class="hero__stats">
-            <div v-for="stat in stats" :key="stat.label" class="hero__stat">
-              <dt>{{ stat.label }}</dt>
-              <dd>{{ stat.value }}</dd>
-            </div>
-          </dl>
+          <ul class="hero__capabilities">
+            <li v-for="capability in capabilities" :key="capability.title" class="hero__capability">
+              <span class="hero__capability-title">{{ capability.title }}</span>
+              <span class="hero__capability-text">{{ capability.text }}</span>
+            </li>
+          </ul>
         </div>
 
         <figure class="hero__globe" aria-label="Interactive globe of the Thimi Tech network">
@@ -66,7 +69,7 @@ const stats = [
           </div>
 
           <figcaption class="sr-only">
-            Interactive 3D globe showing Thimi Tech's headquarters in Kathmandu and its worldwide
+            Interactive 3D globe showing Thimi Tech's headquarters in Bhaktapur and its worldwide
             delivery network. Drag to rotate, scroll to zoom.
           </figcaption>
         </figure>
@@ -162,40 +165,44 @@ const stats = [
   gap: 12px;
 }
 
-.hero__stats {
+.hero__capabilities {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.hero__stat {
+.hero__capability {
+  display: flex;
   min-width: 0;
-  padding: 15px 12px 0 0;
+  flex-direction: column;
+  gap: 6px;
+  padding: 15px 14px 0 0;
   border-top: 1px solid rgb(10 10 10 / 0.13);
   border-right: 1px solid rgb(10 10 10 / 0.13);
 }
 
-.hero__stat:not(:first-child) {
+.hero__capability:not(:first-child) {
   padding-left: 16px;
 }
 
-.hero__stat:last-child {
+.hero__capability:last-child {
   border-right: 0;
 }
 
-.hero__stat dt {
-  font: 500 11.5px/1.5 var(--font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+.hero__capability-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
   color: #000000;
 }
 
-.hero__stat dd {
-  margin-top: 8px;
-  font-family: var(--font-display);
-  font-size: clamp(28px, 2.6vw, 38px);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.045em;
+.hero__capability-text {
+  font-size: 15px;
+  line-height: 1.45;
   color: #000000;
 }
 
@@ -252,7 +259,7 @@ const stats = [
     max-width: 62ch;
   }
 
-  .hero__stats {
+  .hero__capabilities {
     max-width: 640px;
   }
 
@@ -265,7 +272,7 @@ const stats = [
 
 @media (max-width: 767px) {
   .hero__shell {
-    width: calc(100% - 36px);
+    width: calc(100% - 40px);
   }
 
   .hero__grid {
@@ -281,23 +288,23 @@ const stats = [
     font-size: 19px;
   }
 
-  .hero__stats {
+  .hero__capabilities {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .hero__stat {
-    padding-block: 13px 15px;
+  .hero__capability {
+    padding-block: 14px 16px;
   }
 
-  .hero__stat:nth-child(2) {
+  .hero__capability:nth-child(2) {
     border-right: 0;
   }
 
-  .hero__stat:nth-child(3) {
+  .hero__capability:nth-child(3) {
     padding-left: 0;
   }
 
-  .hero__stat:nth-child(4) {
+  .hero__capability:nth-child(4) {
     padding-left: 16px;
     border-right: 0;
   }

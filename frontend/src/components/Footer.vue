@@ -70,7 +70,7 @@ function scrollToTop() {
           <p class="footer-heading">Contact</p>
           <ul>
             <li><a href="mailto:info@thimitech.com">info@thimitech.com</a></li>
-            <li>Kathmandu, Nepal</li>
+            <li>Thimi, Bhaktapur, Nepal</li>
           </ul>
         </div>
       </div>

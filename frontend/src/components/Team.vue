@@ -42,7 +42,10 @@ function initialsFor(name: string, initials?: string) {
         <button type="button" class="state-action" @click="reload">Try again</button>
       </p>
 
-      <p v-else-if="!members.length" class="state">Meet the team here soon.</p>
+      <p v-else-if="!members.length" class="state">
+        Team profiles are coming soon.
+        <a href="#hiring" class="state-action">See open roles</a>
+      </p>
 
       <div v-else class="card-grid">
         <article v-for="member in members" :key="member.id" class="card person-card">
@@ -64,7 +67,7 @@ function initialsFor(name: string, initials?: string) {
         </article>
       </div>
 
-      <p class="section-note">
+      <p v-if="members.length" class="section-note">
         <strong>A small studio by design.</strong> Everyone listed here works directly on client
         projects — no layers between the people who write the code and the people who use the map.
         We are growing: <a href="#hiring">see the open roles</a>.

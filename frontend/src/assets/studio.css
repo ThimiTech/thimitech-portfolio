@@ -26,13 +26,16 @@
   font-family: var(--font-body);
 }
 
+/* One container for the whole site: nav, hero, sections and footer share this
+   exact width, so every left edge lines up. */
 .studio-wrap {
-  width: min(100% - 96px, 1240px);
+  width: min(100% - 56px, 1400px);
   margin-inline: auto;
 }
 
 .studio-section {
-  padding-block: clamp(64px, 8vw, 104px);
+  /* tight, even rhythm — sections follow each other with no dead bands */
+  padding-block: clamp(38px, 3.2vw, 54px);
 }
 
 .studio h1,
@@ -68,7 +71,7 @@
 }
 
 .studio .section-intro {
-  max-width: 620px;
+  max-width: 74ch;
   margin-top: 18px;
   font-size: 20px;
   line-height: 1.62;
@@ -92,25 +95,31 @@
   color: var(--line-strong);
 }
 
-/* Section header: title left, supporting copy right */
+/* Section header — one structure everywhere:
+   kicker → heading → description → content (cards / rows / API data). */
 .section-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: clamp(20px, 5vw, 76px);
-  align-items: end;
-  /* the gap above and below the card grid is deliberately the same value */
-  margin-bottom: clamp(30px, 3.4vw, 48px);
+  display: block;
+  /* the gap above and below the content grid is deliberately the same value */
+  margin-bottom: clamp(22px, 2.2vw, 32px);
+}
+
+.section-head h2 {
+  margin-top: 10px;
 }
 
 .section-head .section-intro {
-  margin-top: 14px;
+  margin-top: 16px;
+}
+
+.section-head .section-intro + .section-intro {
+  margin-top: 12px;
 }
 
 /* Closing line under a section's grid */
 .section-note {
   max-width: 78ch;
-  margin-top: clamp(30px, 3.4vw, 48px);
-  padding-top: 22px;
+  margin-top: clamp(22px, 2.2vw, 32px);
+  padding-top: 18px;
   border-top: 1px solid var(--line);
   font-size: 18px;
   line-height: 1.68;
@@ -284,43 +293,21 @@
   background: rgb(255 255 255 / 0.24);
 }
 
-/* Quiet scroll reveal — progressive enhancement only */
-@keyframes studio-rise {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .studio :is(.section-head, .card-grid, .fact-card, .contact-grid) {
-      animation: studio-rise linear both;
-      animation-timeline: view();
-      animation-range: entry 2% cover 24%;
-    }
-  }
-}
-
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   .studio-wrap {
     width: calc(100% - 48px);
   }
+}
 
-  .section-head {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    align-items: start;
+@media (max-width: 767px) {
+  .studio-wrap {
+    width: calc(100% - 40px);
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 480px) {
   .studio-wrap {
-    width: calc(100% - 36px);
+    width: calc(100% - 32px);
   }
 }
 

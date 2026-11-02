@@ -3,7 +3,7 @@ defineOptions({ name: 'StudioWork' })
 
 import { onMounted, ref } from 'vue'
 import api from '../api/api'
-import ProjectCover from './ProjectCover.vue'
+import SceneImage, { type SceneKind } from './SceneImage.vue'
 
 interface Project {
   id: number
@@ -13,6 +13,9 @@ interface Project {
   image: string | null
   url: string
 }
+
+/** Generated cover art for projects that have no uploaded image yet. */
+const coverScenes: SceneKind[] = ['city', 'satellite', 'terrain', 'analytics', 'dashboard', 'orbit']
 
 const projects = ref<Project[]>([])
 const loading = ref(true)
@@ -40,7 +43,7 @@ onMounted(load)
     <div class="studio-wrap studio-section">
       <header class="section-head">
         <div>
-          <p class="studio-kicker">Portfolio</p>
+          <p class="studio-kicker">Projects</p>
           <h2 id="projects-title">Current projects</h2>
         </div>
         <p class="section-intro">Platforms we’re actively building right now.</p>
@@ -74,7 +77,11 @@ onMounted(load)
               loading="lazy"
               @error="brokenImages.add(project.id)"
             />
-            <ProjectCover v-else :variant="index" />
+            <SceneImage
+              v-else
+              :scene="coverScenes[index % coverScenes.length] ?? 'city'"
+              :seed="20 + index * 7"
+            />
           </RouterLink>
 
           <div class="project-body">
@@ -91,7 +98,7 @@ onMounted(load)
         </article>
       </div>
 
-      <p class="section-note">
+      <p v-if="!loading && !error && projects.length" class="section-note">
         <strong>Every project here is live work</strong>, built with the team that runs it — from the
         first field survey to the dashboards their staff open on a Monday morning. Want a closer
         look at the data model, the stack or what changed for the client?

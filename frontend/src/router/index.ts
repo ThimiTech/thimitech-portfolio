@@ -57,9 +57,22 @@ const router = createRouter({
     },
     { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../pages/NotFoundPage.vue'), meta: { title: 'Page not found' } },
   ],
-  scrollBehavior(to, _from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
-    if (to.hash) return { el: to.hash, top: 112, behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }
+
+    // First load of the app: always open the landing page at the top. A hash left in
+    // the address bar from an earlier visit must not drop the visitor into the footer.
+    if (from.matched.length === 0) return { top: 0 }
+
+    // In-app anchor navigation, offset for the sticky nav.
+    if (to.hash === '#home') return { top: 0 }
+    if (to.hash) {
+      return {
+        el: to.hash,
+        top: 112,
+        behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      }
+    }
     return { top: 0 }
   },
 })

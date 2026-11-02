@@ -4,7 +4,15 @@ import { useRoute } from 'vue-router'
 import api from '../api/api'
 import Navbar from '../components/Navbar.vue'
 import Footer from '../components/Footer.vue'
-import ProjectCover from '../components/ProjectCover.vue'
+import SceneImage from '../components/SceneImage.vue'
+
+/** Generated cover art when a project has no uploaded image. */
+const coverScenes: Array<'city' | 'satellite' | 'terrain' | 'analytics'> = [
+  'city',
+  'satellite',
+  'terrain',
+  'analytics',
+]
 import '../assets/studio.css'
 interface PortfolioProject {
   id: number
@@ -67,7 +75,11 @@ onMounted(load)
               class="h-full w-full object-cover"
               @error="imageFailed = true"
             />
-            <ProjectCover v-else :variant="(project.id - 1) % 4" />
+            <SceneImage
+              v-else
+              :scene="coverScenes[(project.id - 1) % coverScenes.length] ?? 'city'"
+              :seed="20 + project.id * 7"
+            />
           </div>
           <div class="md:pt-3">
             <h2 class="!text-2xl">The project</h2>

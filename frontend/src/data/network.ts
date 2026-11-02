@@ -17,11 +17,11 @@ export interface NetworkNode {
  */
 export const HQ: NetworkNode = {
   id: 'kathmandu',
-  city: 'Kathmandu',
+  city: 'Bhaktapur',
   country: 'Nepal',
   region: 'South Asia',
-  lat: 27.7172,
-  lng: 85.324,
+  lat: 27.671,
+  lng: 85.4298,
   kind: 'hq',
   focus: 'Headquarters · Web GIS & engineering',
 }
