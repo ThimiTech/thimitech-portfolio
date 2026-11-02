@@ -27,7 +27,8 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 4rem;
+  /* the public nav is 94px tall */
+  scroll-padding-top: 6.5rem;
 }
 
 body {
