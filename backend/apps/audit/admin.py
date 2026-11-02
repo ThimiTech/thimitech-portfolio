@@ -1,3 +1,4 @@
+
 from django.contrib import admin
 from .models import AuditLog
 
@@ -11,10 +12,16 @@ class AuditLogAdmin(admin.ModelAdmin):
     actions = None
 
     def has_module_permission(self, request):
-        return request.user.has_role('super_admin')
+        return (
+            request.user.is_authenticated
+            and request.user.has_role('super_admin')
+        )
 
     def has_view_permission(self, request, obj=None):
-        return request.user.has_role('super_admin')
+        return (
+            request.user.is_authenticated
+            and request.user.has_role('super_admin')
+        )
 
     def has_add_permission(self, request):
         return False

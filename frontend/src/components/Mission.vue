@@ -1,87 +1,123 @@
 <script setup lang="ts">
-const values = [
+defineOptions({ name: 'StudioMission' })
+
+import SceneImage, { type SceneKind } from './SceneImage.vue'
+
+/** Values are frontend content, phrased the same way as the services: one idea per card. */
+const values: { scene: SceneKind; seed: number; title: string; text: string }[] = [
   {
+    scene: 'satellite',
+    seed: 61,
     title: 'Data first',
-    text: 'Every decision starts from accurate, well-structured spatial data — not assumptions.',
-    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
-    accent: 'text-river border-river/30 bg-river/5',
+    text: 'Every decision starts from accurate, well-structured spatial data. We check the source, document the schema and fix the gaps before anything is drawn on a map.',
   },
   {
+    scene: 'field',
+    seed: 29,
     title: 'Built for use',
-    text: 'We design maps for the people who open them every day, not just for a demo.',
-    icon: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7',
-    accent: 'text-contour border-contour/30 bg-contour/5',
+    text: 'We design maps for the people who open them every day — field staff, planners, ward offices — not for a demo. If it takes training to read, it is not finished.',
   },
   {
+    scene: 'terrain',
+    seed: 31,
     title: 'Local context',
-    text: "We build for Nepal's geography, infrastructure and the way our clients actually work.",
-    icon: 'M12 21c-4.5-4.5-7-8.25-7-11.5A7 7 0 0112 2a7 7 0 017 7.5c0 3.25-2.5 7-7 11.5zM12 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z',
-    accent: 'text-flag border-flag/30 bg-flag/5',
+    text: 'We build for Nepal’s geography, its infrastructure and the way our clients actually work: patchy connectivity, mixed data, decisions made in the field.',
   },
   {
+    scene: 'city',
+    seed: 43,
     title: 'Built to last',
-    text: 'We choose stable, well-supported tools over trends, so what we ship keeps working for years.',
-    icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',
-    accent: 'text-river border-river/30 bg-river/5',
+    text: 'We choose stable, well-supported tools over trends, document what we hand over, and make sure your team can maintain the platform after we leave.',
   },
   {
+    scene: 'dashboard',
+    seed: 53,
     title: 'Open by default',
-    text: 'We work in the open with our clients — shared progress, honest timelines, no black boxes.',
-    icon: 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
-    accent: 'text-contour border-contour/30 bg-contour/5',
+    text: 'Shared progress, honest timelines and no black boxes. Clients see the work as it grows, question the assumptions and keep the source.',
   },
   {
+    scene: 'orbit',
+    seed: 47,
     title: 'People over platforms',
-    text: 'Technology is the tool, not the goal — every project starts with the person who will use it.',
-    icon: 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4',
-    accent: 'text-flag border-flag/30 bg-flag/5',
+    text: 'Technology is the tool, not the goal. Every project starts with the person who will use it and the decision they are trying to make.',
   },
 ]
 </script>
 
 <template>
-  <section id="mission" class="border-t border-ink/10 bg-panel py-32">
-    <div class="mx-auto max-w-7xl px-6">
-
-      <div class="max-w-2xl">
-        <p class="font-mono text-xs uppercase tracking-wide text-river">Our mission</p>
-        <h2 class="mt-3 font-display text-3xl font-semibold text-ink lg:text-4xl">
-          Make Nepal's geography easy to see, search and act on.
-        </h2>
-        <p class="mt-4 text-ink/65">
-          Too much spatial data in Nepal sits locked in spreadsheets and paper records.
-          We build the maps and platforms that put it in front of the people who need it.
-        </p>
-      </div>
-
-      <div class="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div
-          v-for="v in values"
-          :key="v.title"
-          class="rounded-2xl border border-ink/10 bg-paper p-7"
-        >
-          <div
-            :class="v.accent"
-            class="flex h-12 w-12 items-center justify-center rounded-xl border"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              class="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path :d="v.icon" />
-            </svg>
-          </div>
-
-          <h3 class="mt-5 font-display text-base font-medium text-ink">{{ v.title }}</h3>
-          <p class="mt-2 text-sm text-ink/65">{{ v.text }}</p>
+  <section id="mission" class="mission" aria-labelledby="mission-title">
+    <div class="studio-wrap studio-section">
+      <header class="section-head">
+        <div>
+          <p class="studio-kicker">Our mission</p>
+          <h2 id="mission-title">Make Nepal’s geography easy to see, search and act on.</h2>
         </div>
+        <p class="section-intro">
+          Too much spatial data in Nepal sits locked in spreadsheets and paper records. We build the
+          maps and platforms that put it in front of the people who need it — and we hold ourselves
+          to six principles while doing it.
+        </p>
+      </header>
+
+      <div class="card-grid value-grid">
+        <article v-for="value in values" :key="value.title" class="card value-card">
+          <SceneImage :scene="value.scene" :seed="value.seed" />
+
+          <div class="value-body">
+            <h3>{{ value.title }}</h3>
+            <p>{{ value.text }}</p>
+          </div>
+        </article>
       </div>
 
+      <p class="section-note">
+        <strong>How we work:</strong> a short discovery to agree on the questions the map has to
+        answer, a working prototype in the first weeks, then production hardening — data model,
+        permissions, audit trail — with your team testing alongside ours.
+      </p>
     </div>
   </section>
 </template>
+
+<style scoped>
+.mission {
+  background: #f5f6f7;
+  border-block: 1px solid rgb(10 10 10 / 0.1);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 26px);
+}
+
+.value-card {
+  padding: 0;
+  overflow: hidden;
+  gap: 0;
+}
+
+.value-body {
+  display: grid;
+  gap: 12px;
+  padding: clamp(20px, 2vw, 26px);
+}
+
+.value-body p {
+  font-size: 18px;
+  line-height: 1.66;
+  color: #000000;
+}
+
+@media (max-width: 1023px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+</style>

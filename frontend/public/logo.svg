@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Replace this file with the official Thimi Tech logo. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Thimi Tech">
+  <g fill="#aa4825">
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M22 9.35967V6.58928L10 1.94141V4.66132L12.6723 5.62468L14.6384 6.33113L19.0418 7.93131V7.96592L14.6384 9.51481L12.6723 10.2204L10 11.1504V13.9554L22 9.35967Z"
+    />
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M10 22.4633L22 18.1602V21.1595L13.5629 24.1209V24.1583L22 27.1563V30.1742L10 25.76L10 22.4633Z"
+    />
+  </g>
+</svg>
