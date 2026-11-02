@@ -19,6 +19,8 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/projects/:id', name: 'projects', component: DetailPage },
+    { path: '/work', name: 'work', component: () => import('../pages/WorkPage.vue'), meta: { title: 'Our work' } },
+    { path: '/work/:slug', name: 'work-detail', component: () => import('../pages/WorkDetailPage.vue') },
     { path: '/', name: 'home', component: LandingPage },
     { path: '/new', name: 'new-home', component: () => import('../pages/NewLandingPage.vue') },
     { path: '/apply/:jobId', name: 'apply', component: ApplyPage },
@@ -59,7 +61,7 @@ const router = createRouter({
   ],
   scrollBehavior(to, _from, savedPosition) {
     if (savedPosition) return savedPosition
-    if (to.hash) return { el: to.hash, top: 88, behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }
+    if (to.hash) return { el: to.hash, top: 112, behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }
     return { top: 0 }
   },
 })

@@ -214,6 +214,17 @@ days; no cash-out policy has been defined.
   when live, otherwise by beat task `apps.notices.tasks.email_due_urgent_notices` (every 5 min, looks back 1 day).
 - **Passwords**: HR resets someone else's via `PATCH /api/org/people/{id}/ {password}` (same edit rights as other HR
   fields); everyone changes their own via `POST /api/org/people/me/password/ {current_password, new_password}`.
+- **Delivery workspace** (`apps/pm`): tabs Overview · Board · Sprints · Timeline · Notes · Docs · Meetings · Whiteboard ·
+  Links & milestones · Public profile · Settings (`/app/projects/:id?tab=`). Members create/edit notes, docs, meetings and
+  whiteboards; only the owner or a project manager deletes. Only one sprint per project can be active (DB constraint).
+  `Task.completed_at` is set in `Task.save()` and feeds the burndown. `[[wikilinks]]` resolve on the client
+  (note → doc → task key → meeting). Markdown is rendered with marked + DOMPurify (`pm.ts renderMarkdown`).
+  Whiteboard saves send `version`; a stale version gets 409. Whiteboards are excluded from the audit log.
+- **Project documents** are served only via `GET /api/pm/documents/{id}/file/` (text is served as text/plain, with
+  `CSP: sandbox`). In production block direct access: `location /media/pm/docs/ { internal; }`.
+- **Public case studies**: `/work` and `/work/:slug` call `GET /api/pm/public/[slug/]` (no auth). A project shows up only
+  when `visibility=public` and it is not archived. Only `public_sections` are exposed, and only links/docs marked `public`.
+  Project meetings appear in the calendar feed (`kind: meeting`) for their attendees and creator.
 - **Confirmations** in `/app` use `confirmDialog()` (`components/app/ui/confirm.ts`, host mounted in `AppLayout`), never
   `window.confirm`.
 - Tests: `DB_TEST_NAME=test_thimi_<x> CELERY_TASK_ALWAYS_EAGER=True .venv/Scripts/python.exe manage.py test --noinput`.
