@@ -161,7 +161,7 @@ async function remove(d: Doc) {
           </div>
         </article>
       </div>
-      <div v-else class="panel overflow-x-auto">
+      <div v-else class="panel relative overflow-x-auto">
         <table class="ledger-table">
           <thead><tr><th>Title</th><th>Folder</th><th>Type</th><th>Size</th><th>Uploaded</th><th><span class="sr-only">Actions</span></th></tr></thead>
           <tbody>

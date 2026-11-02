@@ -62,6 +62,7 @@ urlpatterns = [
     path('api/notices/', include('apps.notices.urls')),
     path('api/pm/', include('apps.pm.urls')),
     path('api/finance/', include('apps.finance.urls')),
+    path('api/drive/', include('apps.drive.urls')),
     path('api/inventory/', include('apps.inventory.urls')),
     path('api/audit/', include('apps.audit.urls')),
     path('api/monitoring/overview/', MonitoringView.as_view(), name='monitoring-overview'),

@@ -8,7 +8,7 @@ import StatusPill from '../ui/StatusPill.vue'
 import LoadError from '../org/LoadError.vue'
 import { useServerTable } from '../ui/serverTable'
 import { errorMessage, todayNPT } from '../pm/pm'
-import { money, type Invoice, type InvoiceLine } from './finance'
+import { money, type Invoice, type InvoiceLine, lookups } from './finance'
 const emit = defineEmits<{ changed: [] }>()
 const STATUSES = ['draft', 'issued', 'paid', 'void']
 const status = ref('all')
@@ -37,6 +37,7 @@ const form = reactive({
   number: '',
   client_name: '',
   client_email: '',
+  project: null as number | null,
   issue_date: todayNPT(),
   due_date: '',
   currency: 'NPR',
@@ -51,6 +52,7 @@ function edit(invoice?: Invoice) {
     number: invoice?.number || '',
     client_name: invoice?.client_name || '',
     client_email: invoice?.client_email || '',
+    project: invoice?.project ?? null,
     issue_date: invoice?.issue_date || todayNPT(),
     due_date: invoice?.due_date || '',
     currency: invoice?.currency || 'NPR',
@@ -145,6 +147,13 @@ async function save() {
             ><span class="ledger-label">Client email</span
             ><input v-model="form.client_email" type="email" class="input"
           /></label>
+          <label class="field"
+            ><span class="ledger-label">Project (optional)</span
+            ><select v-model="form.project" class="input">
+              <option :value="null">—</option>
+              <option v-for="p in lookups.projects" :key="p.id" :value="p.id">{{ p.name }}</option>
+            </select></label
+          >
           <div class="grid grid-cols-2 gap-3">
             <label class="field"
               ><span class="ledger-label">Issue date</span

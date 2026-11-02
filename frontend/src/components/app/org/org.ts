@@ -94,7 +94,7 @@ export interface Organization {
   updated_at: string;
 }
 
-export const ROLES: Role[] = ["guest", "employee", "manager", "hr_admin", "super_admin"];
+export const ROLES: Role[] = ["guest", "employee", "accountant", "manager", "hr_admin", "super_admin"];
 export { ROLE_LABEL };
 
 export const EMPLOYMENT_LABEL: Record<EmploymentType, string> = {

@@ -5,7 +5,7 @@ import { ROLE_LABEL } from "./org";
 defineProps<{ role: Role }>();
 
 // Rank reads left-to-right as more filled pips; colour is never the only signal.
-const PIPS: Record<Role, number> = { guest: 0, employee: 1, manager: 2, hr_admin: 3, super_admin: 4 };
+const PIPS: Record<Role, number> = { guest: 0, employee: 1, accountant: 1, manager: 2, hr_admin: 3, super_admin: 4 };
 </script>
 
 <template>

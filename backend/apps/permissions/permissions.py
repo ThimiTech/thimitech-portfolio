@@ -27,3 +27,11 @@ IsEmployee = min_role('employee')
 IsManager = min_role('manager')
 IsHRAdmin = min_role('hr_admin')
 IsSuperAdmin = min_role('super_admin')
+
+
+class IsFinance(BasePermission):
+    """Finance books, payroll, reports and the finance drive: HR/admin+ or the accountant role."""
+    message = 'Requires finance access (HR admin, super admin, or accountant).'
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.can_finance()

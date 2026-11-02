@@ -237,6 +237,29 @@ days; no cash-out policy has been defined.
 - **Server lists**: `config.pagination.ServerListMixin` adds `?page=&page_size=&search=&ordering=&status=` to a
   ViewSet. Paging is opt-in (only with `?page=`), so callers that expect a bare list keep working. Frontend:
   `useServerTable()` + `<DataTable :total>` (server mode).
+- **Finance hub** (`/app/finance`, tabs Overview · Bank & cash · Payroll · Staff claims · Invoices · Reports & export · Setup):
+  finance access = `User.can_finance()` (HR/admin+ or role `accountant`, rank 1 = staff elsewhere; only super admin grants it);
+  DRF `IsFinance`, frontend `hasRole('finance')`. Books = `Account` + `Transaction` (debit=out, credit=in, one side only;
+  running balance via subquery, unaffected by filters) + `Category.kind` (income/expense/payroll/tax/transfer; transfers
+  are loans/capital, never P&L) + `Statement` (reconciles when ledger balance at `end` = closing). Dates in Bikram Sambat
+  and fiscal years (Shrawan–Ashadh) come from `finance/fiscal.py` (`nepali-datetime`), never stored. `FiscalYearClose`
+  makes a year's lines/statements read-only (`services.assert_open`). Payroll: SSF members 11% + 20% of basic, no SST;
+  others 1% SST on gross (`services.apply_statutory`; flat SST only valid in the first slab). `match-payments` links bank
+  lines to payslips (paid date ±3 days, else month end −7..+45). Statement CSV/XLSX import auto-detects headers and
+  skips duplicates (date + amounts + description). Exports `GET /api/finance/export/?what=&type=csv|xlsx&fy=` (not
+  `format=`: DRF reserves it) and `/export/audit-pack/?fy=` (zip: workbook + README + that FY's documents).
+  **Loading real data on a server:** the repo is public, so real books travel only as a private bundle zip
+  (`manifest.json` + ledger JSON + spreadsheets + statement scans + document folders), never committed.
+  `scp` it over, then `manage.py migrate`, `createsuperuser` (once), `manage.py load_books_bundle /path/bundle.zip`,
+  delete the zip. It replays `import_books` + `import_drive` and is idempotent (re-running adds nothing). Files go to
+  `MEDIA_ROOT` (env var; default `backend/media`). Never put real names, salaries, balances or account numbers in tests.
+- **Drive** (`apps/drive`, `/app/drive`): spaces `company` (all staff read/write; uploader or HR deletes), `finance`
+  (finance roles), `people` (HR). Anyone reads files linked to them (`File.employee`); employees may add receipts to their
+  own draft claims (lands in Finance/Receipts & claims). Files served only via `/api/drive/files/{id}/content/`
+  (block `location /media/drive/ { internal; }` in prod). Expiring public share links: `/s/{token}` →
+  `/api/drive/shared/{token}/` (throttle `THROTTLE_DRIVE_SHARE`). Links to employee/project/transaction/claim/invoice/
+  statement drive the "Money & documents" panel on profiles and the project Finance tab (`LinkedFinance.vue`).
+- Tables that scroll sideways need `relative` on the `overflow-x-auto` wrapper, or `sr-only` headers escape it and widen the page.
 - Frontend tests need Node 22 (`C:\Users\Admin\AppData\Local\nvm\v22.14.0`); Node 20 crashes vitest. npm 10 hits an
   arborist bug on this lockfile; use `npx -y npm@11 …` for installs/audit fixes.
 

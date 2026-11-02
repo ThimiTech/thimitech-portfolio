@@ -2,12 +2,15 @@ import { ref, computed } from "vue";
 import axios from "axios";
 import api from "../api/api";
 
-export type Role = "guest" | "employee" | "manager" | "hr_admin" | "super_admin";
+export type Role = "guest" | "employee" | "accountant" | "manager" | "hr_admin" | "super_admin";
+/** A role, or "finance": HR/admin and above, or the accountant role (books, payroll, finance drive). */
+export type Access = Role | "finance";
 
 // Ascending privilege — mirrors backend User.RANK.
 export const ROLE_RANK: Record<Role, number> = {
   guest: 0,
   employee: 1,
+  accountant: 1, // staff-level elsewhere; finance access via hasRole("finance")
   manager: 2,
   hr_admin: 3,
   super_admin: 4,
@@ -16,6 +19,7 @@ export const ROLE_RANK: Record<Role, number> = {
 export const ROLE_LABEL: Record<Role, string> = {
   guest: "Guest",
   employee: "Employee",
+  accountant: "Accountant / CA",
   manager: "Manager",
   hr_admin: "HR / Admin",
   super_admin: "Super admin",
@@ -82,9 +86,11 @@ export function useAuth() {
     return user.value;
   }
 
-  /** True when the loaded user's role is at least `min`. */
-  function hasRole(min: Role): boolean {
-    return !!user.value && ROLE_RANK[user.value.role] >= ROLE_RANK[min];
+  /** True when the loaded user's role is at least `min` ("finance": HR/admin+ or accountant). */
+  function hasRole(min: Access): boolean {
+    if (!user.value) return false;
+    if (min === "finance") return user.value.role === "accountant" || ROLE_RANK[user.value.role] >= ROLE_RANK.hr_admin;
+    return ROLE_RANK[user.value.role] >= ROLE_RANK[min];
   }
 
   function openLogin() {

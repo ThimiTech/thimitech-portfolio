@@ -64,7 +64,7 @@ watch(drawer, async (open) => {
 });
 
 // ── Badges: one nav-counts call, on every route change and every minute while the tab is visible ──
-interface NavCounts { leave_approvals: number; unread_notices: number; overdue_tasks: number; unread_notifications: number; attendance_corrections: number }
+interface NavCounts { leave_approvals: number; unread_notices: number; overdue_tasks: number; unread_notifications: number; attendance_corrections: number; finance_review: number }
 const badges = ref<Record<string, number>>({});
 const unreadNotifications = ref(0);
 const BADGE_LABEL: Record<string, string> = {
@@ -72,6 +72,7 @@ const BADGE_LABEL: Record<string, string> = {
   "/app/notices": "unread notices",
   "/app/projects": "overdue tasks",
   "/app/attendance": "attendance corrections to decide",
+  "/app/finance": "ledger lines and claims to review",
 };
 async function refreshBadges() {
   try {
@@ -81,6 +82,7 @@ async function refreshBadges() {
       "/app/notices": data.unread_notices,
       "/app/projects": data.overdue_tasks,
       "/app/attendance": data.attendance_corrections,
+      "/app/finance": data.finance_review,
     };
     unreadNotifications.value = data.unread_notifications;
   } catch {

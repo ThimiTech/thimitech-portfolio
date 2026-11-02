@@ -13,11 +13,12 @@ import InfoPanel from "@/components/app/org/InfoPanel.vue";
 import LoadError from "@/components/app/org/LoadError.vue";
 import PersonFormModal from "@/components/app/org/PersonFormModal.vue";
 import PasswordModal from "@/components/app/org/PasswordModal.vue";
+import LinkedFinance from "@/components/app/finance/LinkedFinance.vue";
 import { EMPLOYMENT_LABEL, apiError, canManage, fmtDate, tenure, type InfoRow, type Person } from "@/components/app/org/org";
 import axios from "axios";
 
 const route = useRoute();
-const { user, fetchMe } = useAuth();
+const { user, fetchMe, hasRole } = useAuth();
 
 const routeId = computed(() => (route.params.id ? Number(route.params.id) : null));
 const isSelf = computed(() => routeId.value === null || routeId.value === user.value?.id);
@@ -187,6 +188,11 @@ const emergency = computed<InfoRow[]>(() => [
           <p v-else class="text-sm text-ink/40">No bio yet.</p>
         </InfoPanel>
       </div>
+
+      <section v-if="hasRole('finance') && !isSelf" class="mt-8">
+        <h2 class="mb-3 text-lg font-medium">Money &amp; documents</h2>
+        <LinkedFinance :key="person.id" :employee="person.id" />
+      </section>
 
       <PersonFormModal v-if="canEdit" :open="editOpen" :person="person" @close="editOpen = false" @saved="onSaved" />
       <PasswordModal v-if="isSelf" :open="pwOpen" @close="pwOpen = false" @saved="pwOpen = false; toast.success('Password changed.')" />

@@ -2,12 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingPage from '../pages/LandingPage.vue'
 import ApplyPage from '../pages/ApplyPage.vue'
 import DetailPage from '../pages/DetailPage.vue'
-import { useAuth, type Role } from '../stores/auth'
+import { useAuth, type Access } from '../stores/auth'
 
 declare module 'vue-router' {
   interface RouteMeta {
     /** Minimum role to enter. Inherited by children; the deepest match wins. */
-    minRole?: Role
+    minRole?: Access
     /** Sidebar / topbar title (also sets document.title) */
     title?: string
     /** Signed-in users are sent on (to ?next or /app) instead of seeing this page */
@@ -24,6 +24,7 @@ const router = createRouter({
     { path: '/', name: 'home', component: LandingPage },
     { path: '/new', name: 'new-home', component: () => import('../pages/NewLandingPage.vue') },
     { path: '/apply/:jobId', name: 'apply', component: ApplyPage },
+    { path: '/s/:token', name: 'shared', component: () => import('../pages/SharedPage.vue'), meta: { title: 'Shared files' } },
     { path: '/login', name: 'login', component: () => import('../pages/AuthPage.vue'), meta: { title: 'Sign in', guestOnly: true } },
     { path: '/register', name: 'register', component: () => import('../pages/AuthPage.vue'), meta: { title: 'Create account', guestOnly: true } },
     { path: '/forgot-password', name: 'forgot-password', component: () => import('../pages/AuthPage.vue'), meta: { title: 'Reset password' } },
@@ -39,7 +40,8 @@ const router = createRouter({
         { path: '', name: 'app-dashboard', component: () => import('../pages/app/DashboardPage.vue'), meta: { title: 'Dashboard' } },
         { path: 'projects', name: 'app-projects', component: () => import('../pages/app/ProjectsPage.vue'), meta: { title: 'Projects' } },
         { path: 'projects/:id', name: 'app-project', component: () => import('../pages/app/ProjectPage.vue'), meta: { title: 'Project workspace' } },
-        { path: 'finance', name: 'app-finance', component: () => import('../pages/app/FinancePage.vue'), meta: { title: 'Finance', minRole: 'hr_admin' } },
+        { path: 'finance', name: 'app-finance', component: () => import('../pages/app/FinancePage.vue'), meta: { title: 'Finance', minRole: 'finance' } },
+        { path: 'drive', name: 'app-drive', component: () => import('../pages/app/DrivePage.vue'), meta: { title: 'Drive' } },
         { path: 'inventory', name: 'app-inventory', component: () => import('../pages/app/InventoryPage.vue'), meta: { title: 'Inventory', minRole: 'hr_admin' } },
         { path: 'monitoring', name: 'app-monitoring', component: () => import('../pages/app/MonitoringPage.vue'), meta: { title: 'Monitoring', minRole: 'super_admin' } },
         { path: 'audit', name: 'app-audit', component: () => import('../pages/app/AuditPage.vue'), meta: { title: 'Audit trail', minRole: 'super_admin' } },

@@ -38,7 +38,7 @@ def serve_document(doc, download=False):
     except FileNotFoundError:
         raise Http404
     inline = not download and (ext in INLINE_TYPES or ext in TEXT_TYPES)
-    resp = FileResponse(fh, as_attachment=not inline, filename=os.path.basename(doc.file.name))
+    resp = FileResponse(fh, as_attachment=not inline, filename=getattr(doc, 'download_name', None) or os.path.basename(doc.file.name))
     if ext in TEXT_TYPES:
         resp['Content-Type'] = 'text/plain; charset=utf-8'
     elif ext in INLINE_TYPES:

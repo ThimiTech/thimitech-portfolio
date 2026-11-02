@@ -14,6 +14,7 @@ import TaskTimeline from '@/components/app/pm/TaskTimeline.vue'
 import TaskDialog from '@/components/app/pm/TaskDialog.vue'
 import ProjectHub from '@/components/app/pm/ProjectHub.vue'
 import ProjectSettings from '@/components/app/pm/ProjectSettings.vue'
+import LinkedFinance from '@/components/app/finance/LinkedFinance.vue'
 import ProjectOverview from '@/components/app/pm/ProjectOverview.vue'
 import SprintsPanel from '@/components/app/pm/SprintsPanel.vue'
 import NotesPanel from '@/components/app/pm/NotesPanel.vue'
@@ -39,7 +40,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const { user } = useAuth()
+const { user, hasRole } = useAuth()
 const project = ref<Project | null>(null)
 const tasks = ref<Task[]>([])
 const milestones = ref<Milestone[]>([])
@@ -63,7 +64,7 @@ const focus = ref<Record<string, number | null>>({})
 
 const TABS = ['Overview', 'Board', 'Sprints', 'Timeline', 'Notes', 'Docs', 'Meetings', 'Whiteboard', 'Hub']
 const views = computed(() =>
-  [...TABS, ...(project.value?.can_manage ? ['Profile', 'Settings'] : [])].map((id) => ({
+  [...TABS, ...(hasRole('finance') ? ['Finance'] : []), ...(project.value?.can_manage ? ['Profile', 'Settings'] : [])].map((id) => ({
     id,
     label: id === 'Hub' ? 'Links & milestones' : id === 'Profile' ? 'Public profile' : id,
     count:
@@ -319,6 +320,7 @@ onMounted(() => load(true))
         />
         <WhiteboardPanel v-else-if="tab === 'Whiteboard'" :project="project" :boards="whiteboards" @changed="refresh('whiteboards')" />
         <ProjectHub v-else-if="tab === 'Hub'" :project="project" :milestones="milestones" :links="links" @saved="refresh('milestones', 'links')" />
+        <LinkedFinance v-else-if="tab === 'Finance' && hasRole('finance')" :key="project.id" :project="project.id" />
         <ProfileEditor v-else-if="tab === 'Profile' && project.can_manage" :project="project" :docs="docs" :links="links" @saved="reloadProject" />
         <ProjectSettings v-else-if="tab === 'Settings' && project.can_manage" :project="project" @saved="load()" />
       </div>

@@ -6,6 +6,7 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         GUEST = 'guest', 'Guest'
         EMPLOYEE = 'employee', 'Employee'
+        ACCOUNTANT = 'accountant', 'Accountant / CA'
         MANAGER = 'manager', 'Manager'
         HR_ADMIN = 'hr_admin', 'HR / Admin'
         SUPER_ADMIN = 'super_admin', 'Super admin'
@@ -14,6 +15,7 @@ class User(AbstractUser):
     RANK = {
         Role.GUEST: 0,
         Role.EMPLOYEE: 1,
+        Role.ACCOUNTANT: 1,  # staff-level everywhere else; finance access comes from can_finance()
         Role.MANAGER: 2,
         Role.HR_ADMIN: 3,
         Role.SUPER_ADMIN: 4,
@@ -30,6 +32,10 @@ class User(AbstractUser):
 
     def has_role(self, minimum):
         return self.RANK[self.role] >= self.RANK[minimum]
+
+    def can_finance(self):
+        """Books, payroll and finance documents: HR/admin and above, or the accountant/CA role."""
+        return self.is_authenticated and (self.role == self.Role.ACCOUNTANT or self.has_role('hr_admin'))
 
     @property
     def full_name(self):

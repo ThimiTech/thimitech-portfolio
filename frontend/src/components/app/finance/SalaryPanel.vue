@@ -17,6 +17,10 @@ const form = reactive({
   deductions: '0.00',
   effective_from: todayNPT(),
   active: true,
+  ssf_enrolled: false,
+  bank_name: '',
+  bank_account: '',
+  pan: '',
   notes: '',
 })
 function edit(salary?: Salary) {
@@ -29,6 +33,10 @@ function edit(salary?: Salary) {
     deductions: salary?.deductions || '0.00',
     effective_from: salary?.effective_from || todayNPT(),
     active: salary?.active ?? true,
+    ssf_enrolled: salary?.ssf_enrolled ?? false,
+    bank_name: salary?.bank_name || '',
+    bank_account: salary?.bank_account || '',
+    pan: salary?.pan || '',
     notes: salary?.notes || '',
   })
   open.value = true
@@ -57,14 +65,15 @@ async function save() {
     <p v-if="!salaries.length" class="panel p-8 text-sm text-ink/65">
       Set each employee’s monthly NPR pay before generating payslips.
     </p>
-    <div v-else class="panel overflow-x-auto">
+    <div v-else class="panel relative overflow-x-auto">
       <table class="ledger-table">
         <thead>
           <tr>
             <th>Employee</th>
             <th>Gross / month</th>
-            <th>Deductions</th>
-            <th>Net / month</th>
+            <th>SSF</th>
+            <th>Bank</th>
+            <th>Take-home / month</th>
             <th>Effective</th>
             <th>Status</th>
             <th><span class="sr-only">Actions</span></th>
@@ -74,7 +83,8 @@ async function save() {
           <tr v-for="s in salaries" :key="s.id">
             <td>{{ s.employee_name || 'Staff #' + s.employee }}</td>
             <td class="whitespace-nowrap readout">{{ money(s.gross) }}</td>
-            <td class="whitespace-nowrap readout">{{ money(s.deductions) }}</td>
+            <td>{{ s.ssf_enrolled ? 'Enrolled' : '1% SST' }}</td>
+            <td class="text-xs text-ink/65">{{ [s.bank_name, s.bank_account].filter(Boolean).join(' · ') || '—' }}<span v-if="s.pan" class="block">PAN {{ s.pan }}</span></td>
             <td class="whitespace-nowrap readout">{{ money(s.net) }}</td>
             <td class="whitespace-nowrap">{{ s.effective_from }}</td>
             <td>{{ s.active ? 'Active' : 'Inactive' }}</td>
@@ -103,7 +113,7 @@ async function save() {
             <option v-for="p in staff" :key="p.id" :value="p.id">{{ staffName(p) }}</option>
           </select></label
         >
-        <p class="text-xs text-ink/65">Monthly NPR amounts. Deductions are entered manually.</p>
+        <p class="text-xs text-ink/65">Monthly NPR amounts. SSF and TDS are worked out on each payslip; "other deductions" are manual (advances, loans).</p>
         <label class="field"
           ><span class="ledger-label">Basic pay</span
           ><input
@@ -115,7 +125,7 @@ async function save() {
             step="0.01"
             required /></label
         ><label class="field"
-          ><span class="ledger-label">Allowances</span
+          ><span class="ledger-label">Allowances (dearness etc.)</span
           ><input
             v-model="form.allowances"
             class="input"
@@ -125,7 +135,7 @@ async function save() {
             step="0.01"
             required /></label
         ><label class="field"
-          ><span class="ledger-label">Manual deductions</span
+          ><span class="ledger-label">Other monthly deductions</span
           ><input
             v-model="form.deductions"
             class="input"
@@ -140,6 +150,13 @@ async function save() {
         ><label class="field"
           ><span class="ledger-label">Notes</span
           ><textarea v-model="form.notes" class="input" rows="2" /></label
+        ><div class="grid grid-cols-3 gap-3">
+          <label class="field"><span class="ledger-label">Bank</span><input v-model="form.bank_name" class="input" maxlength="120" /></label>
+          <label class="field"><span class="ledger-label">Account no.</span><input v-model="form.bank_account" class="input" maxlength="40" /></label>
+          <label class="field"><span class="ledger-label">PAN</span><input v-model="form.pan" class="input" maxlength="20" /></label>
+        </div>
+        <label class="flex items-center gap-2 text-sm"
+          ><input v-model="form.ssf_enrolled" type="checkbox" class="accent-ink" /> Enrolled in SSF (11% employee + 20% company, no 1% SST)</label
         ><label class="flex items-center gap-2 text-sm"
           ><input v-model="form.active" type="checkbox" class="accent-ink" /> Active
           structure</label

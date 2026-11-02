@@ -113,6 +113,13 @@ def unread_notices_count(request):
     return NoticeViewSet(request=request, action='list', format_kwarg=None).get_queryset().filter(is_read=False).count()
 
 
+def finance_review_count(user):
+    if not user.can_finance():
+        return 0
+    from apps.finance.models import Expense, Transaction
+    return Transaction.objects.filter(status=Transaction.Status.REVIEW).count() + Expense.objects.filter(status='submitted').count()
+
+
 class NavCountsView(APIView):
     """GET /api/nav-counts/ -- sidebar/top-bar badges in one cheap call (the layout polls it)."""
     permission_classes = [IsEmployee]
@@ -123,6 +130,7 @@ class NavCountsView(APIView):
         'overdue_tasks': serializers.IntegerField(help_text='My open tasks past their due date'),
         'unread_notifications': serializers.IntegerField(),
         'attendance_corrections': serializers.IntegerField(help_text='Pending attendance corrections I may decide'),
+        'finance_review': serializers.IntegerField(help_text='Ledger lines needing review + claims awaiting a decision (finance roles; else 0)'),
     }))
     def get(self, request):
         from apps.attendance.models import AttendanceCorrection
@@ -136,4 +144,5 @@ class NavCountsView(APIView):
             'unread_notifications': Notification.objects.filter(recipient=user, read_at__isnull=True).count(),
             'attendance_corrections': AttendanceCorrection.objects.filter(
                 leave.decidable_q(user), status=AttendanceCorrection.Status.PENDING).count(),
+            'finance_review': finance_review_count(user),
         })

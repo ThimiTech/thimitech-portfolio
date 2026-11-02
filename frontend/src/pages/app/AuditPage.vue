@@ -173,7 +173,7 @@ onMounted(load)
       <p v-if="!result.results.length" class="panel p-8 text-sm text-ink/65">
         No events match these filters. Try another date range or reset the filters.
       </p>
-      <div v-else class="panel overflow-x-auto">
+      <div v-else class="panel relative overflow-x-auto">
         <table class="ledger-table">
           <caption class="sr-only">
             Audit events, newest first
