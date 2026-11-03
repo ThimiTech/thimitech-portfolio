@@ -28,8 +28,10 @@ MAX_ZIP_BYTES = 500 * 1024 * 1024
 LINK_FILTERS = ['employee', 'project', 'transaction', 'expense', 'invoice', 'statement']
 
 
-def with_counts(qs):
-    return qs.annotate(file_count=Count('files', distinct=True), folder_count=Count('children', distinct=True))
+def with_counts(qs, user):
+    c = user.clearance
+    return qs.annotate(file_count=Count('files', filter=Q(files__classification__lte=c), distinct=True),
+                       folder_count=Count('children', filter=Q(children__classification__lte=c), distinct=True))
 
 
 def zip_response(files, root_name, base_folder=None):
@@ -69,7 +71,7 @@ class SpacesView(APIView):
         user = request.user
         out = []
         for space in readable_spaces(user):
-            agg = File.objects.filter(space=space).aggregate(n=Count('id'), size=Sum('size'))
+            agg = files_for(user).filter(space=space).aggregate(n=Count('id'), size=Sum('size'))
             out.append({'id': space, 'label': Space(space).label, 'files': agg['n'], 'size': agg['size'] or 0,
                         'can_write': can_write(user, space), 'can_share': can_share(user, space)})
         return Response({'spaces': out, 'mine': File.objects.filter(employee=user).count(),
@@ -100,7 +102,7 @@ class BrowseView(APIView):
                 folders = folders_for(user).filter(name__icontains=q)
                 if payload['space']:
                     folders = folders.filter(space=payload['space'])
-                payload['folders'] = FolderSerializer(with_counts(folders)[:30], many=True).data
+                payload['folders'] = FolderSerializer(with_counts(folders, user)[:30], many=True).data
             if links:
                 files = files.filter(**{f'{k}_id': v for k, v in links.items()})
             if p.get('fy'):
@@ -116,7 +118,7 @@ class BrowseView(APIView):
                 folder = get_object_or_404(folders_for(user).filter(space=space), pk=p['folder'])
             payload.update(space=space, can_write=can_write(user, space),
                            folder=FolderSerializer(folder).data if folder else None,
-                           folders=FolderSerializer(with_counts(Folder.objects.filter(space=space, parent=folder)), many=True).data)
+                           folders=FolderSerializer(with_counts(folders_for(user).filter(space=space, parent=folder), user), many=True).data)
             files = files.filter(space=space, folder=folder)
         payload['files'] = FileSerializer(files, many=True).data
         return Response(payload)
@@ -130,7 +132,7 @@ class FolderViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.U
     http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
-        return with_counts(folders_for(self.request.user).select_related('parent'))
+        return with_counts(folders_for(self.request.user).select_related('parent'), self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -150,7 +152,7 @@ class FolderViewSet(mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.U
     @action(detail=True, methods=['get'])
     def zip(self, request, pk=None):
         folder = self.get_object()
-        return zip_response(File.objects.filter(folder_id__in=folder.descendant_ids()), folder.name, folder)
+        return zip_response(files_for(request.user).filter(folder_id__in=folder.descendant_ids()), folder.name, folder)
 
 
 @extend_schema(tags=['Drive'])
@@ -211,16 +213,18 @@ class ShareLinkViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.De
 
 
 def shared_link(token):
-    link = ShareLink.objects.select_related('folder', 'file').filter(token=token).first()
+    link = ShareLink.objects.select_related('folder', 'file', 'created_by').filter(token=token).first()
     if not link or link.revoked_at or link.expires_at <= timezone.now():
         raise Http404
     return link
 
 
 def shared_files(link):
+    # Never more than the person who made the link may see today (a later clearance downgrade narrows the link too).
+    files = File.objects.filter(classification__lte=link.created_by.clearance)
     if link.file:
-        return File.objects.filter(pk=link.file_id)
-    return File.objects.filter(folder_id__in=link.folder.descendant_ids())
+        return files.filter(pk=link.file_id)
+    return files.filter(folder_id__in=link.folder.descendant_ids())
 
 
 @extend_schema(tags=['Drive'])

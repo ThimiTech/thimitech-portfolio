@@ -25,6 +25,17 @@ export const ROLE_LABEL: Record<Role, string> = {
   super_admin: "Super admin",
 };
 
+/** Security clearance (users) and classification (documents, notes, drive files…) — mirrors backend Clearance.
+ *  You see an item only when your clearance is at least its level. */
+export type Level = 1 | 2 | 3 | 4;
+export const LEVEL_LABEL: Record<Level, string> = { 1: "Internal", 2: "Confidential", 3: "Restricted", 4: "Secret" };
+export const LEVEL_HINT: Record<Level, string> = {
+  1: "Everyone who can already open it",
+  2: "Leads and above, e.g. estimates, client correspondence",
+  3: "Contracts, agreements, HR and finance papers",
+  4: "Owner and directors only",
+};
+
 export interface Me {
   id: number;
   email: string;
@@ -33,6 +44,7 @@ export interface Me {
   last_name: string;
   full_name: string;
   role: Role;
+  clearance: Level;
   is_staff: boolean;
   department: { id: number; name: string } | null;
   designation: string;

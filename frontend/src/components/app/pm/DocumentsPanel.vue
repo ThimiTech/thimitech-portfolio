@@ -6,6 +6,9 @@ import { confirmDialog } from '../ui/confirm'
 import Modal from '../ui/Modal.vue'
 import EmptyState from '../ui/EmptyState.vue'
 import DocViewer from './DocViewer.vue'
+import AccessLevel from '../ui/AccessLevel.vue'
+import AccessBadge from '../ui/AccessBadge.vue'
+import type { Level } from '@/stores/auth'
 import { downloadDoc, errorMessage, fileSize, type Doc, type Project } from './pm'
 const props = defineProps<{ project: Project; docs: Doc[]; openId?: number | null }>()
 const emit = defineEmits<{ changed: []; wikilink: [target: string] }>()
@@ -19,8 +22,9 @@ const viewing = ref<Doc | null>(null)
 const uploading = ref<{ name: string; done: boolean; error?: string }[]>([])
 const dragOver = ref(false)
 const uploadFolder = ref('')
+const uploadLevel = ref<Level>(1)
 const editing = ref<Doc | null>(null)
-const form = reactive({ title: '', folder: '', description: '', public: false })
+const form = reactive({ title: '', folder: '', description: '', public: false, classification: 1 as Level })
 
 const folders = computed(() => [...new Set(props.docs.map((d) => d.folder).filter(Boolean))].sort())
 const shown = computed(() =>
@@ -54,6 +58,7 @@ async function upload(files: FileList | File[] | null) {
       data.append('project', String(props.project.id))
       data.append('title', f.name.replace(/\.[^.]+$/, '').slice(0, 200))
       data.append('folder', uploadFolder.value.trim())
+      data.append('classification', String(uploadLevel.value))
       data.append('file', f)
       try {
         await api.post('pm/documents/', data)
@@ -74,7 +79,7 @@ function onDrop(e: DragEvent) {
 }
 function edit(d: Doc) {
   editing.value = d
-  Object.assign(form, { title: d.title, folder: d.folder, description: d.description, public: d.public })
+  Object.assign(form, { title: d.title, folder: d.folder, description: d.description, public: d.public, classification: d.classification })
 }
 async function saveEdit() {
   try {
@@ -130,6 +135,7 @@ async function remove(d: Doc) {
           <input v-model="uploadFolder" list="doc-folders" class="input !w-36 !py-1 text-xs" placeholder="Folder (optional)" maxlength="80" />
           <datalist id="doc-folders"><option v-for="f in folders" :key="f" :value="f" /></datalist>
         </label>
+        <label class="flex items-center gap-2 text-xs text-ink/60">as <AccessLevel v-model="uploadLevel" compact /></label>
         <div class="ml-auto flex rounded-full border border-ink/15 p-0.5" role="group" aria-label="Layout">
           <button v-for="l in ['grid', 'list'] as const" :key="l" class="rounded-full px-3 py-1 text-xs capitalize" :class="layout === l ? 'bg-ink text-paper' : 'text-ink/60'" :aria-pressed="layout === l" @click="layout = l">{{ l }}</button>
         </div>
@@ -152,6 +158,7 @@ async function remove(d: Doc) {
           </button>
           <div class="flex flex-1 flex-col p-3">
             <p class="line-clamp-2 text-sm font-medium">{{ d.title }}</p>
+            <AccessBadge :level="d.classification" class="mt-1 self-start" />
             <p class="mt-1 font-mono text-[10px] text-ink/50">{{ d.extension }} · {{ fileSize(d.size) }}<span v-if="d.public" class="text-moss"> · public</span></p>
             <div class="mt-auto flex gap-2 pt-3 text-xs opacity-80 group-hover:opacity-100">
               <button class="hover:text-river" @click="downloadDoc(d)">Download</button>
@@ -166,7 +173,7 @@ async function remove(d: Doc) {
           <thead><tr><th>Title</th><th>Folder</th><th>Type</th><th>Size</th><th>Uploaded</th><th><span class="sr-only">Actions</span></th></tr></thead>
           <tbody>
             <tr v-for="d in shown" :key="d.id">
-              <td><button class="text-left font-medium hover:text-river" @click="viewing = d">{{ d.title }}</button><span v-if="d.public" class="ml-2 text-[10px] text-moss">public</span></td>
+              <td><button class="text-left font-medium hover:text-river" @click="viewing = d">{{ d.title }}</button><span v-if="d.public" class="ml-2 text-[10px] text-moss">public</span> <AccessBadge :level="d.classification" /></td>
               <td class="text-ink/60">{{ d.folder || '—' }}</td>
               <td class="font-mono text-xs uppercase">{{ d.extension }}</td>
               <td class="readout text-xs">{{ fileSize(d.size) }}</td>
@@ -187,7 +194,8 @@ async function remove(d: Doc) {
         <label class="field"><span class="ledger-label">Title</span><input v-model="form.title" required maxlength="200" class="input" /></label>
         <label class="field"><span class="ledger-label">Folder</span><input v-model="form.folder" list="doc-folders" maxlength="80" class="input" /></label>
         <label class="field"><span class="ledger-label">Description</span><textarea v-model="form.description" rows="3" class="input" /></label>
-        <label v-if="project.can_manage" class="flex items-start gap-2 text-sm">
+        <label class="field"><span class="ledger-label">Access level</span><AccessLevel v-model="form.classification" /><span class="text-xs text-ink/55">Only people with this clearance or higher can see it.</span></label>
+        <label v-if="project.can_manage && form.classification === 1" class="flex items-start gap-2 text-sm">
           <input v-model="form.public" type="checkbox" class="mt-1 accent-ink" />
           <span>Show on the public project page<span class="block text-xs text-ink/55">Images appear in the gallery, other files in downloads — when those sections are published.</span></span>
         </label>

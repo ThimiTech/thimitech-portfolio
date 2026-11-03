@@ -6,6 +6,8 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 
+from apps.users.models import classification_field
+
 
 def private_path(instance, filename):
     # Unguessable dir; documents are served only through the scoped API (/api/pm/documents/{id}/file/).
@@ -134,6 +136,7 @@ class ProjectLink(models.Model):
     kind = models.CharField(max_length=12, choices=KINDS, default='web')
     url = models.URLField(max_length=1000)
     public = models.BooleanField(default=False)
+    classification = classification_field()
 
     class Meta:
         ordering = ['id']
@@ -161,6 +164,7 @@ class Document(models.Model):
     file = models.FileField(upload_to=private_path)
     size = models.PositiveIntegerField(default=0, editable=False)
     public = models.BooleanField(default=False)
+    classification = classification_field()
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='pm_documents')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -179,6 +183,7 @@ class Note(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField(blank=True, max_length=200_000)
     pinned = models.BooleanField(default=False)
+    classification = classification_field()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='pm_notes')
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -202,6 +207,7 @@ class Meeting(models.Model):
     action_items = models.JSONField(default=list, blank=True)  # [{text, assignee, due, task, done}]
     status = models.CharField(max_length=10, choices=[('scheduled', 'Scheduled'), ('done', 'Held'), ('cancelled', 'Cancelled')], default='scheduled')
     attendees = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='pm_meetings', blank=True)
+    classification = classification_field()
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -216,6 +222,7 @@ class Whiteboard(models.Model):
     title = models.CharField(max_length=120)
     data = models.JSONField(default=dict, blank=True)
     version = models.PositiveIntegerField(default=1)
+    classification = classification_field()
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='+')
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)

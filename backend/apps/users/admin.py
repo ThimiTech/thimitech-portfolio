@@ -5,6 +5,6 @@ from .models import User
 
 @admin.register(User)
 class ThimiUserAdmin(UserAdmin):
-    list_display = ('email', 'username', 'first_name', 'last_name', 'role', 'is_active')
-    list_filter = ('role', 'is_active', 'is_staff')
-    fieldsets = UserAdmin.fieldsets + (('Organization', {'fields': ('role',)}),)
+    list_display = ('email', 'username', 'first_name', 'last_name', 'role', 'clearance', 'is_active')
+    list_filter = ('role', 'clearance', 'is_active', 'is_staff')
+    fieldsets = UserAdmin.fieldsets + (('Organization', {'fields': ('role', 'clearance')}),)

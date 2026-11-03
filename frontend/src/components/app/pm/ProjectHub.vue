@@ -2,13 +2,16 @@
 import { computed, reactive, ref, watch } from 'vue'
 import api from '@/api/api'
 import { confirmDialog } from '../ui/confirm'
+import AccessLevel from '../ui/AccessLevel.vue'
+import AccessBadge from '../ui/AccessBadge.vue'
+import type { Level } from '@/stores/auth'
 import { errorMessage, dateLabel, detectLinkKind, linkLabel, LINK_KINDS, type Project, type Milestone, type ProjectLink } from './pm'
 const props = defineProps<{ project: Project; milestones: Milestone[]; links: ProjectLink[] }>()
 const emit = defineEmits<{ saved: [] }>()
 const error = ref('')
 const busy = ref(false)
 const milestone = reactive({ title: '', due_date: '' })
-const link = reactive({ title: '', url: '', kind: 'web', public: false })
+const link = reactive({ title: '', url: '', kind: 'web', public: false, classification: 1 as Level })
 const kindTouched = ref(false)
 watch(
   () => link.url,
@@ -48,7 +51,7 @@ async function add(kind: 'milestones' | 'links') {
     })
     if (kind === 'milestones') Object.assign(milestone, { title: '', due_date: '' })
     else {
-      Object.assign(link, { title: '', url: '', kind: 'web', public: false })
+      Object.assign(link, { title: '', url: '', kind: 'web', public: false, classification: 1 })
       kindTouched.value = false
     }
     emit('saved')
@@ -166,10 +169,11 @@ async function remove(kind: string, id: number) {
                 class="break-words text-sm font-medium hover:text-river"
                 >{{ l.title }} ↗</a
               >
+              <AccessBadge :level="l.classification" />
               <p class="mt-0.5 truncate text-[11px] text-ink/55">{{ linkLabel(l.kind) }} · {{ l.url.replace(/^https?:\/\//, '') }}</p>
             </div>
             <button
-              v-if="project.can_manage"
+              v-if="project.can_manage && l.classification === 1"
               class="rounded-full border px-2 py-0.5 text-[10px]"
               :class="l.public ? 'border-moss/40 text-moss' : 'border-ink/15 text-ink/50'"
               :aria-pressed="l.public"
@@ -177,7 +181,7 @@ async function remove(kind: string, id: number) {
               :disabled="busy"
               @click="togglePublic(l)"
             >
-              {{ l.public ? 'Public' : 'Internal' }}
+              {{ l.public ? 'Public' : 'Private' }}
             </button>
             <button
               v-if="project.can_manage"
@@ -211,7 +215,9 @@ async function remove(kind: string, id: number) {
               ><select v-model="link.kind" class="input" @change="kindTouched = true">
                 <option v-for="k in LINK_KINDS" :key="k.id" :value="k.id">{{ k.label }}</option>
               </select></label
-            ><label class="flex items-center gap-2 text-sm"
+            ><label class="field"
+              ><span class="ledger-label">Access level</span><AccessLevel v-model="link.classification" /></label
+            ><label v-if="link.classification === 1" class="flex items-center gap-2 text-sm"
               ><input v-model="link.public" type="checkbox" class="accent-ink" /> Show on public project page</label
             ><button class="btn-ghost justify-self-start" :disabled="busy">Add link</button>
           </form>

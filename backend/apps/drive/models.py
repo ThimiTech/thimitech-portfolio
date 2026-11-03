@@ -6,6 +6,8 @@ from django.conf import settings
 from django.db import models
 from django.db.models.functions import Lower
 
+from apps.users.models import classification_field
+
 
 def drive_path(instance, filename):
     # Unguessable dir; files are served only through the scoped API (/api/drive/files/{id}/content/).
@@ -23,6 +25,8 @@ class Folder(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT, related_name='children')
     name = models.CharField(max_length=120)
     fiscal_year = models.CharField(max_length=7, blank=True, help_text='e.g. 2081/82 for an audit folder.')
+    # A floor for everything inside: subfolders and files are never classified below their folder.
+    classification = classification_field()
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='+')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -35,6 +39,16 @@ class Folder(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.parent_id:  # read from the DB: a cached parent may predate a reclassification
+            self.classification = max(self.classification, Folder.objects.get(pk=self.parent_id).classification)
+        adding = self._state.adding
+        super().save(*args, **kwargs)
+        if not adding:  # raised, or moved under a stricter parent: lift the contents (never lowers them)
+            ids = self.descendant_ids()
+            Folder.objects.filter(pk__in=ids, classification__lt=self.classification).update(classification=self.classification)
+            File.objects.filter(folder_id__in=ids, classification__lt=self.classification).update(classification=self.classification)
 
     def path(self):
         names, node = [], self
@@ -59,6 +73,7 @@ class File(models.Model):
     size = models.PositiveIntegerField(default=0, editable=False)
     description = models.TextField(blank=True)
     fiscal_year = models.CharField(max_length=7, blank=True)
+    classification = classification_field()
     # What the document is about: these drive the "linked documents" on people, projects and finance records,
     # and an employee can always read files linked to them (their payslip transfers, offer letter, receipts).
     employee = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='drive_files')
@@ -76,6 +91,11 @@ class File(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.folder_id:  # read from the DB: a cached folder may predate a reclassification
+            self.classification = max(self.classification, Folder.objects.get(pk=self.folder_id).classification)
+        super().save(*args, **kwargs)
 
     @property
     def extension(self):

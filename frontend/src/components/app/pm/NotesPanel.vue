@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import AccessLevel from '../ui/AccessLevel.vue'
+import AccessBadge from '../ui/AccessBadge.vue'
+import type { Level } from '@/stores/auth'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import api from '@/api/api'
 import { toast } from '../ui/toast'
@@ -121,6 +124,14 @@ async function remove() {
     toast.error(errorMessage(e))
   }
 }
+async function setLevel(classification: Level) {
+  if (!selected.value) return
+  try {
+    emit('upsert', (await api.patch<Note>(`pm/notes/${selected.value.id}/`, { classification })).data)
+  } catch (e) {
+    toast.error(errorMessage(e))
+  }
+}
 async function togglePin() {
   if (!selected.value) return
   try {
@@ -229,6 +240,7 @@ const STATUS = { saved: 'Saved', dirty: 'Unsaved changes', saving: 'Saving…', 
         >
           <span v-if="n.pinned" class="text-flag" aria-label="Pinned">●</span>
           <span class="truncate">{{ n.title }}</span>
+          <AccessBadge :level="n.classification" class="ml-auto" />
         </button>
       </nav>
       <p class="border-t border-dashed border-ink/15 px-3 py-2 text-[11px] text-ink/50">
@@ -266,6 +278,7 @@ const STATUS = { saved: 'Saved', dirty: 'Unsaved changes', saving: 'Saving…', 
                 {{ v }}
               </button>
             </div>
+            <AccessLevel compact :model-value="selected.classification" @update:model-value="setLevel" />
             <button class="btn-ghost btn-sm" :aria-pressed="selected.pinned" @click="togglePin">{{ selected.pinned ? 'Unpin' : 'Pin' }}</button>
             <button class="btn-danger btn-sm" @click="remove">Delete</button>
           </div>

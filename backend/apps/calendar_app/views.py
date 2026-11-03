@@ -222,7 +222,8 @@ def feed_items(user, start, end):
                           }))
 
     from apps.pm.models import Meeting
-    meetings = Meeting.objects.filter(Q(attendees=user) | Q(created_by=user), start__lt=hi, end__gte=lo).exclude(
+    meetings = Meeting.objects.filter(Q(attendees=user) | Q(created_by=user), start__lt=hi, end__gte=lo,
+                                      classification__lte=user.clearance).exclude(
         status='cancelled').select_related('project').distinct()
     for m in meetings:
         items.append(item('meeting', m.pk, f'{m.project.key} · {m.title}', dt.to_representation(m.start),
