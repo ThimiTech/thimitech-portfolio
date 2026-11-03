@@ -11,6 +11,9 @@ import DocViewer from '@/components/app/pm/DocViewer.vue'
 import { downloadDoc, errorMessage, fileSize, type Doc } from '@/components/app/pm/pm'
 import ShareDialog from '@/components/app/drive/ShareDialog.vue'
 import MoveDialog from '@/components/app/drive/MoveDialog.vue'
+import AccessLevel from '@/components/app/ui/AccessLevel.vue'
+import AccessBadge from '@/components/app/ui/AccessBadge.vue'
+import type { Level } from '@/stores/auth'
 import { asDoc, BADGE_TONE, fileBadge, SPACE_HINT, uploadFile, type Browse, type DriveFile, type FolderRef, type Space, type SpaceId } from '@/components/app/drive/drive'
 import { dateLabel, downloadFrom, type Lookup, type Staff } from '@/components/app/finance/finance'
 
@@ -117,16 +120,16 @@ async function drop(e: DragEvent) {
 }
 
 // ---------------------------------------------------------------- folders
-const folderDialog = reactive({ open: false, id: null as number | null, name: '', fiscal_year: '', error: '' })
+const folderDialog = reactive({ open: false, id: null as number | null, name: '', fiscal_year: '', classification: 1 as Level, error: '' })
 function newFolder() {
-  Object.assign(folderDialog, { open: true, id: null, name: '', fiscal_year: '', error: '' })
+  Object.assign(folderDialog, { open: true, id: null, name: '', fiscal_year: '', classification: data.value?.folder?.classification ?? 1, error: '' })
 }
 function editFolder(f: FolderRef) {
-  Object.assign(folderDialog, { open: true, id: f.id, name: f.name, fiscal_year: f.fiscal_year, error: '' })
+  Object.assign(folderDialog, { open: true, id: f.id, name: f.name, fiscal_year: f.fiscal_year, classification: f.classification, error: '' })
 }
 async function saveFolder() {
   try {
-    const body = { name: folderDialog.name, fiscal_year: folderDialog.fiscal_year }
+    const body = { name: folderDialog.name, fiscal_year: folderDialog.fiscal_year, classification: folderDialog.classification }
     if (folderDialog.id) await api.patch(`drive/folders/${folderDialog.id}/`, body)
     else await api.post('drive/folders/', { ...body, space: data.value!.space, parent: data.value!.folder?.id ?? null })
     folderDialog.open = false
@@ -148,8 +151,8 @@ const zip = (f: FolderRef) => downloadFrom(`drive/folders/${f.id}/zip/`, {}, f.n
 
 // ---------------------------------------------------------------- files
 const viewing = ref<Doc | null>(null)
-const details = reactive({ name: '', description: '', fiscal_year: '', employee: null as number | null, project: null as number | null, error: '' })
-watch(selected, (f) => f && Object.assign(details, { name: f.name, description: f.description, fiscal_year: f.fiscal_year, employee: f.employee, project: f.project, error: '' }))
+const details = reactive({ name: '', description: '', fiscal_year: '', classification: 1 as Level, employee: null as number | null, project: null as number | null, error: '' })
+watch(selected, (f) => f && Object.assign(details, { name: f.name, description: f.description, fiscal_year: f.fiscal_year, classification: f.classification, employee: f.employee, project: f.project, error: '' }))
 async function saveDetails() {
   try {
     const { error: _e, ...body } = details
@@ -219,6 +222,7 @@ async function loadPickers() {
             <template v-if="data?.mode === 'folder'">
               <button type="button" class="font-medium hover:underline" @click="nav({ space: data.space! })">{{ spaceInfo?.label }}</button>
               <template v-for="p in data.folder?.path || []" :key="p.id"><span class="text-ink/35">/</span><button type="button" class="hover:underline" @click="openFolder(p)">{{ p.name }}</button></template>
+              <AccessBadge :level="data.folder?.classification" class="ml-2" />
               <span v-if="data.folder?.fiscal_year" class="ml-2 rounded-full bg-contour/15 px-2 py-0.5 font-mono text-[10px] text-contour-ink">FY {{ data.folder.fiscal_year }}</span>
             </template>
             <span v-else class="font-medium">{{ title }}</span>
@@ -254,7 +258,7 @@ async function loadPickers() {
                 <li v-for="f in data.folders" :key="f.id" class="group relative">
                   <button type="button" class="flex w-full items-center gap-3 rounded-lg border border-ink/10 bg-sheet px-3 py-2.5 text-left transition hover:border-ink/25" @click="openFolder(f)">
                     <svg viewBox="0 0 24 24" class="h-5 w-5 shrink-0 fill-contour/30 stroke-contour-ink" stroke-width="1.5" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
-                    <span class="min-w-0 flex-1"><span class="block truncate text-sm text-ink">{{ f.name }}</span>
+                    <span class="min-w-0 flex-1"><span class="flex items-center gap-1.5"><span class="truncate text-sm text-ink">{{ f.name }}</span><AccessBadge :level="f.classification" /></span>
                       <span class="block text-[11px] text-ink/50">{{ f.file_count }} file{{ f.file_count === 1 ? '' : 's' }}{{ f.folder_count ? ` · ${f.folder_count} folder${f.folder_count === 1 ? '' : 's'}` : '' }}{{ f.fiscal_year ? ` · FY ${f.fiscal_year}` : '' }}</span></span>
                   </button>
                   <div v-if="canWrite" class="absolute top-1.5 right-1.5 hidden gap-1 group-focus-within:flex group-hover:flex">
@@ -275,6 +279,7 @@ async function loadPickers() {
                     @click="selected = f" @dblclick="viewing = asDoc(f)">
                     <span class="mb-3 grid h-16 place-items-center rounded-md font-mono text-sm font-medium" :class="BADGE_TONE[fileBadge(f.extension)] || 'bg-ink/[0.06] text-ink/60'">{{ fileBadge(f.extension) }}</span>
                     <span class="line-clamp-2 text-sm break-words text-ink">{{ f.name }}</span>
+                    <AccessBadge :level="f.classification" class="mt-1 self-start" />
                     <span class="mt-auto pt-1 text-[11px] text-ink/50">{{ fileSize(f.size) }}{{ f.fiscal_year ? ` · FY ${f.fiscal_year}` : '' }}</span>
                     <span v-if="f.employee_name" class="text-[11px] text-sky">{{ f.employee_name }}</span>
                   </button>
@@ -285,7 +290,7 @@ async function loadPickers() {
                   <thead><tr><th>Name</th><th v-if="data.mode === 'search'">Folder</th><th>Linked to</th><th>FY</th><th class="text-right">Size</th><th>Added</th></tr></thead>
                   <tbody>
                     <tr v-for="f in data.files" :key="f.id" class="cursor-pointer" :class="selected?.id === f.id && 'bg-river/5'" @click="selected = f" @dblclick="viewing = asDoc(f)">
-                      <td><button type="button" class="flex items-center gap-2 text-left" @click.stop="selected = f"><span class="rounded px-1.5 py-0.5 font-mono text-[10px]" :class="BADGE_TONE[fileBadge(f.extension)] || 'bg-ink/[0.06]'">{{ fileBadge(f.extension) }}</span>{{ f.name }}</button></td>
+                      <td><button type="button" class="flex items-center gap-2 text-left" @click.stop="selected = f"><span class="rounded px-1.5 py-0.5 font-mono text-[10px]" :class="BADGE_TONE[fileBadge(f.extension)] || 'bg-ink/[0.06]'">{{ fileBadge(f.extension) }}</span>{{ f.name }}<AccessBadge :level="f.classification" /></button></td>
                       <td v-if="data.mode === 'search'" class="text-xs text-ink/60">{{ f.folder_name || '—' }}</td>
                       <td class="text-xs text-ink/60">{{ [f.employee_name, f.project_name].filter(Boolean).join(' · ') || '—' }}</td>
                       <td class="font-mono text-xs">{{ f.fiscal_year }}</td>
@@ -311,6 +316,7 @@ async function loadPickers() {
             <form class="grid gap-3" @submit.prevent="saveDetails">
               <label class="field"><span class="ledger-label">Name</span><input v-model="details.name" class="input" maxlength="255" /></label>
               <label class="field"><span class="ledger-label">Description</span><textarea v-model="details.description" class="input" rows="2" /></label>
+              <label class="field"><span class="ledger-label">Access level</span><AccessLevel v-model="details.classification" /></label>
               <label class="field"><span class="ledger-label">Fiscal year</span><input v-model="details.fiscal_year" class="input font-mono" placeholder="2082/83" pattern="\d{4}/\d{2}" /></label>
               <label class="field"><span class="ledger-label">Person</span>
                 <select v-model="details.employee" class="input" :disabled="!canLink">
@@ -338,6 +344,7 @@ async function loadPickers() {
       <form class="grid gap-3" @submit.prevent="saveFolder">
         <label class="field"><span class="ledger-label">Name</span><input v-model="folderDialog.name" class="input" required maxlength="120" /></label>
         <label class="field"><span class="ledger-label">Fiscal year (optional, for audit folders)</span><input v-model="folderDialog.fiscal_year" class="input font-mono" placeholder="2081/82" pattern="\d{4}/\d{2}" /></label>
+        <label class="field"><span class="ledger-label">Access level</span><AccessLevel v-model="folderDialog.classification" /><span class="text-xs text-ink/55">Everything inside is raised to at least this level. Lowering it later leaves the contents as they are.</span></label>
         <p v-if="folderDialog.error" role="alert" class="text-sm text-rust">{{ folderDialog.error }}</p>
         <button class="btn-ink justify-self-end">Save</button>
       </form>

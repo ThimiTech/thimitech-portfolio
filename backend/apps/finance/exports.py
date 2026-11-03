@@ -164,7 +164,7 @@ def export(what, fmt, fy, period=None):
 XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
-def audit_pack(fy):
+def audit_pack(fy, user):
     """Zip for the CA: the full workbook, a README with balances and reconciliation, and every document
     tagged with this fiscal year or attached to one of its transactions, claims or statements."""
     from apps.drive.models import File
@@ -172,7 +172,8 @@ def audit_pack(fy):
     slug = fy.replace('/', '-')
     files = File.objects.filter(
         Q(fiscal_year=fy) | Q(folder__fiscal_year=fy) | Q(transaction__date__range=(start, end))
-        | Q(expense__date__range=(start, end)) | Q(statement__end__range=(start, end))).select_related('folder').distinct()
+        | Q(expense__date__range=(start, end)) | Q(statement__end__range=(start, end)),
+        classification__lte=user.clearance).select_related('folder').distinct()
     acct_rows = accounts(fy)[1]
     lines = [f'Thimi Tech - books for fiscal year {fy} ({start} to {end})', f'Generated {timezone.localtime():%Y-%m-%d %H:%M} NPT', '',
              'Accounts (opening -> closing, reconciled):']

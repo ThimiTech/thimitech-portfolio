@@ -87,9 +87,9 @@ class MeSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name', 'full_name',
-            'role', 'is_staff', 'department', 'designation', 'photo', 'theme',
+            'role', 'clearance', 'is_staff', 'department', 'designation', 'photo', 'theme',
         ]
-        read_only_fields = ['id', 'email', 'username', 'role', 'is_staff']
+        read_only_fields = ['id', 'email', 'username', 'role', 'clearance', 'is_staff']
 
     def _profile(self, user):
         return getattr(user, 'profile', None)

@@ -7,6 +7,9 @@ import Modal from '../ui/Modal.vue'
 import StatusPill from '../ui/StatusPill.vue'
 import Avatar from '../ui/Avatar.vue'
 import MarkdownView from './MarkdownView.vue'
+import AccessLevel from '../ui/AccessLevel.vue'
+import AccessBadge from '../ui/AccessBadge.vue'
+import type { Level } from '@/stores/auth'
 import { dateTimeLabel, errorMessage, MEETING_KINDS, toLocalInput, type ActionItem, type Meeting, type Project } from './pm'
 const props = defineProps<{ project: Project; meetings: Meeting[]; openId?: number | null }>()
 const emit = defineEmits<{ changed: []; wikilink: [target: string] }>()
@@ -94,7 +97,7 @@ const personName = (id: number | null) => props.project.people.find((p) => p.id 
 
 // schedule / edit
 const modal = ref(false)
-const form = reactive({ id: 0, title: '', kind: 'general', start: '', duration: 30, location: '', agenda: '', attendees: [] as number[] })
+const form = reactive({ id: 0, title: '', kind: 'general', start: '', duration: 30, location: '', agenda: '', attendees: [] as number[], classification: 1 as Level })
 function openForm(meeting?: Meeting) {
   const start = new Date(Math.ceil(Date.now() / 1800000) * 1800000 + 86400000).toISOString()
   Object.assign(
@@ -109,8 +112,9 @@ function openForm(meeting?: Meeting) {
           location: meeting.location,
           agenda: meeting.agenda,
           attendees: [...meeting.attendees],
+          classification: meeting.classification,
         }
-      : { id: 0, title: '', kind: 'general', start: toLocalInput(start), duration: 30, location: '', agenda: '', attendees: props.project.people.map((p) => p.id) },
+      : { id: 0, title: '', kind: 'general', start: toLocalInput(start), duration: 30, location: '', agenda: '', attendees: props.project.people.map((p) => p.id), classification: 1 as Level },
   )
   modal.value = true
 }
@@ -125,6 +129,7 @@ async function submit() {
     location: form.location,
     agenda: form.agenda,
     attendees: form.attendees,
+    classification: form.classification,
   }
   busy.value = true
   try {
@@ -173,7 +178,7 @@ const durationLabel = (x: Meeting) => `${Math.round((Date.parse(x.end) - Date.pa
           @click="selectedId = x.id"
         >
           <span class="flex items-center justify-between gap-2 font-mono text-[10px] uppercase text-ink/50">
-            {{ MEETING_KINDS[x.kind] }}<span v-if="x.status === 'cancelled'" class="text-rust">cancelled</span>
+            {{ MEETING_KINDS[x.kind] }}<AccessBadge :level="x.classification" /><span v-if="x.status === 'cancelled'" class="text-rust">cancelled</span>
           </span>
           <span class="mt-0.5 block truncate text-sm font-medium" :class="x.status === 'cancelled' ? 'line-through text-ink/50' : ''">{{ x.title }}</span>
           <span class="mt-0.5 block text-xs text-ink/60">{{ dateTimeLabel(x.start) }}</span>
@@ -190,7 +195,7 @@ const durationLabel = (x: Meeting) => `${Math.round((Date.parse(x.end) - Date.pa
     <article v-else class="panel min-w-0">
       <header class="panel-head flex-wrap !items-start">
         <div class="min-w-0">
-          <p class="ledger-label">{{ MEETING_KINDS[m.kind] }}</p>
+          <p class="ledger-label flex items-center gap-2">{{ MEETING_KINDS[m.kind] }}<AccessBadge :level="m.classification" /></p>
           <h2 class="mt-1 font-display text-2xl font-medium">{{ m.title }}</h2>
           <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink/65">
             <span>{{ dateTimeLabel(m.start) }} · {{ durationLabel(m) }}</span>
@@ -269,6 +274,7 @@ const durationLabel = (x: Meeting) => `${Math.round((Date.parse(x.end) - Date.pa
           <label class="field"><span class="ledger-label">Duration</span><select v-model.number="form.duration" class="input"><option v-for="d in [15, 30, 45, 60, 90, 120, 180]" :key="d" :value="d">{{ d }} min</option></select></label>
         </div>
         <label class="field"><span class="ledger-label">Starts</span><input v-model="form.start" type="datetime-local" required class="input" /></label>
+        <label class="field"><span class="ledger-label">Access level</span><AccessLevel v-model="form.classification" /><span class="text-xs text-ink/55">Attendees need this clearance.</span></label>
         <label class="field"><span class="ledger-label">Location or call link</span><input v-model="form.location" maxlength="300" class="input" placeholder="Room 2, or https://meet.google.com/…" /></label>
         <fieldset>
           <legend class="ledger-label mb-2">Attendees</legend>

@@ -2,6 +2,7 @@ import { isAxiosError } from 'axios'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import api from '@/api/api'
+import type { Level } from '@/stores/auth'
 
 export interface Person {
   id: number
@@ -84,6 +85,7 @@ export interface ProjectLink {
   kind: string
   url: string
   public: boolean
+  classification: Level
 }
 export interface Sprint {
   id: number
@@ -106,6 +108,7 @@ export interface Doc {
   extension: string
   size: number
   public: boolean
+  classification: Level
   uploaded_by: number
   uploaded_by_name: string
   can_edit: boolean
@@ -118,6 +121,7 @@ export interface Note {
   title: string
   body: string
   pinned: boolean
+  classification: Level
   author: number
   author_name: string
   updated_by_name: string | null
@@ -145,6 +149,7 @@ export interface Meeting {
   status: 'scheduled' | 'done' | 'cancelled'
   attendees: number[]
   attendees_detail: Person[]
+  classification: Level
   created_by: number
   created_by_name: string
   updated_at: string
@@ -166,6 +171,7 @@ export interface Whiteboard {
   title: string
   data: { elements?: WbElement[] }
   version: number
+  classification: Level
   updated_by_name: string | null
   updated_at: string
 }

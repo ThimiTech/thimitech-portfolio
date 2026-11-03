@@ -24,6 +24,8 @@ export interface Person {
   full_name: string;
   role: Role;
   is_active: boolean;
+  /** Full view only. */
+  clearance?: import("@/stores/auth").Level;
   department: Ref | null;
   manager: PersonBrief | null;
   designation: string;

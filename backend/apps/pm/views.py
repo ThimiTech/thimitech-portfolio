@@ -18,6 +18,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from apps.notifications.services import push
 from apps.permissions.permissions import IsEmployee, IsManager
+from apps.users.models import Clearance
 from .access import visible_projects, can_manage, require_manager
 from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard
 from .serializers import (ProjectSerializer, BoardSerializer, ColumnSerializer, TaskSerializer, CommentSerializer, MilestoneSerializer,
@@ -97,6 +98,8 @@ class ScopedViewSet(viewsets.ModelViewSet):
             if not project.isdigit():
                 raise ValidationError({'project': 'Use a project id.'})
             queryset = queryset.filter(**{f'{self.project_path}_id': project})
+        if hasattr(self.queryset.model, 'classification'):  # documents, notes, meetings, whiteboards, links
+            queryset = queryset.filter(classification__lte=self.request.user.clearance)
         return queryset
 
     def project_of(self, instance):
@@ -296,7 +299,7 @@ class MeetingViewSet(MemberScopedViewSet):
 
 def notify_attendees(meeting, users, actor):
     when = timezone.localtime(meeting.start).strftime('%d %b %H:%M')
-    push(users, 'meeting', f'{name_of(actor)} invited you: {meeting.title}', f'{meeting.project.name} · {when}',
+    push(users.filter(clearance__gte=meeting.classification), 'meeting', f'{name_of(actor)} invited you: {meeting.title}', f'{meeting.project.name} · {when}',
          f'/app/projects/{meeting.project_id}?tab=Meetings', exclude=actor)
 
 
@@ -359,8 +362,8 @@ class PublicProjectViewSet(viewsets.GenericViewSet):
             data['team'] = [{'name': name_of(u), 'role': getattr(getattr(u, 'profile', None), 'designation', ''),
                              'lead': u.pk == p.lead_id} for u in people.values()]
         if 'links' in sections:
-            data['links'] = list(p.links.filter(public=True).values('title', 'kind', 'url'))
-        docs = p.documents.filter(public=True)
+            data['links'] = list(p.links.filter(public=True, classification=Clearance.INTERNAL).values('title', 'kind', 'url'))
+        docs = p.documents.filter(public=True, classification=Clearance.INTERNAL)
         file_url = lambda d: request.build_absolute_uri(f'/api/pm/public/{p.slug}/files/{d.pk}/')  # noqa: E731
         if 'gallery' in sections:
             data['gallery'] = [{'id': d.pk, 'title': d.title, 'description': d.description, 'url': file_url(d)}
@@ -374,7 +377,7 @@ class PublicProjectViewSet(viewsets.GenericViewSet):
     @action(detail=True, methods=['get'], url_path=r'files/(?P<doc>\d+)')
     def files(self, request, slug=None, doc=None):
         p = get_object_or_404(self.get_queryset(), slug=slug)
-        d = get_object_or_404(p.documents.filter(public=True), pk=doc)
+        d = get_object_or_404(p.documents.filter(public=True, classification=Clearance.INTERNAL), pk=doc)
         section = 'gallery' if d.extension in IMAGE_TYPES else 'documents'
         if section not in p.public_sections:
             raise Http404

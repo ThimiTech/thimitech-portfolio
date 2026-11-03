@@ -557,7 +557,7 @@ class ExportView(APIView):
     def get(self, request, pack=False):
         fy = fy_param(request)
         if pack:
-            return exports.audit_pack(fy)
+            return exports.audit_pack(fy, request.user)
         what, fmt = request.query_params.get('what', 'book'), request.query_params.get('type', 'xlsx')
         if what != 'book' and what not in exports.SHEETS or fmt not in ('csv', 'xlsx'):
             raise ValidationError('Unknown export.')

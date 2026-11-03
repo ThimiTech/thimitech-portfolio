@@ -5,6 +5,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.finance.fiscal import parse_fy
+from apps.permissions.permissions import ClassifiedMixin
 from .access import can_link_records, can_write, ensure_path, folders_for
 from .models import File, Folder, ShareLink, Space
 
@@ -25,14 +26,14 @@ def check_fy(value):
     return value
 
 
-class FolderSerializer(serializers.ModelSerializer):
+class FolderSerializer(ClassifiedMixin, serializers.ModelSerializer):
     path = serializers.SerializerMethodField()
     file_count = serializers.IntegerField(read_only=True, required=False)
     folder_count = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         model = Folder
-        fields = ['id', 'space', 'parent', 'name', 'fiscal_year', 'path', 'file_count', 'folder_count', 'created_at']
+        fields = ['id', 'space', 'parent', 'name', 'fiscal_year', 'classification', 'path', 'file_count', 'folder_count', 'created_at']
         read_only_fields = ['created_at']
 
     def get_path(self, folder) -> list[dict]:
@@ -70,7 +71,7 @@ class FolderSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class FileSerializer(serializers.ModelSerializer):
+class FileSerializer(ClassifiedMixin, serializers.ModelSerializer):
     file = serializers.FileField(write_only=True, required=True)
     relative_path = serializers.CharField(write_only=True, required=False, allow_blank=True,
                                           help_text='Folder upload: path inside the chosen folder, e.g. "salary logs/june.pdf".')
@@ -85,7 +86,7 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = File
-        fields = ['id', 'space', 'folder', 'folder_name', 'name', 'title', 'extension', 'size', 'description', 'fiscal_year',
+        fields = ['id', 'space', 'folder', 'folder_name', 'name', 'title', 'extension', 'size', 'description', 'fiscal_year', 'classification',
                   'employee', 'employee_name', 'project', 'project_name', 'transaction', 'transaction_label', 'expense',
                   'invoice', 'statement', 'uploaded_by_name', 'created_at', 'updated_at', 'url', 'file', 'relative_path']
         read_only_fields = ['size', 'created_at', 'updated_at']

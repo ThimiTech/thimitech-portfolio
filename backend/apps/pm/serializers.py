@@ -5,6 +5,7 @@ from django.core.validators import FileExtensionValidator
 from django.urls import reverse
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
+from apps.permissions.permissions import ClassifiedMixin
 from .access import visible_projects, require_manager, can_manage
 from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard
 
@@ -223,10 +224,10 @@ class MilestoneSerializer(ProjectChildSerializer):
         fields = ['id', 'project', 'title', 'due_date', 'completed']
 
 
-class LinkSerializer(ProjectChildSerializer):
+class LinkSerializer(ClassifiedMixin, ProjectChildSerializer):
     class Meta:
         model = ProjectLink
-        fields = ['id', 'project', 'title', 'kind', 'url', 'public']
+        fields = ['id', 'project', 'title', 'kind', 'url', 'public', 'classification']
 
     def validate_url(self, value):
         if not value.startswith(('https://', 'http://')):
@@ -277,7 +278,7 @@ class MemberChildSerializer(serializers.ModelSerializer):
         return attrs
 
 
-class DocumentSerializer(MemberChildSerializer):
+class DocumentSerializer(ClassifiedMixin, MemberChildSerializer):
     file = serializers.FileField(validators=[FileExtensionValidator(DOCUMENT_EXTENSIONS)])
     url = serializers.SerializerMethodField()
     extension = serializers.CharField(read_only=True)
@@ -286,7 +287,7 @@ class DocumentSerializer(MemberChildSerializer):
 
     class Meta:
         model = Document
-        fields = ['id', 'project', 'title', 'folder', 'description', 'file', 'url', 'extension', 'size', 'public',
+        fields = ['id', 'project', 'title', 'folder', 'description', 'file', 'url', 'extension', 'size', 'public', 'classification',
                   'uploaded_by', 'uploaded_by_name', 'can_edit', 'created_at', 'updated_at']
         read_only_fields = ['size', 'uploaded_by', 'created_at', 'updated_at']
 
@@ -324,13 +325,13 @@ class DocumentSerializer(MemberChildSerializer):
         return attrs
 
 
-class NoteSerializer(MemberChildSerializer):
+class NoteSerializer(ClassifiedMixin, MemberChildSerializer):
     author_name = serializers.SerializerMethodField()
     updated_by_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Note
-        fields = ['id', 'project', 'title', 'body', 'pinned', 'author', 'author_name', 'updated_by_name', 'created_at', 'updated_at']
+        fields = ['id', 'project', 'title', 'body', 'pinned', 'classification', 'author', 'author_name', 'updated_by_name', 'created_at', 'updated_at']
         read_only_fields = ['author', 'created_at', 'updated_at']
 
     def get_author_name(self, note) -> str:
@@ -351,7 +352,7 @@ class NoteSerializer(MemberChildSerializer):
         return attrs
 
 
-class MeetingSerializer(MemberChildSerializer):
+class MeetingSerializer(ClassifiedMixin, MemberChildSerializer):
     attendees = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.filter(is_active=True), required=False)
     attendees_detail = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
@@ -359,7 +360,7 @@ class MeetingSerializer(MemberChildSerializer):
     class Meta:
         model = Meeting
         fields = ['id', 'project', 'title', 'kind', 'start', 'end', 'location', 'agenda', 'minutes', 'action_items', 'status',
-                  'attendees', 'attendees_detail', 'created_by', 'created_by_name', 'created_at', 'updated_at']
+                  'attendees', 'attendees_detail', 'classification', 'created_by', 'created_by_name', 'created_at', 'updated_at']
         read_only_fields = ['created_by', 'created_at', 'updated_at']
 
     @extend_schema_field(PersonSerializer(many=True))
@@ -392,17 +393,22 @@ class MeetingSerializer(MemberChildSerializer):
         if start and end and end <= start:
             raise serializers.ValidationError({'end': 'The meeting must end after it starts.'})
         team = {project.lead_id, *project.members.values_list('pk', flat=True)}
+        attendees = attrs.get('attendees', self.instance.attendees.all() if self.instance else [])
         if any(u.pk not in team for u in attrs.get('attendees', [])):
             raise serializers.ValidationError({'attendees': 'Invite members of this project.'})
+        level = attrs.get('classification', getattr(self.instance, 'classification', 1))
+        short = [name_of(u) for u in attendees if u.clearance < level]
+        if short:
+            raise serializers.ValidationError({'attendees': f'Not cleared for this access level: {", ".join(short)}.'})
         return attrs
 
 
-class WhiteboardSerializer(MemberChildSerializer):
+class WhiteboardSerializer(ClassifiedMixin, MemberChildSerializer):
     updated_by_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Whiteboard
-        fields = ['id', 'project', 'title', 'data', 'version', 'updated_by_name', 'created_at', 'updated_at']
+        fields = ['id', 'project', 'title', 'data', 'version', 'classification', 'updated_by_name', 'created_at', 'updated_at']
         read_only_fields = ['version', 'created_at', 'updated_at']
 
     def get_updated_by_name(self, board) -> str | None:

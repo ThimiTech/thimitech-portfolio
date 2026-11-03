@@ -1,4 +1,5 @@
-"""Who can see and change what in the drive. Access is per space; an employee can also always read files linked to them."""
+"""Who can see and change what in the drive. Access is per space, narrowed by clearance (classification <= clearance);
+an employee can also always read files linked to them (their own contract, payslips), whatever the classification."""
 from django.db.models import Q
 
 from .models import File, Folder, Space
@@ -39,11 +40,11 @@ def can_link_records(user):
 
 
 def files_for(user):
-    return File.objects.filter(Q(space__in=readable_spaces(user)) | Q(employee=user))
+    return File.objects.filter(Q(space__in=readable_spaces(user), classification__lte=user.clearance) | Q(employee=user))
 
 
 def folders_for(user):
-    return Folder.objects.filter(space__in=readable_spaces(user))
+    return Folder.objects.filter(space__in=readable_spaces(user), classification__lte=user.clearance)
 
 
 def ensure_path(space, names, user=None, fiscal_year='', parent=None):

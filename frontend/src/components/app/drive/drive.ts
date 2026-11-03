@@ -1,5 +1,6 @@
 import api from '@/api/api'
 import type { Doc } from '../pm/pm'
+import type { Level } from '@/stores/auth'
 
 export type SpaceId = 'company' | 'finance' | 'people'
 export interface Space {
@@ -16,6 +17,7 @@ export interface FolderRef {
   parent: number | null
   name: string
   fiscal_year: string
+  classification: Level
   path: { id: number; name: string }[]
   file_count?: number
   folder_count?: number
@@ -31,6 +33,7 @@ export interface DriveFile {
   size: number
   description: string
   fiscal_year: string
+  classification: Level
   employee: number | null
   employee_name: string
   project: number | null

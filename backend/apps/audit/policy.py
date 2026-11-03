@@ -11,6 +11,7 @@ PUBLIC_FIELDS = {
     'late_grace_minutes', 'weekend_days', 'work_mode', 'source', 'check_in', 'check_out',
     'publish_at', 'expires_at', 'pinned', 'audience', 'employment_type', 'join_date',
     'assigned_at', 'returned_at', 'return_condition', 'issued_at', 'paid_at', 'decided_at',
+    'clearance', 'classification',
 }
 
 

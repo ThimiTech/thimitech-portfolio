@@ -5,6 +5,8 @@ import api from '@/api/api'
 import { toast } from '../ui/toast'
 import { confirmDialog } from '../ui/confirm'
 import { errorMessage, type Project, type WbElement, type Whiteboard } from './pm'
+import AccessLevel from '../ui/AccessLevel.vue'
+import { LEVEL_LABEL, type Level } from '@/stores/auth'
 const props = defineProps<{ project: Project; boards: Whiteboard[] }>()
 const emit = defineEmits<{ changed: [] }>()
 
@@ -321,6 +323,14 @@ async function rename(e: Event) {
     toast.error(errorMessage(err))
   }
 }
+async function setLevel(classification: Level) {
+  try {
+    await api.patch(`pm/whiteboards/${board.value!.id}/`, { classification })
+    emit('changed')
+  } catch (err) {
+    toast.error(errorMessage(err))
+  }
+}
 async function removeBoard() {
   if (!(await confirmDialog({ title: `Delete “${board.value!.title}”?`, body: 'Everything on this whiteboard is lost.', confirmLabel: 'Delete board', danger: true }))) return
   try {
@@ -352,10 +362,11 @@ const sel = computed(() => byId(selected.value))
         ><span class="sr-only">Whiteboard</span>
         <select v-model="boardId" class="input !w-48" @change="save">
           <option v-if="!boards.length" :value="null" disabled>No whiteboards</option>
-          <option v-for="b in boards" :key="b.id" :value="b.id">{{ b.title }}</option>
+          <option v-for="b in boards" :key="b.id" :value="b.id">{{ b.title }}{{ b.classification > 1 ? ` · ${LEVEL_LABEL[b.classification]}` : '' }}</option>
         </select></label
       >
       <label v-if="board" class="field"><span class="sr-only">Rename whiteboard</span><input :value="board.title" maxlength="120" class="input !w-44" @change="rename" /></label>
+      <AccessLevel v-if="board" compact :model-value="board.classification" @update:model-value="setLevel" />
       <button class="btn-ghost btn-sm" @click="newBoard">New board</button>
       <button v-if="board" class="btn-ghost btn-sm" @click="exportSvg">Export SVG</button>
       <button v-if="board" class="text-xs text-rust" @click="removeBoard">Delete</button>

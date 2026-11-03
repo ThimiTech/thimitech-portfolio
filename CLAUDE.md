@@ -99,6 +99,11 @@ npm run dev        # http://localhost:5173  (proxies /api and /media to :8000)
   route guard reads the role from the auth store and hides/redirects. Reuse `api/api.ts`.
 - **Money:** `DecimalField(max_digits=12, decimal_places=2)`, never float.
 - **Migrations are committed.** Run `makemigrations` per app; don't edit applied migrations.
+- **Sensitive content gets a classification.** Any new model holding documents or information that not
+  everyone who can reach it should see adds `classification = classification_field()` (`apps.users.models`),
+  puts `ClassifiedMixin` first in its serializer bases, and filters its querysets with
+  `classification__lte=request.user.clearance`. `pm.ScopedViewSet` does the filter automatically for any model
+  that has the field. See "Clearance" below.
 
 ---
 
@@ -116,6 +121,44 @@ unless a module says otherwise.
 | `super_admin` | Owner | Everything incl. org config, auditing, monitoring, user/role management |
 
 Applicants who are hired are promoted `guest → employee` (keeps one user table).
+
+### Clearance (access levels on content)
+
+Role decides **which modules** you reach; clearance decides **which items inside them** you see. Two people
+on the same project with the same role can differ: a developer (Internal) never sees the contract letter
+(Restricted) that the project lead (Restricted) can open.
+
+| Level | Value | Typical use |
+|-------|-------|-------------|
+| Internal | 1 | Default. Everyone who already has module/project access |
+| Confidential | 2 | Estimates, client correspondence, pricing meetings |
+| Restricted | 3 | Contracts, agreements, HR and finance papers |
+| Secret | 4 | Owner / directors only |
+
+- `User.clearance` (`apps.users.models.Clearance`), separate from `role`. **Only a super admin changes it**
+  (`PATCH /api/org/people/{id}/ {clearance}`; directory view hides it). Super admins are always Secret
+  (forced in `User.save`). Migration `users.0006` seeded starting levels: manager 2, hr_admin 3, super_admin 4,
+  everyone else 1.
+- Classified models (`classification`, default Internal): `pm.Document`, `pm.Note`, `pm.Whiteboard`,
+  `pm.Meeting`, `pm.ProjectLink`, `drive.Folder`, `drive.File`.
+- **Rule:** an item is visible only when `user.clearance >= item.classification`, *in addition to* the
+  module's existing checks (project membership, drive space, role). Anything hidden returns 404, not 403.
+- **Nobody classifies above their own clearance** (`ClassifiedMixin.validate_classification`).
+  **Public items stay Internal**: a classified doc or link can't be `public`, and the public case-study API
+  only serves Internal items.
+- **Meetings:** every attendee must hold the meeting's level (400 otherwise). Invites and the calendar feed
+  skip meetings above your clearance.
+- **Drive folders set a minimum level** for everything inside them: `Folder.save` raises subfolders and files to
+  at least the folder's level, and `File.save` raises a file to its folder's level (both read the folder from
+  the DB). Lowering a folder later leaves its contents as they are. Exception: an employee can still read
+  files **linked to them** (`File.employee`, e.g. their own contract) at any level.
+- Share links (`/s/{token}`) only expose files at or below the **creator's current** clearance. Lowering
+  someone's clearance therefore narrows the links they made too. The folder zip and the finance audit pack
+  apply the same filter.
+- Clearance and classification changes appear in the audit log as plain values (they're in `PUBLIC_FIELDS`).
+- Frontend: `Level`/`LEVEL_LABEL` in `stores/auth.ts` (`Me.clearance`). `ui/AccessLevel.vue` (a picker that
+  only offers levels up to your own) and `ui/AccessBadge.vue` (shows nothing for Internal).
+- Tests: `apps/users/tests_clearance.py`.
 
 ---
 
