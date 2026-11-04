@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'apps.services',
     'apps.projects',
     'apps.users',
-    'apps.team',
     'apps.jobs',
     'apps.org',
     'apps.calendar_app',

@@ -1,64 +1,34 @@
 <script setup lang="ts">
 defineOptions({ name: 'StudioServices' })
 
-import SceneImage, { type SceneKind } from './SceneImage.vue'
+import { onMounted, ref } from 'vue'
+import api from '../api/api'
 
-/**
- * Services are frontend content by design: they describe what the studio offers and
- * change with the company, not with the database. Portfolio data (projects, team,
- * jobs) stays API-driven.
- */
+/** Services are managed in the backend; the frontend only renders them. */
 interface Service {
-  scene: SceneKind
-  seed: number
+  id: number
   title: string
   description: string
 }
 
-const services: Service[] = [
-  {
-    scene: 'city',
-    seed: 3,
-    title: 'WebGIS Development & Geospatial Solutions',
-    description:
-      'We design and develop advanced WebGIS platforms that integrate spatial data, interactive mapping and geospatial analytics. Layers, imagery and field records become one map your team can search, filter and act on.',
-  },
-  {
-    scene: 'field',
-    seed: 5,
-    title: 'Mobile Application Development',
-    description:
-      'We develop intuitive, high-performance mobile applications tailored to diverse business and organisational needs. From field data collection to offline mapping, our apps keep working where the signal does not.',
-  },
-  {
-    scene: 'dashboard',
-    seed: 7,
-    title: 'Custom Software & Web Application Development',
-    description:
-      'We deliver secure, scalable and customised software solutions designed to address unique operational challenges. Our engineers cover the data model, the API and the interface your staff open every day.',
-  },
-  {
-    scene: 'orbit',
-    seed: 11,
-    title: 'Real-World Problem Solving & Digital Innovation',
-    description:
-      'We transform complex real-world challenges into practical digital solutions through innovative technology and strategic problem-solving — starting from the decision you need to make, not from the tool.',
-  },
-  {
-    scene: 'satellite',
-    seed: 13,
-    title: 'Remote Sensing & Earth Observation',
-    description:
-      'We leverage satellite imagery, remote sensing technologies and geospatial analysis to monitor environmental change, assess land use and support evidence-based planning at district and national scale.',
-  },
-  {
-    scene: 'analytics',
-    seed: 17,
-    title: 'Data Analytics & Business Intelligence',
-    description:
-      'We transform complex datasets into meaningful insights through interactive dashboards, advanced analytics and intelligent reporting that people actually open — and trust enough to decide with.',
-  },
-]
+const services = ref<Service[]>([])
+const loading = ref(true)
+const error = ref(false)
+
+async function load() {
+  loading.value = true
+  error.value = false
+  try {
+    const { data } = await api.get<Service[]>('services/')
+    services.value = Array.isArray(data) ? data : []
+  } catch {
+    error.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(load)
 </script>
 
 <template>
@@ -75,18 +45,28 @@ const services: Service[] = [
       </p>
     </header>
 
-    <div class="card-grid">
-      <article v-for="service in services" :key="service.title" class="card service-card">
-        <SceneImage :scene="service.scene" :seed="service.seed" />
+    <div v-if="loading" class="card-grid" aria-busy="true" aria-label="Loading services">
+      <div v-for="n in 3" :key="n" class="card skeleton" />
+    </div>
 
-        <div class="service-body">
-          <h3>{{ service.title }}</h3>
-          <p>{{ service.description }}</p>
-        </div>
+    <p v-else-if="error" role="alert" class="state">
+      We couldn’t load our services.
+      <button type="button" class="state-action" @click="load">Try again</button>
+    </p>
+
+    <p v-else-if="!services.length" class="state">
+      Our services are being updated.
+      <a href="#contact" class="state-action">Start the conversation</a>
+    </p>
+
+    <div v-else class="card-grid">
+      <article v-for="service in services" :key="service.id" class="card service-card">
+        <h3>{{ service.title }}</h3>
+        <p>{{ service.description }}</p>
       </article>
     </div>
 
-    <p class="section-note">
+    <p v-if="!loading && !error && services.length" class="section-note">
       <strong>Not sure which one you need?</strong> Describe the problem and the data you already
       have — a spreadsheet, a survey, a pile of PDFs. We will tell you where to start, what it would
       take, and what we would leave out. <a href="#contact">Start the conversation</a>.
@@ -101,24 +81,43 @@ const services: Service[] = [
   gap: clamp(18px, 2vw, 26px);
 }
 
-.service-card {
-  padding: 0;
-  overflow: hidden;
-  gap: 0;
-}
-
-.service-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: 12px;
-  padding: clamp(22px, 2.2vw, 30px);
-}
-
-.service-body p {
+.service-card p {
   font-size: 18px;
   line-height: 1.66;
   color: #000000;
+}
+
+.skeleton {
+  height: 220px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #f5f6f7, #eceef0 40%, #f5f6f7 80%);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.state {
+  padding: 40px 0;
+  font-size: 16px;
+  color: #5b6169;
+}
+
+.state-action {
+  margin-left: 8px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: none;
+  font: inherit;
+  color: #0a0a0a;
+  cursor: pointer;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 @media (max-width: 1023px) {
@@ -130,6 +129,12 @@ const services: Service[] = [
 @media (max-width: 640px) {
   .card-grid {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
   }
 }
 </style>

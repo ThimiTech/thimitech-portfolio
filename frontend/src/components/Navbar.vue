@@ -24,7 +24,6 @@ const links = [
   { label: 'Mission', href: '#mission' },
   { label: 'Services', href: '#services' },
   { label: 'Projects', href: '#projects' },
-  { label: 'Team', href: '#team' },
   { label: 'Hiring', href: '#hiring' },
   { label: 'Contact', href: '#contact' },
 ]

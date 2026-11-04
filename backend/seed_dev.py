@@ -5,7 +5,6 @@ django.setup()
 
 from apps.services.models import Service
 from apps.projects.models import Project
-from apps.team.models import TeamMember, SocialMedia
 from apps.jobs.models import Job, Requirement
 
 SERVICES = [
@@ -28,20 +27,6 @@ PROJECTS = [
 for name, subtitle, desc in PROJECTS:
     Project.objects.get_or_create(name=name, defaults={"subtitle": subtitle, "description": desc})
 
-TEAM = [
-    ("Ravi Prajapati", "Founder", "RP", "ravi@thimitech.com", 1),
-    ("Prateek Sharma", "Lead Engineer", "PS", "", 2),
-    ("Kshitiz Chaudhary", "Full-Stack Developer", "KC", "", 3),
-    ("Suresh Rokaya", "Full-Stack Developer", "SR", "", 4),
-    ("Aayush Thapa", "Geospatial Developer", "AT", "", 5),
-    ("Maya Gurung", "GIS Analyst", "MG", "", 6),
-]
-for name, role, initials, email, order in TEAM:
-    TeamMember.objects.get_or_create(name=name, defaults={
-        "role": role, "initials": initials, "email": email,
-        "is_active": True, "display_order": order,
-    })
-
 JOBS = [
     ("Full-Stack Developer (Vue + Django)", "Full-time",
      "Build and maintain geospatial and AI-driven web platforms end to end.",
@@ -60,7 +45,6 @@ for title, etype, desc, reqs in JOBS:
 print("Seeded:",
       Service.objects.count(), "services,",
       Project.objects.count(), "projects,",
-      TeamMember.objects.count(), "team,",
       Job.objects.count(), "jobs")
 
 

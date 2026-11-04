@@ -36,7 +36,7 @@ from apps.permissions.permissions import IsAdminOrReadOnly
 def service_list(request):
 
     if request.method == 'GET':
-        services = Service.objects.all()
+        services = Service.objects.order_by('id')
         serializer = ServiceSerializer(services, many=True)
         return Response(serializer.data)
 

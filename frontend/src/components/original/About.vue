@@ -15,9 +15,9 @@ const facts = [
     accent: 'text-contour border-contour/30 bg-contour/5',
   },
   {
-    k: 'Team',
-    v: '4 people',
-    icon: 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-2.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a4 4 0 10-4-4',
+    k: 'Delivery',
+    v: 'Two-week cycles',
+    icon: 'M12 3l9 5-9 5-9-5 9-5zm9 9l-9 5-9-5m18 4l-9 5-9-5',
     accent: 'text-flag border-flag/30 bg-flag/5',
   },
   {

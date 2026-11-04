@@ -24,7 +24,7 @@ npm run dev     # http://localhost:5173
 
 `npm run dev` proxies `/api` and `/media` to the Django backend on `127.0.0.1:8000`.
 Start the backend too (see `../CLAUDE.md`, or run `start-dev.bat` in the repo root) or
-the portfolio's project / team / hiring sections will show their "unavailable" states.
+the portfolio's project / hiring sections will show their "unavailable" states.
 
 ## The hero globe
 

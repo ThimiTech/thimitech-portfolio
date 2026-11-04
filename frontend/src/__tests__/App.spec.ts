@@ -17,9 +17,22 @@ const PROJECT = {
   url: '',
 }
 
+const SERVICES = [
+  {
+    id: 1,
+    title: 'WebGIS Development & Geospatial Solutions',
+    description: 'Interactive platforms for spatial data.',
+  },
+  {
+    id: 2,
+    title: 'Data Analytics & Business Intelligence',
+    description: 'Dashboards and reporting that people trust.',
+  },
+]
+
 beforeEach(() => {
   vi.mocked(api.get).mockImplementation(async (url) => ({
-    data: url === 'projects/' ? [PROJECT] : [],
+    data: url === 'projects/' ? [PROJECT] : url === 'services/' ? SERVICES : [],
   }))
 })
 
@@ -39,12 +52,23 @@ describe('Public portfolio', () => {
     await flushPromises()
     expect(wrapper.findAll('h1')).toHaveLength(1)
     expect(wrapper.find('h1').text()).toBe(heading)
-    // Services are frontend content — no API call involved.
+    // Services come from the API, just like projects.
     expect(wrapper.text()).toContain('WebGIS Development & Geospatial Solutions')
     expect(wrapper.text()).toContain('Data Analytics & Business Intelligence')
     expect(
       wrapper.findAll(`a[href="${workHref}"]`).some((a) => a.text().includes(workLink)),
     ).toBe(true)
+    wrapper.unmount()
+  })
+  it('renders service cards from backend data without local imagery', async () => {
+    const { default: Services } = await import('../components/Services.vue')
+    const wrapper = mount(Services)
+    await flushPromises()
+    expect(api.get).toHaveBeenCalledWith('services/')
+    expect(wrapper.findAll('.service-card')).toHaveLength(SERVICES.length)
+    expect(wrapper.find('.service-card canvas').exists()).toBe(false)
+    expect(wrapper.find('.service-card img').exists()).toBe(false)
+    expect(wrapper.text()).toContain(SERVICES[0]!.title)
     wrapper.unmount()
   })
   it('keeps /new links and skip link on the new design', async () => {

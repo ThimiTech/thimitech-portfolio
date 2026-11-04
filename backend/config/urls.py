@@ -53,7 +53,6 @@ urlpatterns = [
     path('api/', include('apps.projects.urls')),
     path('api/', include('apps.services.urls')),
     path('api/', include('apps.users.urls')),
-    path('api/', include('apps.team.urls')),
     path('api/', include('apps.jobs.urls')),
     path('api/org/', include('apps.org.urls')),
     path('api/attendance/', include('apps.attendance.urls')),

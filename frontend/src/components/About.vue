@@ -1,27 +1,14 @@
 <script setup lang="ts">
 defineOptions({ name: 'StudioAbout' })
 
-import { computed } from 'vue'
 import { ICONS } from '../data/icons'
-import { useTeamDirectory } from '../composables/useTeamDirectory'
 
-const { members } = useTeamDirectory()
-
-/** Known roster size — shown until the team API answers with real rows. */
-const KNOWN_TEAM_SIZE = 6
-
-const teamCount = computed(() => (members.value.length > 0 ? members.value.length : KNOWN_TEAM_SIZE))
-
-const facts = computed(() => [
+const facts = [
   { icon: ICONS.target, label: 'Founded', value: '2021' },
   { icon: ICONS.pin, label: 'Based in', value: 'Bhaktapur, Nepal' },
-  {
-    icon: ICONS.users,
-    label: 'Team',
-    value: `${teamCount.value} ${teamCount.value === 1 ? 'person' : 'people'}`,
-  },
+  { icon: ICONS.layers, label: 'Delivery', value: 'Two-week cycles' },
   { icon: ICONS.map, label: 'Focus', value: 'Web GIS & spatial data' },
-])
+]
 
 const stats = [
   { value: '4+', label: 'Years mapping' },

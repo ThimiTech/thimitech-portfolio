@@ -26,7 +26,7 @@ a single product with three faces —
 ### Backend layout (`backend/`)
 - `config/` — settings, urls, wsgi/asgi. Env-driven via `python-dotenv` (`.env`).
 - `apps/users/` — custom `User` (email login), registration.
-- `apps/services/`, `apps/projects/`, `apps/team/`, `apps/jobs/` — portfolio + recruitment content.
+- `apps/services/`, `apps/projects/`, `apps/jobs/` — portfolio + recruitment content.
 - `apps/permissions/permissions.py` — `IsAdminOrReadOnly`.
 - **View style today:** function-based views with `@api_view` + `@extend_schema`. Serializers are `ModelSerializer`.
   *(New modules should move to DRF `ViewSet` + routers — see Conventions.)*

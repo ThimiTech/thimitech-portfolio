@@ -88,7 +88,8 @@ interface SparkleDatum {
 
 type LayerDatum = SatelliteDatum | SparkleDatum
 
-const INITIAL_POV = { lat: 20, lng: 78, altitude: 1.78 }
+/** Slightly farther back than before so the full sphere clears the hero edges. */
+const INITIAL_POV = { lat: 20, lng: 78, altitude: 2.08 }
 const ARC_BRANCH: string[] = [
   'rgba(255, 255, 255, 0)',
   'rgba(255, 255, 255, 0.96)',
@@ -248,7 +249,9 @@ async function initGlobe() {
   const { default: Globe } = await import('globe.gl')
   if (disposed) return
 
-  const instance = new Globe(element, { animateIn: !reducedMotion })
+  // Start at the final framing. The built-in `animateIn` scales the globe up
+  // after load, which reads as the scene zooming/settling on every refresh.
+  const instance = new Globe(element, { animateIn: false })
   globe = instance
   configure(instance, element)
   applyNetwork(instance)
