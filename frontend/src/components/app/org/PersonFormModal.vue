@@ -3,7 +3,7 @@
 // self -> contact fields + photo; hr_admin+ -> everything (role limited by grant rules, never own role).
 import { computed, reactive, ref, watch } from "vue";
 import api from "@/api/api";
-import { useAuth, type Role } from "@/stores/auth";
+import { LEVEL_HINT, LEVEL_LABEL, useAuth, type Level, type Role } from "@/stores/auth";
 import Modal from "../ui/Modal.vue";
 import Avatar from "../ui/Avatar.vue";
 import FormField from "./FormField.vue";
@@ -23,6 +23,8 @@ const hrScope = computed(() =>
   creating.value ? !!user.value && grantableRoles(user.value.role).length > 0 : canManage(user.value, props.person!),
 );
 const roleEditable = computed(() => hrScope.value && !isSelf.value);
+// Security clearance: only a super admin grants it; super admins always hold the top level.
+const clearanceEditable = computed(() => user.value?.role === "super_admin" && !isSelf.value && form.role !== "super_admin");
 const roleOptions = computed<Role[]>(() => {
   const opts = user.value ? grantableRoles(user.value.role) : [];
   const cur = props.person?.role;
@@ -30,7 +32,7 @@ const roleOptions = computed<Role[]>(() => {
 });
 
 const blank = () => ({
-  first_name: "", last_name: "", email: "", password: "", role: "employee" as Role,
+  first_name: "", last_name: "", email: "", password: "", role: "employee" as Role, clearance: 1 as Level,
   department_id: null as number | null, designation: "", employment_type: "full_time" as EmploymentType,
   join_date: "", employee_code: "", date_of_birth: "", phone: "", address: "",
   emergency_contact_name: "", emergency_contact_phone: "", bio: "", skills: "",
@@ -47,7 +49,7 @@ const created = ref<Person | null>(null);
 
 function fromPerson(p: Person) {
   return {
-    first_name: p.first_name, last_name: p.last_name, email: p.email, password: "", role: p.role,
+    first_name: p.first_name, last_name: p.last_name, email: p.email, password: "", role: p.role, clearance: (p.clearance ?? 1) as Level,
     department_id: p.department?.id ?? null, designation: p.designation ?? "",
     employment_type: p.employment_type ?? "full_time", join_date: p.join_date ?? "",
     employee_code: p.employee_code ?? "", date_of_birth: p.date_of_birth ?? "", phone: p.phone ?? "",
@@ -107,7 +109,7 @@ const SELF_KEYS = [
   "first_name", "last_name", "phone", "address", "emergency_contact_name", "emergency_contact_phone", "bio", "skills",
 ] as const;
 const HR_KEYS = [
-  "email", "role", "department_id", "designation", "employment_type", "join_date", "employee_code", "date_of_birth",
+  "email", "role", "clearance", "department_id", "designation", "employment_type", "join_date", "employee_code", "date_of_birth",
 ] as const;
 
 function payloadFrom(src: ReturnType<typeof blank>) {
@@ -115,6 +117,7 @@ function payloadFrom(src: ReturnType<typeof blank>) {
   const out: Record<string, unknown> = {};
   for (const k of keys) {
     if (k === "role" && !roleEditable.value) continue;
+    if (k === "clearance" && !clearanceEditable.value) continue;
     const v = src[k as keyof typeof src];
     if (k === "skills") out.skills = String(v).split(",").map((s) => s.trim()).filter(Boolean);
     else if (k === "join_date" || k === "date_of_birth") out[k] = v || null;
@@ -231,6 +234,17 @@ const describe = (id: string) => `${id}-msg`;
           <select id="pf-role" v-model="form.role" class="input" :disabled="!roleEditable" :aria-describedby="describe('pf-role')">
             <option v-for="r in roleOptions" :key="r" :value="r">{{ ROLE_LABEL[r] }}</option>
             <option v-if="!roleOptions.includes(form.role)" :value="form.role">{{ ROLE_LABEL[form.role] }}</option>
+          </select>
+        </FormField>
+        <FormField
+          v-if="person?.clearance || clearanceEditable"
+          id="pf-clearance"
+          label="Security clearance"
+          :error="fieldErrors.clearance"
+          :hint="clearanceEditable ? LEVEL_HINT[form.clearance] : 'Set by a super admin.'"
+        >
+          <select id="pf-clearance" v-model.number="form.clearance" class="input" :disabled="!clearanceEditable" :aria-describedby="describe('pf-clearance')">
+            <option v-for="l in ([1, 2, 3, 4] as Level[])" :key="l" :value="l">{{ LEVEL_LABEL[l] }}</option>
           </select>
         </FormField>
         <FormField id="pf-dept" label="Department" :error="fieldErrors.department_id">

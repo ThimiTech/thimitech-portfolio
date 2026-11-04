@@ -1,6 +1,7 @@
 from decimal import Decimal
 from rest_framework.test import APITestCase
 from apps.users.models import User
+from apps.finance.models import Category
 
 
 class FinanceTests(APITestCase):
@@ -29,7 +30,8 @@ class FinanceTests(APITestCase):
         response = self.client.post('/api/finance/payslips/generate/', {'salary': salary['id'], 'period': '2026-10-01'}, format='json')
         self.assertEqual(response.status_code, 201, response.data)
         slip = response.data; url = f"/api/finance/payslips/{slip['id']}/"
-        self.assertEqual(Decimal(slip['net']), Decimal('53500.00'))
+        self.assertEqual(Decimal(slip['tds']), Decimal('550.00'))  # 1% SST on 55,000 gross (not in SSF)
+        self.assertEqual(Decimal(slip['net']), Decimal('52950.00'))
         self.client.patch(f"/api/finance/salaries/{salary['id']}/", {'basic': '60000.00'}, format='json')
         self.assertEqual(Decimal(self.client.get(url).data['basic']), Decimal('50000.00'))
         self.assertEqual(self.client.post('/api/finance/payslips/generate/', {'salary': salary['id'], 'period': '2026-10-01'}, format='json').status_code, 400)
@@ -53,7 +55,7 @@ class FinanceTests(APITestCase):
         self.assertEqual(self.client.delete(url).status_code, 400)
 
     def test_expense_approval_and_summary(self):
-        r = self.as_user(self.hr).post('/api/finance/expenses/', {'employee': self.emp.pk, 'description': 'Survey transport', 'date': '2026-10-17', 'amount': '1200.25', 'category': 'travel'}, format='json')
+        r = self.as_user(self.hr).post('/api/finance/expenses/', {'employee': self.emp.pk, 'description': 'Survey transport', 'date': '2026-10-17', 'amount': '1200.25', 'category': Category.objects.get(name='Travel').pk}, format='json')
         self.assertEqual(r.status_code, 201, r.data)
         url = f"/api/finance/expenses/{r.data['id']}/"
         self.assertEqual(self.client.post(url + 'approve/').status_code, 400)
@@ -125,7 +127,7 @@ class FinanceSeparationOfDutiesTests(APITestCase):
 
     def test_hr_cannot_approve_own_expense_but_others_can(self):
         self.client.force_authenticate(self.hr)
-        e = self.client.post('/api/finance/expenses/', {'employee': self.hr.pk, 'description': 'Taxi', 'date': '2026-10-01', 'category': 'travel', 'amount': '10.00', 'currency': 'NPR'}, format='json')
+        e = self.client.post('/api/finance/expenses/', {'employee': self.hr.pk, 'description': 'Taxi', 'date': '2026-10-01', 'category': Category.objects.get(name='Travel').pk, 'amount': '10.00', 'currency': 'NPR'}, format='json')
         self.assertEqual(e.status_code, 201, e.data)
         url = f"/api/finance/expenses/{e.data['id']}/"
         self.assertEqual(self.client.post(url + 'submit/').status_code, 200)

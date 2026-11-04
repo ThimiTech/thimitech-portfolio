@@ -63,13 +63,18 @@ const print = () => window.print();
         <tbody>
           <tr><th scope="row" class="py-2 text-left font-normal text-ink/70">Basic pay</th><td class="readout py-2 text-right">{{ money(slip.basic, slip.currency) }}</td></tr>
           <tr><th scope="row" class="py-2 text-left font-normal text-ink/70">Allowances</th><td class="readout py-2 text-right">{{ money(slip.allowances, slip.currency) }}</td></tr>
+          <tr v-if="slip.earned !== (Number(slip.basic) + Number(slip.allowances)).toFixed(2)"><th scope="row" class="py-2 text-left font-normal text-ink/70">Earned for {{ slip.days_worked }} of {{ slip.working_days }} days</th><td class="readout py-2 text-right">{{ money(slip.earned, slip.currency) }}</td></tr>
+          <tr v-if="Number(slip.bonus)"><th scope="row" class="py-2 text-left font-normal text-ink/70">Bonus</th><td class="readout py-2 text-right">{{ money(slip.bonus, slip.currency) }}</td></tr>
           <tr class="border-t border-dashed border-ink/15"><th scope="row" class="py-2 text-left font-medium">Gross pay</th><td class="readout py-2 text-right">{{ money(slip.gross, slip.currency) }}</td></tr>
-          <tr><th scope="row" class="py-2 text-left font-normal text-ink/70">Deductions</th><td class="readout py-2 text-right">− {{ money(slip.deductions, slip.currency) }}</td></tr>
+          <tr v-if="Number(slip.ssf_employee)"><th scope="row" class="py-2 text-left font-normal text-ink/70">SSF contribution (11%)</th><td class="readout py-2 text-right">− {{ money(slip.ssf_employee, slip.currency) }}</td></tr>
+          <tr v-if="Number(slip.tds)"><th scope="row" class="py-2 text-left font-normal text-ink/70">Tax deducted (TDS / SST)</th><td class="readout py-2 text-right">− {{ money(slip.tds, slip.currency) }}</td></tr>
+          <tr v-if="Number(slip.deductions)"><th scope="row" class="py-2 text-left font-normal text-ink/70">Other deductions</th><td class="readout py-2 text-right">− {{ money(slip.deductions, slip.currency) }}</td></tr>
           <tr class="border-t border-ink/30"><th scope="row" class="py-3 text-left font-display text-lg">Net pay</th><td class="readout py-3 text-right text-lg font-medium">{{ money(slip.net, slip.currency) }}</td></tr>
         </tbody>
       </table>
 
       <dl class="grid gap-3 pt-5 text-sm">
+        <div v-if="Number(slip.ssf_employer)"><dt class="ledger-label">Company SSF contribution (20%, on top of your pay)</dt><dd class="readout mt-1">{{ money(slip.ssf_employer, slip.currency) }}</dd></div>
         <div v-if="slip.issued_at"><dt class="ledger-label">Issued</dt><dd class="mt-1">{{ timestamp(slip.issued_at) }}</dd></div>
         <div v-if="slip.paid_at"><dt class="ledger-label">Paid</dt><dd class="mt-1">{{ timestamp(slip.paid_at) }}<template v-if="slip.payment_reference"> · ref {{ slip.payment_reference }}</template></dd></div>
         <div v-if="slip.notes"><dt class="ledger-label">Notes</dt><dd class="mt-1 whitespace-pre-line text-ink/75">{{ slip.notes }}</dd></div>

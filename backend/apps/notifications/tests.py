@@ -73,7 +73,7 @@ class InboxApiTests(APITestCase):
         r = self.as_(self.a).get('/api/nav-counts/')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data, {'leave_approvals': 0, 'unread_notices': 0, 'overdue_tasks': 0, 'unread_notifications': 2,
-                                  'attendance_corrections': 0})
+                                  'attendance_corrections': 0, 'finance_review': 0})
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
@@ -162,4 +162,4 @@ class EventHookTests(APITestCase):
         asset = hr.post('/api/inventory/assets/', {'tag': 'LT-1', 'name': 'ThinkPad', 'category': cat['id']}, format='json').data
         self.assertEqual(hr.post('/api/inventory/assignments/', {'asset': asset['id'], 'employee': self.emp.pk}, format='json').status_code, 201)
         self.assertEqual(self.inbox(self.emp, 'asset_assigned'), ['ThinkPad (LT-1) was assigned to you'])
-        self.assertEqual(Decimal(slip['net']), Decimal('50000.00'))
+        self.assertEqual(Decimal(slip['net']), Decimal('49500.00'))  # 1% SST: not enrolled in SSF

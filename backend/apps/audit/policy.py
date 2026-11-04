@@ -1,5 +1,5 @@
-TRACKED_APPS = {'users', 'org', 'attendance', 'leave', 'calendar_app', 'notices', 'pm', 'finance', 'inventory', 'projects', 'services', 'team', 'jobs'}
-EXCLUDED_MODELS = {'notices.noticeread'}
+TRACKED_APPS = {'users', 'org', 'attendance', 'leave', 'calendar_app', 'notices', 'pm', 'finance', 'drive', 'inventory', 'projects', 'services', 'team', 'jobs'}
+EXCLUDED_MODELS = {'notices.noticeread', 'pm.whiteboard'}  # whiteboard autosaves every few seconds
 EXCLUDED_FIELDS = {'id', 'created_at', 'updated_at', 'date_joined', 'last_login', 'emailed_at'}
 # Everything else, including new fields, defaults to redacted. FK identities are metadata.
 PUBLIC_FIELDS = {
@@ -11,6 +11,7 @@ PUBLIC_FIELDS = {
     'late_grace_minutes', 'weekend_days', 'work_mode', 'source', 'check_in', 'check_out',
     'publish_at', 'expires_at', 'pinned', 'audience', 'employment_type', 'join_date',
     'assigned_at', 'returned_at', 'return_condition', 'issued_at', 'paid_at', 'decided_at',
+    'clearance', 'classification',
 }
 
 

@@ -24,7 +24,7 @@ DIRECTORY_FIELDS = (
 )
 SENSITIVE_FIELDS = (
     'employee_code', 'employment_type', 'date_of_birth', 'address',
-    'emergency_contact_name', 'emergency_contact_phone',
+    'emergency_contact_name', 'emergency_contact_phone', 'clearance',
 )
 SELF_EDITABLE = {
     'first_name', 'last_name', 'phone', 'address', 'emergency_contact_name',
@@ -171,13 +171,13 @@ class PersonSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'is_active', 'password',
+            'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'clearance', 'is_active', 'password',
             'department', 'department_id', 'manager', 'employee_code', 'designation', 'employment_type',
             'join_date', 'date_of_birth', 'phone', 'address', 'emergency_contact_name',
             'emergency_contact_phone', 'photo', 'bio', 'skills', 'visibility',
         ]
         read_only_fields = ['id', 'is_active']
-        extra_kwargs = {'role': {'required': False}}
+        extra_kwargs = {'role': {'required': False}, 'clearance': {'required': False}}
 
     # -- representation -------------------------------------------------------
 
@@ -277,6 +277,9 @@ class PersonSerializer(serializers.ModelSerializer):
 
         if 'role' in attrs:
             self._check_role_change(actor, target, attrs['role'])
+        if 'clearance' in attrs and attrs['clearance'] != getattr(target, 'clearance', User.clearance.field.default):
+            if not actor.has_role('super_admin'):
+                raise PermissionDenied('Only a super admin can change security clearance.')
         return attrs
 
     def _check_role_change(self, actor, target, new_role):

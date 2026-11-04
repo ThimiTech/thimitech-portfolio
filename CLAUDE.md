@@ -99,6 +99,11 @@ npm run dev        # http://localhost:5173  (proxies /api and /media to :8000)
   route guard reads the role from the auth store and hides/redirects. Reuse `api/api.ts`.
 - **Money:** `DecimalField(max_digits=12, decimal_places=2)`, never float.
 - **Migrations are committed.** Run `makemigrations` per app; don't edit applied migrations.
+- **Sensitive content gets a classification.** Any new model holding documents or information that not
+  everyone who can reach it should see adds `classification = classification_field()` (`apps.users.models`),
+  puts `ClassifiedMixin` first in its serializer bases, and filters its querysets with
+  `classification__lte=request.user.clearance`. `pm.ScopedViewSet` does the filter automatically for any model
+  that has the field. See "Clearance" below.
 
 ---
 
@@ -116,6 +121,44 @@ unless a module says otherwise.
 | `super_admin` | Owner | Everything incl. org config, auditing, monitoring, user/role management |
 
 Applicants who are hired are promoted `guest → employee` (keeps one user table).
+
+### Clearance (access levels on content)
+
+Role decides **which modules** you reach; clearance decides **which items inside them** you see. Two people
+on the same project with the same role can differ: a developer (Internal) never sees the contract letter
+(Restricted) that the project lead (Restricted) can open.
+
+| Level | Value | Typical use |
+|-------|-------|-------------|
+| Internal | 1 | Default. Everyone who already has module/project access |
+| Confidential | 2 | Estimates, client correspondence, pricing meetings |
+| Restricted | 3 | Contracts, agreements, HR and finance papers |
+| Secret | 4 | Owner / directors only |
+
+- `User.clearance` (`apps.users.models.Clearance`), separate from `role`. **Only a super admin changes it**
+  (`PATCH /api/org/people/{id}/ {clearance}`; directory view hides it). Super admins are always Secret
+  (forced in `User.save`). Migration `users.0006` seeded starting levels: manager 2, hr_admin 3, super_admin 4,
+  everyone else 1.
+- Classified models (`classification`, default Internal): `pm.Document`, `pm.Note`, `pm.Whiteboard`,
+  `pm.Meeting`, `pm.ProjectLink`, `drive.Folder`, `drive.File`.
+- **Rule:** an item is visible only when `user.clearance >= item.classification`, *in addition to* the
+  module's existing checks (project membership, drive space, role). Anything hidden returns 404, not 403.
+- **Nobody classifies above their own clearance** (`ClassifiedMixin.validate_classification`).
+  **Public items stay Internal**: a classified doc or link can't be `public`, and the public case-study API
+  only serves Internal items.
+- **Meetings:** every attendee must hold the meeting's level (400 otherwise). Invites and the calendar feed
+  skip meetings above your clearance.
+- **Drive folders set a minimum level** for everything inside them: `Folder.save` raises subfolders and files to
+  at least the folder's level, and `File.save` raises a file to its folder's level (both read the folder from
+  the DB). Lowering a folder later leaves its contents as they are. Exception: an employee can still read
+  files **linked to them** (`File.employee`, e.g. their own contract) at any level.
+- Share links (`/s/{token}`) only expose files at or below the **creator's current** clearance. Lowering
+  someone's clearance therefore narrows the links they made too. The folder zip and the finance audit pack
+  apply the same filter.
+- Clearance and classification changes appear in the audit log as plain values (they're in `PUBLIC_FIELDS`).
+- Frontend: `Level`/`LEVEL_LABEL` in `stores/auth.ts` (`Me.clearance`). `ui/AccessLevel.vue` (a picker that
+  only offers levels up to your own) and `ui/AccessBadge.vue` (shows nothing for Internal).
+- Tests: `apps/users/tests_clearance.py`.
 
 ---
 
@@ -214,6 +257,17 @@ days; no cash-out policy has been defined.
   when live, otherwise by beat task `apps.notices.tasks.email_due_urgent_notices` (every 5 min, looks back 1 day).
 - **Passwords**: HR resets someone else's via `PATCH /api/org/people/{id}/ {password}` (same edit rights as other HR
   fields); everyone changes their own via `POST /api/org/people/me/password/ {current_password, new_password}`.
+- **Delivery workspace** (`apps/pm`): tabs Overview · Board · Sprints · Timeline · Notes · Docs · Meetings · Whiteboard ·
+  Links & milestones · Public profile · Settings (`/app/projects/:id?tab=`). Members create/edit notes, docs, meetings and
+  whiteboards; only the owner or a project manager deletes. Only one sprint per project can be active (DB constraint).
+  `Task.completed_at` is set in `Task.save()` and feeds the burndown. `[[wikilinks]]` resolve on the client
+  (note → doc → task key → meeting). Markdown is rendered with marked + DOMPurify (`pm.ts renderMarkdown`).
+  Whiteboard saves send `version`; a stale version gets 409. Whiteboards are excluded from the audit log.
+- **Project documents** are served only via `GET /api/pm/documents/{id}/file/` (text is served as text/plain, with
+  `CSP: sandbox`). In production block direct access: `location /media/pm/docs/ { internal; }`.
+- **Public case studies**: `/work` and `/work/:slug` call `GET /api/pm/public/[slug/]` (no auth). A project shows up only
+  when `visibility=public` and it is not archived. Only `public_sections` are exposed, and only links/docs marked `public`.
+  Project meetings appear in the calendar feed (`kind: meeting`) for their attendees and creator.
 - **Confirmations** in `/app` use `confirmDialog()` (`components/app/ui/confirm.ts`, host mounted in `AppLayout`), never
   `window.confirm`.
 - Tests: `DB_TEST_NAME=test_thimi_<x> CELERY_TASK_ALWAYS_EAGER=True .venv/Scripts/python.exe manage.py test --noinput`.
@@ -226,6 +280,29 @@ days; no cash-out policy has been defined.
 - **Server lists**: `config.pagination.ServerListMixin` adds `?page=&page_size=&search=&ordering=&status=` to a
   ViewSet. Paging is opt-in (only with `?page=`), so callers that expect a bare list keep working. Frontend:
   `useServerTable()` + `<DataTable :total>` (server mode).
+- **Finance hub** (`/app/finance`, tabs Overview · Bank & cash · Payroll · Staff claims · Invoices · Reports & export · Setup):
+  finance access = `User.can_finance()` (HR/admin+ or role `accountant`, rank 1 = staff elsewhere; only super admin grants it);
+  DRF `IsFinance`, frontend `hasRole('finance')`. Books = `Account` + `Transaction` (debit=out, credit=in, one side only;
+  running balance via subquery, unaffected by filters) + `Category.kind` (income/expense/payroll/tax/transfer; transfers
+  are loans/capital, never P&L) + `Statement` (reconciles when ledger balance at `end` = closing). Dates in Bikram Sambat
+  and fiscal years (Shrawan–Ashadh) come from `finance/fiscal.py` (`nepali-datetime`), never stored. `FiscalYearClose`
+  makes a year's lines/statements read-only (`services.assert_open`). Payroll: SSF members 11% + 20% of basic, no SST;
+  others 1% SST on gross (`services.apply_statutory`; flat SST only valid in the first slab). `match-payments` links bank
+  lines to payslips (paid date ±3 days, else month end −7..+45). Statement CSV/XLSX import auto-detects headers and
+  skips duplicates (date + amounts + description). Exports `GET /api/finance/export/?what=&type=csv|xlsx&fy=` (not
+  `format=`: DRF reserves it) and `/export/audit-pack/?fy=` (zip: workbook + README + that FY's documents).
+  **Loading real data on a server:** the repo is public, so real books travel only as a private bundle zip
+  (`manifest.json` + ledger JSON + spreadsheets + statement scans + document folders), never committed.
+  `scp` it over, then `manage.py migrate`, `createsuperuser` (once), `manage.py load_books_bundle /path/bundle.zip`,
+  delete the zip. It replays `import_books` + `import_drive` and is idempotent (re-running adds nothing). Files go to
+  `MEDIA_ROOT` (env var; default `backend/media`). Never put real names, salaries, balances or account numbers in tests.
+- **Drive** (`apps/drive`, `/app/drive`): spaces `company` (all staff read/write; uploader or HR deletes), `finance`
+  (finance roles), `people` (HR). Anyone reads files linked to them (`File.employee`); employees may add receipts to their
+  own draft claims (lands in Finance/Receipts & claims). Files served only via `/api/drive/files/{id}/content/`
+  (block `location /media/drive/ { internal; }` in prod). Expiring public share links: `/s/{token}` →
+  `/api/drive/shared/{token}/` (throttle `THROTTLE_DRIVE_SHARE`). Links to employee/project/transaction/claim/invoice/
+  statement drive the "Money & documents" panel on profiles and the project Finance tab (`LinkedFinance.vue`).
+- Tables that scroll sideways need `relative` on the `overflow-x-auto` wrapper, or `sr-only` headers escape it and widen the page.
 - Frontend tests need Node 22 (`C:\Users\Admin\AppData\Local\nvm\v22.14.0`); Node 20 crashes vitest. npm 10 hits an
   arborist bug on this lockfile; use `npx -y npm@11 …` for installs/audit fixes.
 

@@ -1,10 +1,10 @@
-import type { Role } from "@/stores/auth";
+import type { Access } from "@/stores/auth";
 
 export interface NavItem {
   label: string;
   to: string;
   icon: keyof typeof ICONS;
-  minRole?: Role;
+  minRole?: Access;
   /** Extra words the command palette matches on. */
   keywords?: string;
 }
@@ -28,6 +28,7 @@ export const ICONS = {
   inventory: "M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8",
   monitoring: "M22 12h-4l-3 9L9 3l-3 9H2",
   audit: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15l2 2 4-4",
+  drive: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
 } as const;
 
 export const NAV: NavGroup[] = [
@@ -39,6 +40,7 @@ export const NAV: NavGroup[] = [
       { label: "Leave", to: "/app/leave", icon: "leave", keywords: "time off holiday request approvals" },
       { label: "Calendar", to: "/app/calendar", icon: "calendar", keywords: "events holidays schedule" },
       { label: "Notice board", to: "/app/notices", icon: "notices", keywords: "announcements news" },
+      { label: "Drive", to: "/app/drive", icon: "drive", keywords: "documents files folders letterhead logo stamp templates share" },
     ],
   },
   {
@@ -51,14 +53,14 @@ export const NAV: NavGroup[] = [
       { label: "People", to: "/app/people", icon: "people", keywords: "directory staff employees" },
       { label: "Organization", to: "/app/organization", icon: "organization", keywords: "departments structure chart" },
       { label: "My profile", to: "/app/profile", icon: "profile", keywords: "account me settings" },
-      { label: "My pay", to: "/app/my-pay", icon: "finance", keywords: "payslip salary payroll me print" },
+      { label: "My pay", to: "/app/my-pay", icon: "finance", keywords: "payslip salary payroll me print claims reimbursement ssf tds" },
       { label: "My assets", to: "/app/my-assets", icon: "inventory", keywords: "equipment laptop report issue me" },
     ],
   },
   {
     title: "Administration",
     items: [
-      { label: "Finance", to: "/app/finance", icon: "finance", minRole: "hr_admin", keywords: "salary payroll payslips expenses invoices" },
+      { label: "Finance", to: "/app/finance", icon: "finance", minRole: "finance", keywords: "bank ledger statement salary payroll payslips ssf tds claims expenses invoices reports audit export ca" },
       { label: "Inventory", to: "/app/inventory", icon: "inventory", minRole: "hr_admin", keywords: "assets equipment" },
     ],
   },
@@ -72,7 +74,7 @@ export const NAV: NavGroup[] = [
 ];
 
 /** Groups/items visible to a user, given a role check. */
-export function navFor(hasRole: (r: Role) => boolean): NavGroup[] {
+export function navFor(hasRole: (r: Access) => boolean): NavGroup[] {
   return NAV.map((g) => ({ ...g, items: g.items.filter((i) => !i.minRole || hasRole(i.minRole)) })).filter((g) => g.items.length);
 }
 

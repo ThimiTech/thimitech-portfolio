@@ -145,7 +145,7 @@ const showSearch = computed(() => !!props.searchText || server.value);
       </slot>
     </div>
 
-    <div v-else class="panel overflow-x-auto transition-opacity" :class="loading ? 'opacity-60' : ''" :aria-busy="loading">
+    <div v-else class="panel relative overflow-x-auto transition-opacity" :class="loading ? 'opacity-60' : ''" :aria-busy="loading">
       <table class="ledger-table">
         <caption class="sr-only">{{ caption }}</caption>
         <thead>
