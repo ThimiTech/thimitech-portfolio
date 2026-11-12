@@ -307,6 +307,12 @@ days; no cash-out policy has been defined.
   pages (profile, pay, assets) are `ME` in the same file: they share `layouts/MeLayout.vue` and are reached from the
   account menu, not the sidebar. The dashboard leads with "Needs your attention", built from `/api/nav-counts/`;
   add a count there and to `ATTENTION` in `DashboardPage.vue` rather than adding a panel.
+- **Finding things**: Ctrl/Cmd+K or `/` opens search (`ui/CommandPalette.vue`): pages and actions, plus
+  `GET /api/search/?q=` (`apps/org/search.py`) for people, projects, tasks (`KEY-12` works), notes, documents and
+  notices. Each source reuses its module's visibility rule; add a new source the same way. A detail page sets
+  `pageTitle` (`ui/crumb.ts`) once loaded: the shell shows it in the breadcrumb and browser tab and keeps the last
+  five under "Recent". Page tabs live in `?tab=` (`useTabQuery` in the same file). Phones get a bottom tab bar
+  (Home · Attendance · Leave · Projects · More); "More" opens the full sidebar.
 - **Hiring** (`apps/jobs`, `/app/hiring`, hr_admin+): `JobViewSet` keeps the public URLs (`jobs/`, `jobs/{id}/`,
   `jobs/apply/`, `jobs/applications/`); HR reads with `?manage=1` to get closed postings and counts.
   `hiring/applications/` is the pipeline (PATCH `status`/`hr_notes` only; a stage change emails the applicant).

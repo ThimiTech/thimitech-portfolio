@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { pageTitle } from '@/components/app/ui/crumb'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/api/api'
 import { toast } from '@/components/app/ui/toast'
@@ -61,6 +62,8 @@ const dialog = ref(false)
 const selected = ref<Task | null>(null)
 const newColumn = ref(0)
 const focus = ref<Record<string, number | null>>({})
+
+watch(() => project.value?.name, (name) => (pageTitle.value = name ?? ''), { immediate: true })
 
 const TABS = ['Overview', 'Board', 'Sprints', 'Timeline', 'Notes', 'Docs', 'Meetings', 'Whiteboard', 'Hub']
 const views = computed(() =>

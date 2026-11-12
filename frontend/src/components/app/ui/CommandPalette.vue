@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import api from "@/api/api";
+import { ICONS } from "../nav";
 
 /** A palette entry: navigates (`to`) or runs (`run`). */
 export interface Command {
@@ -7,6 +9,8 @@ export interface Command {
   label: string;
   group: string;
   icon?: string;
+  /** Second line: where the thing lives (a task's project, a person's title). */
+  sub?: string;
   keywords?: string;
   to?: string;
   run?: () => void;
@@ -21,7 +25,41 @@ const input = ref<HTMLInputElement | null>(null);
 const list = ref<HTMLElement | null>(null);
 let previousFocus: HTMLElement | null = null;
 
-const results = computed(() => {
+// Things, not pages: people, projects, tasks, notes, documents and notices from /api/search/.
+interface Hit { kind: keyof typeof KIND; label: string; sub: string; to: string }
+const KIND = {
+  person: { group: "Person", icon: ICONS.people },
+  project: { group: "Project", icon: ICONS.projects },
+  task: { group: "Task", icon: ICONS.audit },
+  note: { group: "Note", icon: ICONS.audit },
+  document: { group: "Document", icon: ICONS.drive },
+  notice: { group: "Notice", icon: ICONS.notices },
+} as const;
+const found = ref<Command[]>([]);
+const searching = ref(false);
+let debounce: ReturnType<typeof setTimeout> | undefined;
+let seq = 0;
+watch(query, (q) => {
+  clearTimeout(debounce);
+  const id = ++seq;
+  const text = q.trim();
+  searching.value = text.length >= 2;
+  if (!searching.value) return void (found.value = []);
+  debounce = setTimeout(async () => {
+    let hits: Hit[] = [];
+    try {
+      hits = (await api.get<Hit[]>("search/", { params: { q: text } }))?.data ?? [];
+    } catch {
+      /* pages and actions still work without it */
+    }
+    if (id !== seq) return; // a newer keystroke owns the list now
+    found.value = hits.map((h, i) => ({ id: `hit-${i}-${h.to}`, label: h.label, sub: h.sub, group: KIND[h.kind].group, icon: KIND[h.kind].icon, to: h.to }));
+    searching.value = false;
+  }, 220);
+});
+onBeforeUnmount(() => clearTimeout(debounce));
+
+const matches = computed(() => {
   const terms = query.value.toLowerCase().split(/\s+/).filter(Boolean);
   if (!terms.length) return props.commands;
   return props.commands
@@ -35,6 +73,8 @@ const results = computed(() => {
     .sort((a, b) => a.score - b.score)
     .map((x) => x.c);
 });
+// a recent project is also a search hit: list it once
+const results = computed(() => [...matches.value, ...found.value.filter((f) => !matches.value.some((m) => m.to === f.to))]);
 
 watch(query, () => (active.value = 0));
 watch(
@@ -74,7 +114,7 @@ function onKey(e: KeyboardEvent) {
 <template>
   <Teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[10000] flex items-start justify-center bg-scrim/60 px-4 pt-[12vh] backdrop-blur-[2px]" @click.self="emit('close')">
-      <div role="dialog" aria-modal="true" aria-label="Command palette" class="rise w-full max-w-lg overflow-hidden rounded-xl border border-ink/10 bg-sheet shadow-2xl">
+      <div role="dialog" aria-modal="true" aria-label="Command palette" class="rise w-full max-w-xl overflow-hidden rounded-xl border border-ink/10 bg-sheet shadow-2xl">
         <div class="flex items-center gap-3 border-b border-dashed border-ink/15 px-4">
           <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-ink/45" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
           <input
@@ -86,15 +126,15 @@ function onKey(e: KeyboardEvent) {
             aria-controls="cmd-list"
             aria-autocomplete="list"
             :aria-activedescendant="results.length ? `cmd-opt-${active}` : undefined"
-            aria-label="Search pages and actions"
-            placeholder="Jump to a page or action…"
+            aria-label="Search the workspace"
+            placeholder="Search people, projects, tasks, or jump to a page…"
             class="h-12 w-full bg-transparent text-[15px] text-ink outline-none! placeholder:text-ink/40"
             @keydown="onKey"
           />
           <kbd class="hidden rounded border border-ink/15 px-1.5 py-0.5 font-mono text-[10px] text-ink/45 sm:block">Esc</kbd>
         </div>
         <ul id="cmd-list" ref="list" role="listbox" aria-label="Results" class="max-h-[50vh] overflow-y-auto p-2">
-          <li v-if="!results.length" class="px-3 py-8 text-center text-sm text-ink/55" role="presentation">No pages match “{{ query }}”.</li>
+          <li v-if="!results.length" class="px-3 py-8 text-center text-sm text-ink/55" role="presentation">{{ searching ? "Searching…" : `Nothing matches “${query}”.` }}</li>
           <li
             v-for="(c, i) in results"
             :id="`cmd-opt-${i}`"
@@ -107,7 +147,10 @@ function onKey(e: KeyboardEvent) {
             @click="emit('select', c)"
           >
             <svg v-if="c.icon" viewBox="0 0 24 24" class="h-4 w-4 shrink-0" :class="i === active ? 'text-flag' : 'text-ink/45'" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="c.icon" /></svg>
-            <span class="flex-1 truncate">{{ c.label }}</span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate">{{ c.label }}</span>
+              <span v-if="c.sub" class="block truncate text-xs text-ink/50">{{ c.sub }}</span>
+            </span>
             <span class="font-mono text-[10px] tracking-[0.12em] text-ink/40 uppercase">{{ c.group }}</span>
           </li>
         </ul>

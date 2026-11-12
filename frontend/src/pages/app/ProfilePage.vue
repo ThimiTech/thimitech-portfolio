@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import api from "@/api/api";
 import { toast } from "@/components/app/ui/toast";
+import { pageTitle } from "@/components/app/ui/crumb";
 import { useAuth } from "@/stores/auth";
 import PageHeader from "@/components/app/ui/PageHeader.vue";
 import Avatar from "@/components/app/ui/Avatar.vue";
@@ -54,6 +55,9 @@ watch(
   },
   { immediate: true },
 );
+
+// Someone else's profile is named in the breadcrumb and remembered under "Recent"; your own is just "My profile".
+watch(person, (p) => (pageTitle.value = p && !isSelf.value ? p.full_name || p.email : ""));
 
 const canEdit = computed(() => !!person.value && (isSelf.value || canManage(user.value, person.value)));
 const full = computed(() => person.value?.visibility === "full");

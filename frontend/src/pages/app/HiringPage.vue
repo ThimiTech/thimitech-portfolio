@@ -11,6 +11,7 @@ import SkeletonBlock from "@/components/app/ui/SkeletonBlock.vue";
 import LoadError from "@/components/app/org/LoadError.vue";
 import { confirmDialog } from "@/components/app/ui/confirm";
 import { toast } from "@/components/app/ui/toast";
+import { useTabQuery } from "@/components/app/ui/crumb";
 import { errMsg } from "@/components/app/attendance/attendance";
 
 type Stage = "pending" | "shortlisted" | "interview" | "selected" | "rejected";
@@ -34,7 +35,7 @@ const STAGES: { id: Stage; label: string }[] = [
 const EMPLOYMENT = [["full_time", "Full-time"], ["part_time", "Part-time"], ["contract", "Contract"], ["intern", "Intern"]] as const;
 
 const route = useRoute();
-const tab = ref("pipeline");
+const tab = useTabQuery(() => ["pipeline", "postings", "onboarding"], "pipeline");
 const loading = ref(true);
 const error = ref("");
 const applications = ref<Application[]>([]);
