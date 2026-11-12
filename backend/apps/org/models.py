@@ -121,3 +121,35 @@ class EmployeeProfile(models.Model):
         """The approver for this employee: their department's manager (never themselves)."""
         m = self.department.manager if self.department else None
         return m if m and m.pk != self.user_id else None
+
+
+class OnboardingStep(models.Model):
+    """The onboarding template: one row per step, copied to each new hire."""
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    position = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['position', 'id']
+
+    def __str__(self):
+        return self.title
+
+
+class OnboardingTask(models.Model):
+    """A copy of one step for one person. A snapshot: editing the template later does not rewrite it."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='onboarding_tasks')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    position = models.PositiveSmallIntegerField(default=0)
+    done_at = models.DateTimeField(null=True, blank=True)
+    done_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
+                                related_name='+')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['position', 'id']
+
+    def __str__(self):
+        return f'{self.user}: {self.title}'

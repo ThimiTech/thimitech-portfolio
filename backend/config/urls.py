@@ -68,6 +68,7 @@ urlpatterns = [
     path('api/monitoring/overview/', MonitoringView.as_view(), name='monitoring-overview'),
     path('api/dashboard/', DashboardView.as_view(), name='dashboard'),
     path('api/nav-counts/', NavCountsView.as_view(), name='nav-counts'),
+    path('api/inquiries/', include('apps.inquiries.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
 
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),

@@ -11,7 +11,7 @@ import PasswordModal from "../components/app/org/PasswordModal.vue";
 import { confirmState } from "../components/app/ui/confirm";
 import { toast } from "../components/app/ui/toast";
 import { useTheme } from "../components/app/ui/theme";
-import { ICONS, activeItem, navFor } from "../components/app/nav";
+import { ICONS, ME, activeItem, navFor } from "../components/app/nav";
 import api from "../api/api";
 
 const { user, logout, hasRole } = useAuth();
@@ -34,6 +34,7 @@ function toggleTheme() {
 const groups = computed(() => navFor(hasRole));
 const current = computed(() => activeItem(route.path));
 const isActive = (to: string) => current.value?.item.to === to;
+const isMe = computed(() => ME.some((i) => route.path === i.to || route.path.startsWith(i.to + "/")));
 
 // ── Theme: scoped to the workspace so the public site never inherits it ──
 watch(isDark, (d) => document.documentElement.classList.toggle("app-dark", d), { immediate: true });
@@ -64,7 +65,7 @@ watch(drawer, async (open) => {
 });
 
 // ── Badges: one nav-counts call, on every route change and every minute while the tab is visible ──
-interface NavCounts { leave_approvals: number; unread_notices: number; overdue_tasks: number; unread_notifications: number; attendance_corrections: number; finance_review: number }
+interface NavCounts { leave_approvals: number; unread_notices: number; overdue_tasks: number; unread_notifications: number; attendance_corrections: number; finance_review: number; new_applications: number; new_inquiries: number }
 const badges = ref<Record<string, number>>({});
 const unreadNotifications = ref(0);
 const BADGE_LABEL: Record<string, string> = {
@@ -73,6 +74,8 @@ const BADGE_LABEL: Record<string, string> = {
   "/app/projects": "overdue tasks",
   "/app/attendance": "attendance corrections to decide",
   "/app/finance": "ledger lines and claims to review",
+  "/app/hiring": "new job applications",
+  "/app/inquiries": "new inquiries",
 };
 async function refreshBadges() {
   try {
@@ -83,6 +86,8 @@ async function refreshBadges() {
       "/app/projects": data.overdue_tasks,
       "/app/attendance": data.attendance_corrections,
       "/app/finance": data.finance_review,
+      "/app/hiring": data.new_applications,
+      "/app/inquiries": data.new_inquiries,
     };
     unreadNotifications.value = data.unread_notifications;
   } catch {
@@ -108,17 +113,6 @@ watch(
     main.value?.focus({ preventScroll: true });
   },
   { immediate: true },
-);
-
-// ── Live Nepal clock ──
-const now = ref(new Date());
-let timer: number | undefined;
-const tz = "Asia/Kathmandu";
-const clock = computed(() =>
-  new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(now.value),
-);
-const today = computed(() =>
-  new Intl.DateTimeFormat("en-GB", { timeZone: tz, weekday: "short", day: "2-digit", month: "short" }).format(now.value),
 );
 
 // ── User menu ──
@@ -164,8 +158,9 @@ const paletteOpen = ref(false);
 const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 const commands = computed<Command[]>(() => [
   ...groups.value.flatMap((g) =>
-    g.items.map((i) => ({ id: i.to, label: i.label, group: g.title, icon: ICONS[i.icon], keywords: i.keywords, to: i.to })),
+    g.items.map((i) => ({ id: i.to, label: i.label, group: g.title || "Home", icon: ICONS[i.icon], keywords: i.keywords, to: i.to })),
   ),
+  ...ME.map((i) => ({ id: i.to, label: i.label, group: "Me", icon: ICONS[i.icon], keywords: i.keywords, to: i.to })),
   { id: "act-leave", label: "Apply for leave", group: "Action", icon: ICONS.leave, keywords: "request time off", to: "/app/leave?apply=1" },
   { id: "act-correction", label: "Request attendance correction", group: "Action", icon: ICONS.attendance, keywords: "missed punch fix check in out", to: "/app/attendance?tab=corrections&new=1" },
   { id: "act-theme", label: isDark.value ? "Switch to light mode" : "Switch to dark mode", group: "Action", keywords: "theme dark light appearance", run: toggleTheme },
@@ -185,14 +180,12 @@ function onGlobalKey(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  timer = window.setInterval(() => (now.value = new Date()), 15_000);
   poll = window.setInterval(pollIfVisible, POLL_MS);
   document.addEventListener("visibilitychange", pollIfVisible);
   document.addEventListener("keydown", onGlobalKey);
   document.addEventListener("click", onDocClick);
 });
 onBeforeUnmount(() => {
-  clearInterval(timer);
   clearInterval(poll);
   document.removeEventListener("visibilitychange", pollIfVisible);
   document.removeEventListener("keydown", onGlobalKey);
@@ -236,7 +229,7 @@ onBeforeUnmount(() => {
       <!-- Nav -->
       <nav class="flex-1 overflow-y-auto px-3 py-4" aria-label="Main">
         <div v-for="g in groups" :key="g.title" class="mb-5">
-          <p class="mb-2 px-2 font-mono text-[10px] tracking-[0.18em] text-paper/40 uppercase" :class="collapsed ? 'lg:sr-only' : ''">{{ g.title }}</p>
+          <p v-if="g.title" class="mb-2 px-2 font-mono text-[10px] tracking-[0.18em] text-paper/40 uppercase" :class="collapsed ? 'lg:sr-only' : ''">{{ g.title }}</p>
           <ul class="grid gap-0.5">
             <li v-for="item in g.items" :key="item.to">
               <RouterLink
@@ -322,7 +315,7 @@ onBeforeUnmount(() => {
         <!-- Breadcrumb -->
         <nav aria-label="Breadcrumb" class="min-w-0">
           <ol class="flex min-w-0 items-center gap-1.5 text-[13px]">
-            <li class="hidden text-ink/45 sm:block">{{ current?.group.title ?? "Workspace" }}</li>
+            <li class="hidden text-ink/45 sm:block">{{ current?.group.title || (isMe ? "Me" : "Workspace") }}</li>
             <li class="hidden text-ink/25 sm:block" aria-hidden="true">/</li>
             <li v-if="current && route.path !== current.item.to && route.meta.title !== current.item.label" class="flex min-w-0 items-center gap-1.5">
               <RouterLink :to="current.item.to" class="truncate text-ink/55 hover:text-ink">{{ current.item.label }}</RouterLink>
@@ -345,27 +338,7 @@ onBeforeUnmount(() => {
             <kbd class="hidden rounded border border-ink/15 px-1 font-mono text-[10px] text-ink/45 md:inline">{{ isMac ? "⌘" : "Ctrl" }} K</kbd>
           </button>
 
-          <div class="hidden px-2 text-right xl:block" aria-label="Nepal time">
-            <p class="readout text-[13px] leading-tight text-ink">{{ clock }} <span class="text-ink/40">NPT</span></p>
-            <p class="font-mono text-[9.5px] tracking-[0.12em] text-ink/45 uppercase">{{ today }}</p>
-          </div>
-
           <NotificationBell :unread="unreadNotifications" @changed="refreshBadges" />
-
-          <button
-            type="button"
-            class="rounded-lg p-2 text-ink/60 hover:bg-panel hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40"
-            :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-            :title="isDark ? 'Light mode' : 'Dark mode'"
-            @click="toggleTheme"
-          >
-            <svg v-if="isDark" viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-            </svg>
-            <svg v-else viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-            </svg>
-          </button>
 
           <!-- User menu -->
           <div v-if="user" ref="menuRoot" class="relative" @keydown="onMenuKey">
@@ -393,9 +366,10 @@ onBeforeUnmount(() => {
                 <p class="truncate text-xs text-ink/55">{{ user.email }}</p>
                 <p class="mt-1 font-mono text-[10px] tracking-[0.12em] text-river uppercase">{{ ROLE_LABEL[user.role] }}</p>
               </div>
-              <RouterLink to="/app/profile" role="menuitem" class="menu-item" @click="menuOpen = false">My profile</RouterLink>
+              <RouterLink v-for="m in ME" :key="m.to" :to="m.to" role="menuitem" class="menu-item" @click="menuOpen = false">{{ m.label }}</RouterLink>
+              <div class="my-1 border-t border-dashed border-ink/15" role="separator" />
+              <button type="button" role="menuitem" class="menu-item" @click="toggleTheme">{{ isDark ? "Light mode" : "Dark mode" }}</button>
               <button type="button" role="menuitem" class="menu-item" @click="changePassword">Change password</button>
-              <button type="button" role="menuitem" class="menu-item" @click="menuOpen = false; paletteOpen = true">Jump to page…</button>
               <div class="my-1 border-t border-dashed border-ink/15" role="separator" />
               <button type="button" role="menuitem" class="menu-item menu-danger" @click="signOut">Sign out</button>
             </div>

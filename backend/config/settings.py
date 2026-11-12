@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'apps.audit',
     'apps.notifications',
     'apps.drive',
+    'apps.inquiries',
 
 
     "rest_framework",
@@ -217,6 +218,7 @@ REST_FRAMEWORK = {
         'password_reset_ip': os.getenv('THROTTLE_PASSWORD_RESET_IP', '60/hour'),  # per IP (office NAT)
         'password_reset_confirm': os.getenv('THROTTLE_PASSWORD_RESET_CONFIRM', '60/hour'),  # token is unguessable
         'token_refresh': os.getenv('THROTTLE_TOKEN_REFRESH', '60/min'),
+        'inquiry': os.getenv('THROTTLE_INQUIRY', '10/hour'),  # public contact form, per IP
         'drive_share': os.getenv('THROTTLE_DRIVE_SHARE', '300/hour'),  # public share links, per IP
     },
 }

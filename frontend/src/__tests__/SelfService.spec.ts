@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import CorrectionsPanel from '../components/app/attendance/CorrectionsPanel.vue'
-import { navFor } from '../components/app/nav'
+import { ME, navFor } from '../components/app/nav'
 import api from '../api/api'
 import type { Correction } from '../components/app/attendance/attendance'
 
@@ -60,9 +60,12 @@ describe('Attendance corrections', () => {
 })
 
 describe('Self-service navigation', () => {
-  it('shows My pay and My assets to every employee', () => {
+  it('offers My pay and My assets to everyone, from the account menu rather than the sidebar', () => {
     const labels = navFor((r) => r === 'employee').flatMap((g) => g.items.map((i) => i.label))
-    expect(labels).toEqual(expect.arrayContaining(['My pay', 'My assets']))
+    expect(ME.map((i) => i.label)).toEqual(expect.arrayContaining(['My pay', 'My assets']))
+    expect(ME.every((i) => !i.minRole)).toBe(true)
+    expect(labels).toHaveLength(9)
     expect(labels).not.toContain('Finance')
+    expect(labels).not.toContain('Hiring')
   })
 })

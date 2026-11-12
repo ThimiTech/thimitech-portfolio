@@ -14,6 +14,8 @@ const TONE: Record<string, string> = {
   review: "contour", maintenance: "contour", submitted: "contour", draft: "contour", high: "contour",
   active_task: "sky", assigned: "sky", issued: "sky", in_progress: "sky",
   overdue: "rust", cancelled: "rust", void: "rust", lost: "rust",
+  // hiring / inquiries
+  new: "contour", shortlisted: "sky", interview: "sky", selected: "moss", spam: "rust",
 };
 
 const CLASSES: Record<string, string> = {

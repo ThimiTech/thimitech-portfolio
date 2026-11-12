@@ -73,7 +73,11 @@ class JobApplication(models.Model):
     )
 
 
+    # Internal: never serialized to the applicant.
+    hr_notes = models.TextField(blank=True)
+
     applied_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-applied_at']
