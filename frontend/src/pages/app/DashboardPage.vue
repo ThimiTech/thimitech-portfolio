@@ -9,7 +9,7 @@ import StatusPill from "../../components/app/ui/StatusPill.vue";
 import Avatar from "../../components/app/ui/Avatar.vue";
 import PunchCard from "../../components/app/attendance/PunchCard.vue";
 import { errMsg, fmtDay, STATUS_META, type TodayResponse } from "../../components/app/attendance/attendance";
-import { fmtDays, fmtRange, type Balance, type LeaveRequest } from "../../components/app/leave/leave";
+import { fmtDays, type Balance, type LeaveRequest } from "../../components/app/leave/leave";
 import { CATEGORY_LABEL, fmtRel, type Notice } from "../../components/app/notices/notices";
 import { KIND, itemKey, npDate, npTime, type FeedItem } from "../../components/app/calendar/calendar";
 import { dateLabel, isOverdue, type Task } from "../../components/app/pm/pm";
@@ -38,13 +38,34 @@ interface Dashboard {
   } | null;
 }
 
-const { user, hasRole } = useAuth();
+const { user } = useAuth();
 const data = ref<Dashboard | null>(null);
 const loading = ref(true);
 const error = ref("");
 
+type CountKey =
+  | "leave_approvals" | "attendance_corrections" | "overdue_tasks" | "new_applications"
+  | "new_inquiries" | "finance_review" | "onboarding_open" | "unread_notices";
+const counts = ref<Partial<Record<CountKey, number>>>({});
+
+// Only things that need the reader to act, most urgent first. Zero counts are left out.
+const ATTENTION: { key: CountKey; one: string; many: string; to: string }[] = [
+  { key: "leave_approvals", one: "leave request to decide", many: "leave requests to decide", to: "/app/leave?tab=approvals" },
+  { key: "attendance_corrections", one: "attendance correction to decide", many: "attendance corrections to decide", to: "/app/attendance?tab=corrections" },
+  { key: "overdue_tasks", one: "overdue task", many: "overdue tasks", to: "/app/projects" },
+  { key: "new_applications", one: "new job application", many: "new job applications", to: "/app/hiring" },
+  { key: "new_inquiries", one: "new inquiry", many: "new inquiries", to: "/app/inquiries" },
+  { key: "finance_review", one: "finance item to review", many: "finance items to review", to: "/app/finance" },
+  { key: "onboarding_open", one: "onboarding step left", many: "onboarding steps left", to: "/app/profile" },
+  { key: "unread_notices", one: "unread notice", many: "unread notices", to: "/app/notices" },
+];
+const attention = computed(() =>
+  ATTENTION.map((a) => ({ ...a, n: counts.value[a.key] ?? 0 })).filter((a) => a.n > 0),
+);
+
 async function load() {
   error.value = "";
+  api.get("nav-counts/").then((r) => (counts.value = r.data)).catch(() => {});
   try {
     data.value = (await api.get<Dashboard>("dashboard/")).data;
   } catch (e) {
@@ -60,48 +81,6 @@ const TASK_STATUS: Record<string, { pill: string; label: string }> = {
 };
 
 onMounted(load);
-
-// ── Role-specific headline numbers ─────────────────────
-interface Kpi { label: string; value: string | number; hint?: string; to: string; alert?: boolean }
-const kpis = computed<Kpi[]>(() => {
-  const d = data.value;
-  if (!d) return [];
-  const { open, overdue } = d.my_tasks;
-  const tasksKpi: Kpi = {
-    label: "My open tasks",
-    value: open,
-    hint: overdue ? `${overdue} overdue` : open ? "None overdue" : "Nothing assigned",
-    to: "/app/projects",
-    alert: overdue > 0,
-  };
-  const noticesKpi: Kpi = { label: "Unread notices", value: d.notices.unread, hint: d.notices.unread ? "Catch up" : "All read", to: "/app/notices", alert: d.notices.unread > 0 };
-  const approvalsKpi: Kpi = { label: "Awaiting your approval", value: d.approvals.count, hint: d.approvals.count ? "Leave requests" : "All clear", to: "/app/leave?tab=approvals", alert: d.approvals.count > 0 };
-  if (d.org) {
-    const a = d.org.attendance;
-    return [
-      { label: "Active staff", value: d.org.total_staff, hint: `${d.org.headcount.length} departments`, to: "/app/people" },
-      { label: "On leave today", value: a.on_leave, hint: `${a.present + a.late} checked in · ${a.not_checked_in} not yet`, to: "/app/attendance?tab=team" },
-      { label: "Pending leave · org", value: d.org.pending_leave, hint: "Across all teams", to: "/app/leave?tab=team", alert: d.org.pending_leave > 0 },
-      approvalsKpi,
-    ];
-  }
-  if (d.team) {
-    const c = d.team.counts;
-    return [
-      { ...approvalsKpi, hint: d.team.pending_leave ? `${d.team.pending_leave} pending in your team` : approvalsKpi.hint },
-      { label: "Team in today", value: `${c.present + c.late}/${c.total}`, hint: `${c.on_leave} on leave · ${c.absent} absent`, to: "/app/attendance?tab=team" },
-      tasksKpi,
-      noticesKpi,
-    ];
-  }
-  const holiday = d.upcoming.items.find((i) => i.kind === "holiday");
-  return [
-    tasksKpi,
-    { label: "Leave pending", value: d.leave.my_pending, hint: d.leave.my_pending ? "Awaiting a decision" : "No open requests", to: "/app/leave" },
-    noticesKpi,
-    { label: "Next holiday", value: holiday ? fmtDay(holiday.start) : "—", hint: holiday?.title ?? `None in ${d.upcoming.days} days`, to: "/app/calendar" },
-  ];
-});
 
 // ── Greeting (Nepal time) ───────────────────────────────
 const TZ = "Asia/Kathmandu";
@@ -164,17 +143,13 @@ function segments(c: Counts) {
 }
 const describe = (c: Counts) => PULSE.map((k) => `${STATUS_META[k].label} ${c[k]}`).join(", ");
 
-const pulses = computed(() => {
+// One pulse: the whole organization for HR, otherwise the departments this manager runs.
+const pulse = computed(() => {
   const d = data.value;
-  if (!d) return [];
-  const out: { id: string; title: string; caption: string; counts: Counts; dayKind: string }[] = [];
-  // HR who run no department would only see an empty team row; their org pulse covers it.
-  if (d.team && (d.team.counts.total > 0 || !d.org))
-    out.push({ id: "team", title: "Team pulse", caption: "Departments you manage", counts: d.team.counts, dayKind: d.team.day_kind });
-  if (d.org) out.push({ id: "org", title: "Org pulse", caption: "Everyone on staff", counts: d.org.attendance, dayKind: d.org.day_kind });
-  return out;
+  if (d?.org) return { title: "Who is in today", caption: "Everyone on staff", counts: d.org.attendance, dayKind: d.org.day_kind };
+  if (d?.team) return { title: "Who is in today", caption: "Departments you manage", counts: d.team.counts, dayKind: d.team.day_kind };
+  return null;
 });
-const maxHead = computed(() => Math.max(1, ...(data.value?.org?.headcount.map((h) => h.count) ?? [])));
 
 const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
 </script>
@@ -196,18 +171,23 @@ const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
 
     <PunchCard @changed="load" />
 
-    <ul v-if="kpis.length" class="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="At a glance">
-      <li v-for="(k, i) in kpis" :key="k.label" class="rise" :style="delay(i)">
-        <RouterLink
-          :to="k.to"
-          class="panel group flex h-full flex-col gap-1 p-4 transition-colors hover:border-river/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40"
-        >
-          <span class="ledger-label">{{ k.label }}</span>
-          <span class="readout font-display text-[28px] leading-tight text-ink" :class="k.alert ? 'text-flag' : ''">{{ k.value }}</span>
-          <span class="truncate text-xs text-ink/55">{{ k.hint }}</span>
-        </RouterLink>
-      </li>
-    </ul>
+    <section v-if="!loading && !error" class="panel" aria-labelledby="attn-title">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4">
+        <h2 id="attn-title" class="ledger-label shrink-0">Needs your attention</h2>
+        <p v-if="!attention.length" class="text-sm text-ink/60">Nothing is waiting on you.</p>
+        <ul v-else class="flex flex-wrap gap-2">
+          <li v-for="a in attention" :key="a.key">
+            <RouterLink
+              :to="a.to"
+              class="inline-flex items-center gap-2 rounded-full border border-ink/15 py-1 pr-3 pl-1 text-sm transition-colors hover:border-flag/50 hover:bg-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40"
+            >
+              <span class="readout min-w-6 rounded-full bg-flag px-1.5 text-center text-xs leading-6 text-on-accent">{{ a.n }}</span>
+              {{ a.n === 1 ? a.one : a.many }}
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+    </section>
 
     <!-- Loading -->
     <div v-if="loading" class="grid gap-6 lg:grid-cols-3" aria-busy="true" aria-label="Loading dashboard">
@@ -229,12 +209,12 @@ const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
 
     <template v-else-if="data">
       <!-- Pulse (manager+) -->
-      <section v-if="pulses.length" aria-label="Attendance pulse" class="grid gap-6" :class="pulses.length > 1 ? 'lg:grid-cols-2' : ''">
-        <article v-for="(p, i) in pulses" :key="p.id" class="rise panel" :style="delay(i)" :aria-labelledby="`pulse-${p.id}`">
+      <section v-if="pulse" aria-label="Attendance today">
+        <article v-for="p in [pulse]" :key="p.title" class="rise panel" aria-labelledby="pulse-title">
           <div class="panel-head">
             <div>
-              <h2 :id="`pulse-${p.id}`" class="font-display text-lg">{{ p.title }}</h2>
-              <p class="ledger-label mt-0.5">{{ p.caption }} · today</p>
+              <h2 id="pulse-title" class="font-display text-lg">{{ p.title }}</h2>
+              <p class="ledger-label mt-0.5">{{ p.caption }}</p>
             </div>
             <RouterLink to="/app/attendance?tab=team" class="font-mono text-[11px] uppercase tracking-[0.12em] text-river hover:text-flag">Team board →</RouterLink>
           </div>
@@ -259,6 +239,17 @@ const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
                   <dd class="readout mt-0.5 text-lg text-ink" :title="STATUS_META[k].label">{{ p.counts[k] }}</dd>
                 </div>
               </dl>
+              <p v-if="data.on_leave_today?.length" class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-ink/60">
+                <span class="ledger-label">On leave</span>
+                <RouterLink
+                  v-for="person in data.on_leave_today"
+                  :key="person.id"
+                  :to="`/app/people/${person.id}`"
+                  class="inline-flex items-center gap-1.5 rounded-full hover:text-river focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40"
+                >
+                  <Avatar :name="person.full_name" :photo="person.photo" :size="22" />{{ person.full_name }}
+                </RouterLink>
+              </p>
             </template>
           </div>
         </article>
@@ -267,41 +258,6 @@ const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
       <div class="grid gap-6 lg:grid-cols-3">
         <!-- Left column -->
         <div class="space-y-6 lg:col-span-2">
-          <!-- Leave balances -->
-          <section class="rise panel" :style="delay(2)" aria-labelledby="bal-title">
-            <div class="panel-head">
-              <div>
-                <h2 id="bal-title" class="font-display text-lg">Leave balance</h2>
-                <p class="ledger-label mt-0.5">{{ data.leave.year }} · days remaining</p>
-              </div>
-              <RouterLink to="/app/leave" class="font-mono text-[11px] uppercase tracking-[0.12em] text-river hover:text-flag">
-                {{ data.leave.my_pending ? `${data.leave.my_pending} pending →` : "My leave →" }}
-              </RouterLink>
-            </div>
-            <div class="panel-body">
-              <EmptyState v-if="!data.leave.balances.length" title="No leave types yet" hint="HR hasn't set up leave types." />
-              <ul v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                <li v-for="b in data.leave.balances" :key="b.leave_type.id" class="rounded-lg border border-ink/10 bg-paper/50 p-3.5">
-                  <p class="flex items-center gap-2 text-sm font-medium">
-                    <span class="h-2 w-2 shrink-0 rounded-full" :style="{ background: b.leave_type.color || 'var(--color-river)' }" aria-hidden="true" />
-                    <span class="truncate">{{ b.leave_type.name }}</span>
-                    <span v-if="!b.leave_type.is_paid" class="ml-auto font-mono text-[9.5px] uppercase tracking-wider text-ink/40">Unpaid</span>
-                  </p>
-                  <p class="mt-2 flex items-baseline gap-1.5">
-                    <span class="readout font-display text-3xl text-ink">{{ b.remaining === null ? fmtDays(b.used) : fmtDays(b.remaining) }}</span>
-                    <span class="readout text-xs text-ink/50">{{ b.remaining === null ? "used · no fixed quota" : `of ${fmtDays(b.quota)} left` }}</span>
-                  </p>
-                  <svg v-if="b.quota > 0" viewBox="0 0 100 4" preserveAspectRatio="none" class="mt-2.5 h-1.5 w-full rounded-full bg-panel" role="img"
-                    :aria-label="`${fmtDays(b.used)} used, ${fmtDays(b.pending)} pending, of ${fmtDays(b.quota)}`">
-                    <rect x="0" :width="balanceBar(b).used" height="4" class="fill-river" />
-                    <rect :x="balanceBar(b).used" :width="balanceBar(b).pending" height="4" class="fill-contour/60" />
-                  </svg>
-                  <p v-if="b.pending" class="mt-1.5 font-mono text-[10px] text-ink/45">{{ fmtDays(b.pending) }} pending</p>
-                </li>
-              </ul>
-            </div>
-          </section>
-
           <!-- My tasks -->
           <section class="rise panel" :style="delay(3)" aria-labelledby="tasks-title">
             <div class="panel-head">
@@ -368,47 +324,6 @@ const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
 
         <!-- Right column -->
         <div class="space-y-6">
-          <!-- Approvals (manager+, or anyone something is waiting on) -->
-          <section v-if="hasRole('manager') || data.approvals.count" class="rise panel" :style="delay(4)" aria-labelledby="appr-title">
-            <div class="panel-head">
-              <h2 id="appr-title" class="font-display text-lg">
-                Waiting on you
-                <span v-if="data.approvals.count" class="readout ml-1 rounded-full bg-flag px-2 py-0.5 align-middle text-xs text-on-accent">{{ data.approvals.count }}</span>
-              </h2>
-              <RouterLink v-if="data.approvals.count" to="/app/leave?tab=approvals" class="font-mono text-[11px] uppercase tracking-[0.12em] text-river hover:text-flag">Review →</RouterLink>
-            </div>
-            <p v-if="!data.approvals.count" class="panel-body text-sm text-ink/55">No leave requests to decide. All clear.</p>
-            <ul v-else class="divide-y divide-dashed divide-ink/10">
-              <li v-for="r in data.approvals.items" :key="r.id">
-                <RouterLink to="/app/leave?tab=approvals" class="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-panel/40 focus-visible:bg-panel/40 focus-visible:outline-none">
-                  <Avatar :name="r.user.full_name" :size="30" />
-                  <span class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-medium">{{ r.user.full_name }}</span>
-                    <span class="block truncate font-mono text-[10.5px] text-ink/50">{{ r.leave_type.name }} · {{ fmtRange(r.start_date, r.end_date) }}</span>
-                  </span>
-                  <span class="readout text-xs text-ink/60">{{ fmtDays(r.days) }}d</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </section>
-
-          <!-- Away today (manager: team, HR: org) -->
-          <section v-if="data.on_leave_today" class="rise panel" :style="delay(4)" aria-labelledby="away-title">
-            <div class="panel-head">
-              <h2 id="away-title" class="font-display text-lg">On leave today</h2>
-              <p class="ledger-label">{{ hasRole("hr_admin") ? "Everyone" : "Your team" }}</p>
-            </div>
-            <p v-if="!data.on_leave_today.length" class="panel-body text-sm text-ink/55">Nobody is on leave today.</p>
-            <ul v-else class="panel-body grid gap-2.5">
-              <li v-for="p in data.on_leave_today" :key="p.id">
-                <RouterLink :to="`/app/people/${p.id}`" class="flex items-center gap-3 rounded-md hover:text-river focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40">
-                  <Avatar :name="p.full_name" :photo="p.photo" :size="28" />
-                  <span class="truncate text-sm">{{ p.full_name }}</span>
-                </RouterLink>
-              </li>
-            </ul>
-          </section>
-
           <!-- Notices -->
           <section class="rise panel" :style="delay(5)" aria-labelledby="notice-title">
             <div class="panel-head">
@@ -437,67 +352,43 @@ const delay = (i: number) => ({ animationDelay: `${i * 70}ms` });
             </ul>
           </section>
 
-          <!-- Celebrations -->
-          <section class="rise panel" :style="delay(6)" aria-labelledby="cele-title">
+          <!-- Leave balances -->
+          <section v-if="!pulse" class="rise panel" :style="delay(2)" aria-labelledby="bal-title">
             <div class="panel-head">
-              <h2 id="cele-title" class="font-display text-lg">This week</h2>
-              <p class="ledger-label">Birthdays · anniversaries</p>
+              <div>
+                <h2 id="bal-title" class="font-display text-lg">Leave balance</h2>
+                <p class="ledger-label mt-0.5">{{ data.leave.year }} · days remaining</p>
+              </div>
+              <RouterLink to="/app/leave" class="font-mono text-[11px] uppercase tracking-[0.12em] text-river hover:text-flag">
+                {{ data.leave.my_pending ? `${data.leave.my_pending} pending →` : "My leave →" }}
+              </RouterLink>
             </div>
-            <p v-if="!data.celebrations.length" class="panel-body text-sm text-ink/55">No birthdays or work anniversaries this week.</p>
-            <ul v-else class="panel-body grid gap-3">
-              <li v-for="c in data.celebrations" :key="itemKey(c)" class="flex items-center gap-3">
-                <Avatar v-if="c.kind === 'birthday' || c.kind === 'work_anniversary'" :name="c.meta.user.full_name" :size="32" />
-                <span class="min-w-0 flex-1">
-                  <span class="block truncate text-sm">{{ c.title }}</span>
-                  <span class="block font-mono text-[10.5px] text-ink/45">{{ KIND[c.kind].label }} · {{ fmtDay(c.start) }}</span>
-                </span>
-              </li>
-            </ul>
+            <div class="panel-body">
+              <EmptyState v-if="!data.leave.balances.length" title="No leave types yet" hint="HR hasn't set up leave types." />
+              <ul v-else class="grid gap-3">
+                <li v-for="b in data.leave.balances" :key="b.leave_type.id" class="rounded-lg border border-ink/10 bg-paper/50 p-3.5">
+                  <p class="flex items-center gap-2 text-sm font-medium">
+                    <span class="h-2 w-2 shrink-0 rounded-full" :style="{ background: b.leave_type.color || 'var(--color-river)' }" aria-hidden="true" />
+                    <span class="truncate">{{ b.leave_type.name }}</span>
+                    <span v-if="!b.leave_type.is_paid" class="ml-auto font-mono text-[9.5px] uppercase tracking-wider text-ink/40">Unpaid</span>
+                  </p>
+                  <p class="mt-2 flex items-baseline gap-1.5">
+                    <span class="readout font-display text-3xl text-ink">{{ b.remaining === null ? fmtDays(b.used) : fmtDays(b.remaining) }}</span>
+                    <span class="readout text-xs text-ink/50">{{ b.remaining === null ? "used · no fixed quota" : `of ${fmtDays(b.quota)} left` }}</span>
+                  </p>
+                  <svg v-if="b.quota > 0" viewBox="0 0 100 4" preserveAspectRatio="none" class="mt-2.5 h-1.5 w-full rounded-full bg-panel" role="img"
+                    :aria-label="`${fmtDays(b.used)} used, ${fmtDays(b.pending)} pending, of ${fmtDays(b.quota)}`">
+                    <rect x="0" :width="balanceBar(b).used" height="4" class="fill-river" />
+                    <rect :x="balanceBar(b).used" :width="balanceBar(b).pending" height="4" class="fill-contour/60" />
+                  </svg>
+                  <p v-if="b.pending" class="mt-1.5 font-mono text-[10px] text-ink/45">{{ fmtDays(b.pending) }} pending</p>
+                </li>
+              </ul>
+            </div>
           </section>
+
         </div>
       </div>
-
-      <!-- Org (hr_admin+) -->
-      <section v-if="data.org" class="rise panel" :style="delay(7)" aria-labelledby="org-title">
-        <div class="panel-head">
-          <div>
-            <h2 id="org-title" class="font-display text-lg">Organization survey</h2>
-            <p class="ledger-label mt-0.5">Headcount by department</p>
-          </div>
-          <RouterLink to="/app/organization" class="font-mono text-[11px] uppercase tracking-[0.12em] text-river hover:text-flag">Structure →</RouterLink>
-        </div>
-        <div class="panel-body grid gap-6 md:grid-cols-[220px_1fr]">
-          <div class="grid grid-cols-2 gap-3 md:grid-cols-1">
-            <div class="rounded-lg border border-dashed border-ink/12 p-3">
-              <p class="ledger-label">Active staff</p>
-              <p class="readout font-display text-3xl">{{ data.org.total_staff }}</p>
-            </div>
-            <RouterLink to="/app/leave?tab=approvals" class="rounded-lg border border-dashed border-ink/12 p-3 transition-colors hover:border-flag/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40">
-              <p class="ledger-label">Pending leave · org</p>
-              <p class="readout font-display text-3xl" :class="data.org.pending_leave ? 'text-flag' : ''">{{ data.org.pending_leave }}</p>
-            </RouterLink>
-          </div>
-          <div>
-            <EmptyState v-if="!data.org.headcount.length" title="No departments yet" hint="Create departments under Organization." />
-            <ul v-else class="grid gap-2.5">
-              <li v-for="h in data.org.headcount" :key="h.id" class="grid grid-cols-[minmax(0,9rem)_1fr_2.5rem] items-center gap-3">
-                <span class="truncate text-sm">{{ h.name }}</span>
-                <svg viewBox="0 0 100 6" preserveAspectRatio="none" class="h-2 w-full rounded-full bg-panel" aria-hidden="true">
-                  <rect x="0" y="0" height="6" :width="(100 * h.count) / maxHead" class="fill-river" />
-                </svg>
-                <span class="readout text-right text-sm">{{ h.count }}</span>
-              </li>
-              <li v-if="data.org.unassigned" class="grid grid-cols-[minmax(0,9rem)_1fr_2.5rem] items-center gap-3 text-ink/50">
-                <span class="truncate text-sm italic">Unassigned</span>
-                <svg viewBox="0 0 100 6" preserveAspectRatio="none" class="h-2 w-full rounded-full bg-panel" aria-hidden="true">
-                  <rect x="0" y="0" height="6" :width="(100 * data.org.unassigned) / Math.max(maxHead, data.org.unassigned)" class="fill-ink/20" />
-                </svg>
-                <span class="readout text-right text-sm">{{ data.org.unassigned }}</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
     </template>
   </div>
 </template>

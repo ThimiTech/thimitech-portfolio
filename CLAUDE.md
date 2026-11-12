@@ -193,10 +193,17 @@ Phase 1 API surface (illustrative): `POST /api/attendance/check-in|check-out`,
 Phase 1 frontend: `/app` shell (sidebar by role) → dashboard, attendance, leave, calendar,
 notices, directory, my-profile.
 
-Public landing variants: `/` restores the pre-Codex landing page from Git; `/new`
-preserves the redesigned landing page and its scroll-driven 3D scene. Original
+Public landing variants: `/` restores the pre-Codex landing page from Git. Original
 components live in `frontend/src/components/original/` and original font/color
 tokens are scoped in `frontend/src/assets/original.css`.
+
+`/new` is "The descent" (`pages/NewLandingPage.vue` + `components/descent/`): one scroll-driven zoom from orbit
+to street level in Thimi, night to daylight. Section ids match the old anchors (`#home #about #services #projects
+#mission #team #hiring #contact`). All scroll animation is GSAP ScrollTrigger behind `descent/motion.ts canAnimate`
+(false with reduced motion or in tests, where every section renders its static layout). One CSS number, `--day`,
+drives every colour; the altimeter reads altitude from `BANDS` in the page. The contact form posts to
+`/api/inquiries/`. The older studio components (`components/HeroSection.vue`, `Services.vue`, …) are no longer
+used by `/new` but still back `/apply`, `/work` and the unit tests.
 
 ### Phase 2 — Project management + Jira-style workflow
 `apps/pm/`: `Project`, `Board`, `Column`, `Task` (status/assignee/estimate/labels), `Comment`,
@@ -296,6 +303,19 @@ days; no cash-out policy has been defined.
   `scp` it over, then `manage.py migrate`, `createsuperuser` (once), `manage.py load_books_bundle /path/bundle.zip`,
   delete the zip. It replays `import_books` + `import_drive` and is idempotent (re-running adds nothing). Files go to
   `MEDIA_ROOT` (env var; default `backend/media`). Never put real names, salaries, balances or account numbers in tests.
+- **Shell**: the sidebar has four groups (Dashboard · Work · Company · Admin) in `components/app/nav.ts`. Personal
+  pages (profile, pay, assets) are `ME` in the same file: they share `layouts/MeLayout.vue` and are reached from the
+  account menu, not the sidebar. The dashboard leads with "Needs your attention", built from `/api/nav-counts/`;
+  add a count there and to `ATTENTION` in `DashboardPage.vue` rather than adding a panel.
+- **Hiring** (`apps/jobs`, `/app/hiring`, hr_admin+): `JobViewSet` keeps the public URLs (`jobs/`, `jobs/{id}/`,
+  `jobs/apply/`, `jobs/applications/`); HR reads with `?manage=1` to get closed postings and counts.
+  `hiring/applications/` is the pipeline (PATCH `status`/`hr_notes` only; a stage change emails the applicant).
+  CVs are read only through `hiring/applications/{id}/cv/`; in production block `location /media/applications/ { internal; }`.
+  `POST …/{id}/hire/` promotes guest → employee (never demotes), fills the profile and starts onboarding.
+- **Onboarding** (`apps/org/onboarding.py`): HR edits one template (`org/onboarding/steps/`); `start_onboarding(user)`
+  copies the active steps once. Tasks are snapshots. The owner or HR ticks them; a manager can read their team's.
+- **Inquiries** (`apps/inquiries`, `/app/inquiries`, manager+): `POST /api/inquiries/` is the public contact form
+  (no auth, throttle `THROTTLE_INQUIRY`, honeypot field `website`); everything else is the inbox.
 - **Drive** (`apps/drive`, `/app/drive`): spaces `company` (all staff read/write; uploader or HR deletes), `finance`
   (finance roles), `people` (HR). Anyone reads files linked to them (`File.employee`); employees may add receipts to their
   own draft claims (lands in Finance/Receipts & claims). Files served only via `/api/drive/files/{id}/content/`

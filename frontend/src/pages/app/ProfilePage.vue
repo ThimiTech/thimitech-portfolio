@@ -13,6 +13,7 @@ import InfoPanel from "@/components/app/org/InfoPanel.vue";
 import LoadError from "@/components/app/org/LoadError.vue";
 import PersonFormModal from "@/components/app/org/PersonFormModal.vue";
 import PasswordModal from "@/components/app/org/PasswordModal.vue";
+import OnboardingChecklist from "@/components/app/org/OnboardingChecklist.vue";
 import LinkedFinance from "@/components/app/finance/LinkedFinance.vue";
 import { EMPLOYMENT_LABEL, apiError, canManage, fmtDate, tenure, type InfoRow, type Person } from "@/components/app/org/org";
 import axios from "axios";
@@ -164,6 +165,15 @@ const emergency = computed<InfoRow[]>(() => [
       <p v-if="!full" class="mt-4 text-xs text-ink/50">
         <span aria-hidden="true">⌖</span> Personal details are visible only to {{ person.first_name || "them" }}, their manager and HR.
       </p>
+
+      <OnboardingChecklist
+        v-if="person.role !== 'guest'"
+        :key="person.id"
+        class="mt-5"
+        :user-id="person.id"
+        :can-tick="isSelf || hasRole('hr_admin')"
+        :can-start="hasRole('hr_admin')"
+      />
 
       <div class="mt-5 grid gap-5 lg:grid-cols-2">
         <InfoPanel title="Contact" ref-code="§1" :rows="contact" />

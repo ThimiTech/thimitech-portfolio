@@ -28,49 +28,53 @@ export const ICONS = {
   inventory: "M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8",
   monitoring: "M22 12h-4l-3 9L9 3l-3 9H2",
   audit: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15l2 2 4-4",
+  hiring: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6",
+  inquiries: "M22 12h-6l-2 3h-4l-2-3H2M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z",
   drive: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
 } as const;
 
+// Four groups. Personal pages (profile, pay, assets) live under the account menu, not here.
 export const NAV: NavGroup[] = [
   {
-    title: "Daily",
+    title: "",
+    items: [{ label: "Dashboard", to: "/app", icon: "dashboard", keywords: "home overview" }],
+  },
+  {
+    title: "Work",
     items: [
-      { label: "Dashboard", to: "/app", icon: "dashboard", keywords: "home overview" },
       { label: "Attendance", to: "/app/attendance", icon: "attendance", keywords: "check in punch clock" },
       { label: "Leave", to: "/app/leave", icon: "leave", keywords: "time off holiday request approvals" },
       { label: "Calendar", to: "/app/calendar", icon: "calendar", keywords: "events holidays schedule" },
+      { label: "Projects", to: "/app/projects", icon: "projects", keywords: "tasks board jira kanban" },
+    ],
+  },
+  {
+    title: "Company",
+    items: [
       { label: "Notice board", to: "/app/notices", icon: "notices", keywords: "announcements news" },
       { label: "Drive", to: "/app/drive", icon: "drive", keywords: "documents files folders letterhead logo stamp templates share" },
-    ],
-  },
-  {
-    title: "Delivery",
-    items: [{ label: "Projects", to: "/app/projects", icon: "projects", keywords: "tasks board jira kanban" }],
-  },
-  {
-    title: "Organization",
-    items: [
       { label: "People", to: "/app/people", icon: "people", keywords: "directory staff employees" },
       { label: "Organization", to: "/app/organization", icon: "organization", keywords: "departments structure chart" },
-      { label: "My profile", to: "/app/profile", icon: "profile", keywords: "account me settings" },
-      { label: "My pay", to: "/app/my-pay", icon: "finance", keywords: "payslip salary payroll me print claims reimbursement ssf tds" },
-      { label: "My assets", to: "/app/my-assets", icon: "inventory", keywords: "equipment laptop report issue me" },
     ],
   },
   {
-    title: "Administration",
+    title: "Admin",
     items: [
+      { label: "Hiring", to: "/app/hiring", icon: "hiring", minRole: "hr_admin", keywords: "jobs applicants recruitment candidates cv onboarding postings" },
+      { label: "Inquiries", to: "/app/inquiries", icon: "inquiries", minRole: "manager", keywords: "contact leads messages clients inbox" },
       { label: "Finance", to: "/app/finance", icon: "finance", minRole: "finance", keywords: "bank ledger statement salary payroll payslips ssf tds claims expenses invoices reports audit export ca" },
       { label: "Inventory", to: "/app/inventory", icon: "inventory", minRole: "hr_admin", keywords: "assets equipment" },
-    ],
-  },
-  {
-    title: "Oversight",
-    items: [
       { label: "Monitoring", to: "/app/monitoring", icon: "monitoring", minRole: "super_admin", keywords: "metrics trends health" },
       { label: "Audit trail", to: "/app/audit", icon: "audit", minRole: "super_admin", keywords: "log events history" },
     ],
   },
+];
+
+/** Personal pages: tabs of the "Me" area and entries in the account menu and command palette. */
+export const ME: NavItem[] = [
+  { label: "My profile", to: "/app/profile", icon: "profile", keywords: "account me settings onboarding" },
+  { label: "My pay", to: "/app/my-pay", icon: "finance", keywords: "payslip salary payroll me print claims reimbursement ssf tds" },
+  { label: "My assets", to: "/app/my-assets", icon: "inventory", keywords: "equipment laptop report issue me" },
 ];
 
 /** Groups/items visible to a user, given a role check. */

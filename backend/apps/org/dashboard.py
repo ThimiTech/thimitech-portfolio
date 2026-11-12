@@ -131,9 +131,14 @@ class NavCountsView(APIView):
         'unread_notifications': serializers.IntegerField(),
         'attendance_corrections': serializers.IntegerField(help_text='Pending attendance corrections I may decide'),
         'finance_review': serializers.IntegerField(help_text='Ledger lines needing review + claims awaiting a decision (finance roles; else 0)'),
+        'new_applications': serializers.IntegerField(help_text='Unreviewed job applications (hr_admin+; else 0)'),
+        'new_inquiries': serializers.IntegerField(help_text='Unanswered contact-form inquiries (manager+; else 0)'),
+        'onboarding_open': serializers.IntegerField(help_text='My unfinished onboarding steps'),
     }))
     def get(self, request):
         from apps.attendance.models import AttendanceCorrection
+        from apps.inquiries.models import Inquiry
+        from apps.jobs.models import JobApplication
         from apps.notifications.models import Notification
         user = request.user
         return Response({
@@ -145,4 +150,7 @@ class NavCountsView(APIView):
             'attendance_corrections': AttendanceCorrection.objects.filter(
                 leave.decidable_q(user), status=AttendanceCorrection.Status.PENDING).count(),
             'finance_review': finance_review_count(user),
+            'new_applications': JobApplication.objects.filter(status='pending').count() if user.has_role('hr_admin') else 0,
+            'new_inquiries': Inquiry.objects.filter(status='new').count() if user.has_role('manager') else 0,
+            'onboarding_open': user.onboarding_tasks.filter(done_at__isnull=True).count(),
         })

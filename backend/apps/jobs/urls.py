@@ -1,9 +1,9 @@
-from django.urls import path
-from .views import job_list, job_detail, apply_for_job, my_applications
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('jobs/', job_list, name='job-list'),
-    path('jobs/<int:pk>/', job_detail, name='job-detail'),
-    path('jobs/apply/', apply_for_job, name='apply-for-job'),
-    path('jobs/applications/', my_applications, name='my-applications'),
-    ]
+from .views import HiringApplicationViewSet, JobViewSet
+
+# Public URLs are unchanged: jobs/, jobs/{id}/, jobs/apply/, jobs/applications/.
+router = DefaultRouter()
+router.register('jobs', JobViewSet, basename='job')
+router.register('hiring/applications', HiringApplicationViewSet, basename='hiring-application')
+urlpatterns = router.urls

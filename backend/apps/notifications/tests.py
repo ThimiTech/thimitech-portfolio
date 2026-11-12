@@ -73,7 +73,8 @@ class InboxApiTests(APITestCase):
         r = self.as_(self.a).get('/api/nav-counts/')
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.data, {'leave_approvals': 0, 'unread_notices': 0, 'overdue_tasks': 0, 'unread_notifications': 2,
-                                  'attendance_corrections': 0, 'finance_review': 0})
+                                  'attendance_corrections': 0, 'finance_review': 0,
+                                  'new_applications': 0, 'new_inquiries': 0, 'onboarding_open': 0})
 
 
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True, EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend')
