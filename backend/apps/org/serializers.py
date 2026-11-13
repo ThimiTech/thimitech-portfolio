@@ -64,6 +64,21 @@ def user_brief(user, request=None):
 
 # ---------------------------------------------------------------- Organization
 
+PUBLIC_ORG_FIELDS = [
+    'name', 'tagline', 'about', 'logo', 'email', 'phone', 'address', 'website', 'github', 'linkedin', 'youtube',
+    'founded', 'founder_name', 'founder_title', 'founder_photo', 'founder_quote', 'founder_message',
+]
+
+
+class PublicOrganizationSerializer(serializers.ModelSerializer):
+    """What the public site may show. Work policy stays inside."""
+
+    class Meta:
+        model = Organization
+        fields = PUBLIC_ORG_FIELDS
+        read_only_fields = PUBLIC_ORG_FIELDS
+
+
 class OrganizationSerializer(serializers.ModelSerializer):
     weekend_days = serializers.ListField(
         child=serializers.IntegerField(min_value=0, max_value=6), required=False, max_length=7,
@@ -74,12 +89,15 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = [
             'name', 'tagline', 'about', 'logo', 'email', 'phone', 'address', 'website',
             'github', 'linkedin', 'youtube', 'founded',
+            'founder_name', 'founder_title', 'founder_photo', 'founder_quote', 'founder_message',
             'work_start', 'work_end', 'late_grace_minutes', 'weekend_days', 'updated_at',
         ]
         read_only_fields = ['updated_at']
 
     def validate_logo(self, f):
         return validate_photo_file(f)
+
+    validate_founder_photo = validate_logo
 
     def validate_weekend_days(self, days):
         if len(set(days)) != len(days):

@@ -1,22 +1,34 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import api from '../../api/api'
 import { canAnimate, gsap } from './motion'
 
-/** Services, ordered the way a platform is actually built: from the imagery up to the decision. */
-const layers = [
+/**
+ * Services come from `/api/services/` (managed in the backend). Until they load, or if none are
+ * published, the stack shows this default set, ordered the way a platform is built.
+ */
+const layers = ref([
   { tag: 'Imagery', title: 'Remote Sensing & Earth Observation', text: 'Satellite imagery and remote sensing to monitor environmental change, assess land use and support evidence-based planning at district and national scale.' },
   { tag: 'Spatial data', title: 'WebGIS Development & Geospatial Solutions', text: 'Layers, imagery and field records become one map your team can search, filter and act on.' },
   { tag: 'Field capture', title: 'Mobile Application Development', text: 'From field data collection to offline mapping, apps that keep working where the signal does not.' },
   { tag: 'Application', title: 'Custom Software & Web Application Development', text: 'Secure, scalable software: the data model, the API and the interface your staff open every day.' },
   { tag: 'Insight', title: 'Data Analytics & Business Intelligence', text: 'Dashboards and reporting that people actually open, and trust enough to decide with.' },
   { tag: 'Decision', title: 'Real-World Problem Solving & Digital Innovation', text: 'We start from the decision you need to make, not from the tool.' },
-]
+])
 
 const root = ref<HTMLElement | null>(null)
 const active = ref(0)
 let ctx: gsap.Context | undefined
 
 onMounted(() => {
+  api
+    .get<{ title: string; description: string }[]>('services/')
+    .then(({ data }) => {
+      if (!Array.isArray(data) || !data.length) return
+      // the plate label is the first word of the title ("GeoPortal Solutions" → "GeoPortal")
+      layers.value = data.slice(0, 7).map((s) => ({ tag: s.title.split(/[\s&]+/)[0] ?? '', title: s.title, text: s.description }))
+    })
+    .catch(() => undefined)
   if (!canAnimate || !root.value) return
   ctx = gsap.context(() => {
     gsap
@@ -28,7 +40,7 @@ onMounted(() => {
           pin: true,
           scrub: true,
           refreshPriority: 2,
-          onUpdate: (self) => (active.value = Math.min(layers.length - 1, Math.floor(self.progress * layers.length))),
+          onUpdate: (self) => (active.value = Math.min(layers.value.length - 1, Math.floor(self.progress * layers.value.length))),
         },
       })
       // The stack fans open first, then stays open while each layer takes its turn.
@@ -44,7 +56,7 @@ onBeforeUnmount(() => ctx?.revert())
     <div class="wrap grid">
       <div class="stage" aria-hidden="true">
         <div class="iso">
-          <div v-for="(l, i) in layers" :key="l.tag" class="plate" :class="[`p${i}`, { on: active === i }]" :style="{ '--i': i }">
+          <div v-for="(l, i) in layers" :key="l.title" class="plate" :class="[`p${i % 6}`, { on: active === i }]" :style="{ '--i': i }">
             <span>{{ l.tag }}</span>
           </div>
         </div>
@@ -54,7 +66,7 @@ onBeforeUnmount(() => ctx?.revert())
         <p class="kicker">Altitude 600 m · what we build</p>
         <h2 id="services-title">Every platform is a stack of layers.</h2>
         <ol>
-          <li v-for="(l, i) in layers" :key="l.tag" :class="{ on: active === i }">
+          <li v-for="(l, i) in layers" :key="l.title" :class="{ on: active === i }">
             <span class="num">L{{ i + 1 }}</span>
             <div>
               <h3>{{ l.title }}</h3>

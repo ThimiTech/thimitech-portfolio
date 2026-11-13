@@ -9,23 +9,24 @@ import { RouterLink } from 'vue-router'
 import { useAuth } from '../stores/auth'
 import { canAnimate, gsap, ScrollTrigger } from '../components/descent/motion'
 import DescentHero from '../components/descent/DescentHero.vue'
-import DescentZoom from '../components/descent/DescentZoom.vue'
 import DescentLayers from '../components/descent/DescentLayers.vue'
 import DescentWork from '../components/descent/DescentWork.vue'
 import DescentGround from '../components/descent/DescentGround.vue'
 import DescentContact from '../components/descent/DescentContact.vue'
+import DescentFooter from '../components/descent/DescentFooter.vue'
 
 const { isLoggedIn, user, fetchMe, hasRole } = useAuth()
-const year = new Date().getFullYear()
 
-// [section id, band name, altitude in metres where the section starts]; each section ends at the next one's altitude.
+// [element id, band name, altitude in metres where it starts]; each band ends at the next one's altitude.
+// The first four are marks inside the opening scene (DescentHero); the rest are sections.
 const BANDS = [
   ['home', 'Orbit', 705_000],
   ['about', 'Country', 400_000],
-  ['services', 'Layers', 1326],
-  ['projects', 'Field notes', 600],
-  ['mission', 'Principles', 120],
-  ['team', 'Eye level', 30],
+  ['valley', 'Valley', 12_000],
+  ['thimi', 'Thimi', 1326],
+  ['services', 'Layers', 600],
+  ['projects', 'Field notes', 120],
+  ['mission', 'Founder’s note', 30],
   ['hiring', 'Open roles', 2],
   ['contact', 'Street level', 1],
 ] as const
@@ -42,7 +43,9 @@ function locate() {
   for (let i = BANDS.length - 1; i >= 0; i--) {
     const el = document.getElementById(BANDS[i]![0])
     const box = (el?.parentElement?.classList.contains('pin-spacer') ? el.parentElement : el)?.getBoundingClientRect()
-    if (box && box.top <= mid) return void (at.value = { i, t: Math.min(1, (mid - box.top) / box.height) })
+    // The page opens on the first band, so that one is measured from the top of the screen and starts at 0.
+    const from = i ? mid : 0
+    if (box && box.top <= from) return void (at.value = { i, t: Math.min(1, (from - box.top) / (box.height - mid + from)) })
   }
 }
 
@@ -89,6 +92,8 @@ onMounted(() => {
       ease: 'none',
       scrollTrigger: { trigger: '#mission', start: 'top 88%', end: 'top 30%', scrub: true },
     })
+    // The footer is night again, so the bar over it is too.
+    ScrollTrigger.create({ trigger: '.foot', start: 'top 64px', toggleClass: { targets: '.bar', className: 'night' } })
   }, root.value)
   // Projects, people and roles load after first paint and change the page height.
   observer = new ResizeObserver(() => {
@@ -113,7 +118,7 @@ onBeforeUnmount(() => {
       <nav aria-label="Sections">
         <RouterLink to="/new#services">Services</RouterLink>
         <RouterLink to="/new#projects">Work</RouterLink>
-        <RouterLink to="/new#team">Team</RouterLink>
+        <RouterLink to="/new#mission">Founder</RouterLink>
         <RouterLink to="/new#hiring">Careers</RouterLink>
         <RouterLink to="/new#contact">Contact</RouterLink>
       </nav>
@@ -134,30 +139,21 @@ onBeforeUnmount(() => {
 
     <main id="main-content">
       <DescentHero />
-      <DescentZoom />
       <DescentLayers />
       <DescentWork />
       <DescentGround />
       <DescentContact />
     </main>
 
-    <footer class="foot daylight">
-      <div class="wrap">
-        <p>© {{ year }} Thimi Tech · Kathmandu, Nepal</p>
-        <p>
-          <RouterLink to="/work">Case studies</RouterLink>
-          <RouterLink to="/">Classic site</RouterLink>
-          <a href="mailto:info@thimitech.com">info@thimitech.com</a>
-        </p>
-      </div>
-    </footer>
+    <DescentFooter />
   </div>
 </template>
 
 <style>
 /* Unscoped on purpose: the section components share these tokens. Everything is namespaced under .descent. */
 .descent,
-.descent .daylight {
+.descent .daylight,
+.descent .night {
   --night: #06080a;
   --paper: #f3f0e9;
   --signal: #ff5a1f;
@@ -178,6 +174,10 @@ onBeforeUnmount(() => {
 /* Without scroll animation there is no daybreak tween: the lower sections are simply light. */
 .descent.is-static .daylight {
   --day: 1;
+}
+/* The footer is night again whatever the time of day above it. */
+.descent .night {
+  --day: 0;
 }
 .descent section,
 .descent .foot {
@@ -284,6 +284,8 @@ onBeforeUnmount(() => {
   background: color-mix(in oklab, var(--bg) 78%, transparent);
   backdrop-filter: blur(14px);
   font-size: 14.5px;
+  color: var(--fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 .descent .bar a {
   color: inherit;
@@ -360,29 +362,6 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
-}
-
-.descent .foot {
-  padding-block: 28px 36px;
-  border-top: 1px solid var(--line);
-  font: 400 11.5px/1.6 var(--font-mono);
-  letter-spacing: 0.08em;
-  color: var(--dim);
-}
-.descent .foot .wrap {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 10px 32px;
-}
-.descent .foot p {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 24px;
-  margin: 0;
-}
-.descent .foot a {
-  color: var(--fg);
 }
 
 @media (max-width: 1100px) {
