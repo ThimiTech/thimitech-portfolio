@@ -198,10 +198,16 @@ components live in `frontend/src/components/original/` and original font/color
 tokens are scoped in `frontend/src/assets/original.css`.
 
 `/new` is "The descent" (`pages/NewLandingPage.vue` + `components/descent/`): one scroll-driven zoom from orbit
-to street level in Thimi, night to daylight. Section ids match the old anchors (`#home #about #services #projects
-#mission #team #hiring #contact`). All scroll animation is GSAP ScrollTrigger behind `descent/motion.ts canAnimate`
-(false with reduced motion or in tests, where every section renders its static layout). One CSS number, `--day`,
-drives every colour; the altimeter reads altitude from `BANDS` in the page. The contact form posts to
+to street level in Thimi, night to daylight, and night again in the footer. Anchors: `#home #about #services #projects
+#mission #hiring #contact` (no `#team`; `#mission` is the founder's note). All scroll animation is GSAP ScrollTrigger
+behind `descent/motion.ts canAnimate` (false with reduced motion or in tests, where every section renders its static
+layout). One CSS number, `--day`, drives every colour; the altimeter reads altitude from `BANDS` in the page.
+`DescentHero` is the whole orbit-to-Thimi scene: one orthographic drawing (globe from `public/countries-110m.json`,
+districts from `nepal-districts.geojson`) scaled about the Thimi pin inside a sticky stage; its timeline positions and the
+`.mark` spans the altimeter measures must be changed together. **Content comes from the backend** through
+`descent/site.ts`: `GET /api/org/public/` (no auth: profile, socials, founder's note, live counts; HR edits the
+`founder_*` fields in the org profile modal) and `GET /api/pm/public/` (the work deck and footer list). Services read
+`/api/services/`, roles `/api/jobs/`; each keeps fallback copy for an empty or failed response. The contact form posts to
 `/api/inquiries/`. The older studio components (`components/HeroSection.vue`, `Services.vue`, …) are no longer
 used by `/new` but still back `/apply`, `/work` and the unit tests.
 

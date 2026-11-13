@@ -89,6 +89,11 @@ export interface Organization {
   linkedin: string;
   youtube: string;
   founded: string | null;
+  founder_name: string;
+  founder_title: string;
+  founder_photo: string | null;
+  founder_quote: string;
+  founder_message: string;
   work_start: string;
   work_end: string;
   late_grace_minutes: number;

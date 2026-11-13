@@ -9,12 +9,14 @@ import { MAX_IMAGE_BYTES, WEEKDAYS, WEEKDAYS_LONG, apiError, diff, hhmm, type Or
 const props = defineProps<{ open: boolean; mode: "profile" | "policy"; org: Organization }>();
 const emit = defineEmits<{ close: []; saved: [org: Organization] }>();
 
-const PROFILE_KEYS = ["name", "tagline", "about", "email", "phone", "address", "website", "github", "linkedin", "youtube", "founded"] as const;
+const PROFILE_KEYS = ["name", "tagline", "about", "email", "phone", "address", "website", "github", "linkedin", "youtube", "founded", "founder_name", "founder_title", "founder_quote", "founder_message"] as const;
 type ProfileKey = (typeof PROFILE_KEYS)[number];
 
 const profile = reactive<Record<ProfileKey, string>>(Object.fromEntries(PROFILE_KEYS.map((k) => [k, ""])) as Record<ProfileKey, string>);
 const policy = reactive({ work_start: "", work_end: "", late_grace_minutes: 0, weekend_days: [] as number[] });
 const logo = ref<File | null>(null);
+const founderPhoto = ref<File | null>(null);
+const LONG = new Set<ProfileKey>(["about", "founder_quote", "founder_message"]);
 const saving = ref(false);
 const error = ref("");
 const fe = ref<Record<string, string>>({});
@@ -31,20 +33,21 @@ watch(
       weekend_days: [...props.org.weekend_days],
     });
     logo.value = null;
+    founderPhoto.value = null;
     error.value = "";
     fe.value = {};
   },
   { immediate: true },
 );
 
-function onLogo(e: Event) {
+function onImage(e: Event, field: "logo" | "founder_photo") {
   const f = (e.target as HTMLInputElement).files?.[0] ?? null;
   if (f && f.size > MAX_IMAGE_BYTES) {
-    fe.value = { ...fe.value, logo: "Logo must be 3 MB or smaller." };
+    fe.value = { ...fe.value, [field]: "Image must be 3 MB or smaller." };
     return;
   }
-  delete fe.value.logo;
-  logo.value = f;
+  delete fe.value[field];
+  (field === "logo" ? logo : founderPhoto).value = f;
 }
 
 function toggleDay(d: number) {
@@ -71,9 +74,10 @@ async function submit() {
     }
     let saved = props.org;
     if (Object.keys(body).length) saved = (await api.patch<Organization>("org/organization/", body)).data;
-    if (logo.value) {
+    if (logo.value || founderPhoto.value) {
       const fd = new FormData();
-      fd.append("logo", logo.value);
+      if (logo.value) fd.append("logo", logo.value);
+      if (founderPhoto.value) fd.append("founder_photo", founderPhoto.value);
       saved = (await api.patch<Organization>("org/organization/", fd)).data;
     }
     emit("saved", saved);
@@ -89,6 +93,8 @@ async function submit() {
 const LABELS: Record<ProfileKey, string> = {
   name: "Name", tagline: "Tagline", about: "About", email: "Email", phone: "Phone", address: "Address",
   website: "Website", github: "GitHub", linkedin: "LinkedIn", youtube: "YouTube", founded: "Founded",
+  founder_name: "Founder name", founder_title: "Founder title", founder_quote: "Founder quote (public site)",
+  founder_message: "Founder note (public site)",
 };
 const URL_KEYS = new Set<ProfileKey>(["website", "github", "linkedin", "youtube"]);
 const inputType = (k: ProfileKey) => (k === "founded" ? "date" : k === "email" ? "email" : k === "phone" ? "tel" : URL_KEYS.has(k) ? "url" : "text");
@@ -108,9 +114,9 @@ const title = computed(() => (props.mode === "profile" ? "Edit organization prof
               :label="LABELS[k]"
               :optional="k !== 'name'"
               :error="fe[k]"
-              :class="k === 'about' || k === 'tagline' || k === 'address' ? 'sm:col-span-2' : ''"
+              :class="LONG.has(k) || k === 'tagline' || k === 'address' ? 'sm:col-span-2' : ''"
             >
-              <textarea v-if="k === 'about'" :id="`org-${k}`" v-model="profile[k]" rows="4" class="input" :aria-describedby="`org-${k}-msg`" />
+              <textarea v-if="LONG.has(k)" :id="`org-${k}`" v-model="profile[k]" :rows="k === 'founder_quote' ? 2 : 4" class="input" :aria-describedby="`org-${k}-msg`" />
               <input
                 v-else
                 :id="`org-${k}`"
@@ -123,7 +129,10 @@ const title = computed(() => (props.mode === "profile" ? "Edit organization prof
             </FormField>
           </template>
           <FormField id="org-logo" label="Logo" optional :error="fe.logo" hint="Square image, up to 3 MB." class="sm:col-span-2">
-            <input id="org-logo" type="file" accept="image/*" class="input file:mr-3 file:rounded-full file:border-0 file:bg-panel file:px-3 file:py-1 file:text-xs" aria-describedby="org-logo-msg" @change="onLogo" />
+            <input id="org-logo" type="file" accept="image/*" class="input file:mr-3 file:rounded-full file:border-0 file:bg-panel file:px-3 file:py-1 file:text-xs" aria-describedby="org-logo-msg" @change="onImage($event, 'logo')" />
+          </FormField>
+          <FormField id="org-founder-photo" label="Founder photo" optional :error="fe.founder_photo" hint="Portrait, up to 3 MB. Shown beside the founder's note on the public site." class="sm:col-span-2">
+            <input id="org-founder-photo" type="file" accept="image/*" class="input file:mr-3 file:rounded-full file:border-0 file:bg-panel file:px-3 file:py-1 file:text-xs" aria-describedby="org-founder-photo-msg" @change="onImage($event, 'founder_photo')" />
           </FormField>
         </div>
       </template>

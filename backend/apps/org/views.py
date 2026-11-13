@@ -9,12 +9,15 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rest_framework.permissions import AllowAny
+
 from apps.permissions.permissions import IsEmployee, IsHRAdmin
 from apps.users.throttles import PasswordThrottle
 
 from .models import Department, Organization
 from .serializers import (
-    DepartmentSerializer, OrganizationSerializer, PasswordChangeSerializer, PersonSerializer, user_brief,
+    DepartmentSerializer, OrganizationSerializer, PasswordChangeSerializer, PersonSerializer,
+    PublicOrganizationSerializer, user_brief,
 )
 
 User = get_user_model()
@@ -50,6 +53,25 @@ class OrganizationViewSet(viewsets.GenericViewSet):
         s.is_valid(raise_exception=True)
         s.save()
         return Response(s.data)
+
+
+@extend_schema(tags=TAG, summary='Public organization profile for the website', responses=dict)
+class PublicOrganizationView(APIView):
+    """Profile, founder's note and a few live counts for the public site. No auth, no work policy."""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        from apps.jobs.models import Job
+        from apps.pm.models import Project
+
+        data = PublicOrganizationSerializer(Organization.load(), context={'request': request}).data
+        data['stats'] = {
+            'people': User.objects.filter(is_active=True, role__in=STAFF_ROLES).count(),
+            'projects': Project.objects.filter(visibility='public', archived=False).exclude(slug=None).count(),
+            'open_roles': Job.objects.filter(is_active=True).count(),
+        }
+        return Response(data)
 
 
 @extend_schema_view(

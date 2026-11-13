@@ -2,6 +2,9 @@
 import { reactive, ref } from 'vue'
 import { isAxiosError } from 'axios'
 import api from '../../api/api'
+import { useSite } from './site'
+
+const { site } = useSite()
 
 // `website` is a honeypot: people never see it, bots fill it, the API quietly drops those.
 const form = reactive({ name: '', email: '', company: '', phone: '', message: '', website: '' })
@@ -24,7 +27,7 @@ async function send() {
         ? 'That is a lot of messages in a short time. Please try again in a while, or email us.'
         : res?.status === 400 && first
           ? `${first[0]}: ${detail}`
-          : 'We could not send that. Please try again, or email info@thimitech.com.'
+          : `We could not send that. Please try again, or email ${site.value.email}.`
   } finally {
     sending.value = false
   }
@@ -42,8 +45,9 @@ async function send() {
           start, what it takes, and whether we are the right team for it.
         </p>
         <dl class="details">
-          <div><dt>Write</dt><dd><a href="mailto:info@thimitech.com">info@thimitech.com</a></dd></div>
-          <div><dt>Studio</dt><dd>Kathmandu, Nepal · GMT +5:45</dd></div>
+          <div><dt>Write</dt><dd><a :href="`mailto:${site.email}`">{{ site.email }}</a></dd></div>
+          <div v-if="site.phone"><dt>Call</dt><dd><a :href="`tel:${site.phone.replace(/\s+/g, '')}`">{{ site.phone }}</a></dd></div>
+          <div><dt>Studio</dt><dd>{{ site.address }} · GMT +5:45</dd></div>
           <div><dt>How it goes</dt><dd>Discovery call, scoped proposal, two-week delivery cycles</dd></div>
         </dl>
       </div>
@@ -133,7 +137,12 @@ form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-content: start;
+  align-self: start;
   gap: 26px 24px;
+  padding: clamp(22px, 3vw, 44px);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--fg) 3%, var(--bg));
 }
 .wide {
   grid-column: 1 / -1;

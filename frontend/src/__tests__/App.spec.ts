@@ -17,9 +17,11 @@ const PROJECT = {
   url: '',
 }
 
+const CASE = { slug: 'flood-atlas', name: 'Bagmati Flood Atlas', key: 'BFA', tagline: 'Flood risk by ward.', cover: null, tech: ['PostGIS'], start_date: '2025-03-01', published_at: null }
+
 beforeEach(() => {
   vi.mocked(api.get).mockImplementation(async (url) => ({
-    data: url === 'projects/' ? [PROJECT] : [],
+    data: url === 'projects/' ? [PROJECT] : url === 'pm/public/' ? [CASE] : [],
   }))
 })
 
@@ -61,6 +63,21 @@ describe('Public portfolio', () => {
     expect(wrapper.find('a[href="/new#contact"]').exists()).toBe(true)
     expect(wrapper.find('a[href="/#contact"]').exists()).toBe(false)
     expect(wrapper.find('a[href="/new#projects"]').exists()).toBe(true)
+    wrapper.unmount()
+  })
+  it('fills /new from the backend: published case studies and the founder, no team grid', async () => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [{ path: '/new', component: NewLandingPage }],
+    })
+    await router.push('/new')
+    const wrapper = mount(App, { global: { plugins: [router] } })
+    await flushPromises()
+    expect(wrapper.find('#projects a[href="/work/flood-atlas"]').text()).toContain('Bagmati Flood Atlas')
+    expect(wrapper.find('#mission').text()).toContain('Ravi Prajapati')
+    expect(wrapper.find('#team').exists()).toBe(false)
+    // every anchor the bar and footer link to still exists
+    for (const id of ['home', 'services', 'projects', 'mission', 'hiring', 'contact']) expect(wrapper.find(`#${id}`).exists()).toBe(true)
     wrapper.unmount()
   })
   it('shows a retry when the project list fails to load', async () => {

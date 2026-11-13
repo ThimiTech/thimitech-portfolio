@@ -9,6 +9,16 @@ def default_weekend_days():
     return [5]  # Python weekday(): Monday=0 ... Saturday=5 (Nepal standard weekend)
 
 
+FOUNDER_QUOTE = 'Thimi has shaped clay for a thousand years. We are learning to shape data with the same patience.'
+FOUNDER_MESSAGE = (
+    'Thimi Tech is still being built, and I would rather say that plainly than pretend we have arrived. '
+    'Every week we ship something, find out what we got wrong, and fix it before the next one.\n\n'
+    'We take on work we can stand behind, we stay with our clients long after launch, and we invest in people '
+    'from this valley who want to do world-class engineering without leaving it. If we keep doing that, '
+    'one honest project at a time, the company takes care of itself.'
+)
+
+
 class Organization(models.Model):
     """Singleton (pk=1): public profile + work policy. Use Organization.load()."""
 
@@ -24,6 +34,13 @@ class Organization(models.Model):
     linkedin = models.URLField(blank=True)
     youtube = models.URLField(blank=True)
     founded = models.DateField(null=True, blank=True)
+
+    # Founder's note on the public landing page (/new)
+    founder_name = models.CharField(max_length=120, default='Ravi Prajapati')
+    founder_title = models.CharField(max_length=120, default='Founder & CEO')
+    founder_photo = models.ImageField(upload_to='org/', blank=True)
+    founder_quote = models.TextField(blank=True, default=FOUNDER_QUOTE)
+    founder_message = models.TextField(blank=True, default=FOUNDER_MESSAGE)
 
     # Work policy (drives attendance lateness and working-day maths)
     work_start = models.TimeField(default=datetime.time(10, 0))

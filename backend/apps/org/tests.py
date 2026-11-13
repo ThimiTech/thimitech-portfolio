@@ -102,6 +102,25 @@ class OrganizationTests(OrgBase):
         self.assertIn('/media/org/', r.data['logo'])
 
 
+class PublicOrganizationTests(OrgBase):
+    def test_anonymous_gets_profile_and_counts_but_no_work_policy(self):
+        Organization.objects.update_or_create(pk=1, defaults={'founder_quote': 'Keep going.'})
+        r = self.client.get('/api/org/public/')
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.data['founder_name'], 'Ravi Prajapati')
+        self.assertEqual(r.data['founder_quote'], 'Keep going.')
+        self.assertEqual(r.data['stats']['people'], 6)  # every active user except the guest
+        self.assertEqual(r.data['stats']['projects'], 0)
+        self.assertFalse({'work_start', 'work_end', 'late_grace_minutes', 'weekend_days'} & set(r.data))
+
+    def test_founder_note_is_edited_by_hr(self):
+        self.assertEqual(self.as_(self.emp).patch(ORG, {'founder_quote': 'x'}).status_code, 403)
+        r = self.as_(self.hr).patch(ORG, {'founder_quote': 'Build slowly.'})
+        self.assertEqual(r.status_code, 200, r.data)
+        self.client.force_authenticate(None)
+        self.assertEqual(self.client.get('/api/org/public/').data['founder_quote'], 'Build slowly.')
+
+
 class DepartmentTests(OrgBase):
     def test_permission_matrix(self):
         self.assertEqual(self.as_(self.guest).get(DEPTS).status_code, 403)
