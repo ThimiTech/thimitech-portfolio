@@ -12,6 +12,7 @@ import StatusPill from '@/components/app/ui/StatusPill.vue'
 import SkeletonBlock from '@/components/app/ui/SkeletonBlock.vue'
 import LoadError from '@/components/app/org/LoadError.vue'
 import { useServerTable } from '@/components/app/ui/serverTable'
+import { useTabQuery } from '@/components/app/ui/crumb'
 import {
   timestamp,
   type Asset,
@@ -26,8 +27,8 @@ const summary = ref<InventorySummary | null>(null)
 const loading = ref(true)
 const refreshing = ref(false)
 const error = ref('')
-const tab = ref('Assets')
 const TABS = ['Assets', 'Assignments', 'Categories'].map((id) => ({ id, label: id }))
+const tab = useTabQuery(() => TABS.map((t) => t.id), 'Assets')
 const status = ref('all')
 const editor = ref(false)
 const selected = ref<Asset | null>(null)

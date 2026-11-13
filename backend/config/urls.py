@@ -28,6 +28,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from apps.org.dashboard import DashboardView, NavCountsView
+from apps.org.search import SearchView
 from apps.audit.views import MonitoringView
 
 from apps.users.throttles import LoginIPThrottle, LoginThrottle, TokenRefreshThrottle
@@ -68,6 +69,7 @@ urlpatterns = [
     path('api/monitoring/overview/', MonitoringView.as_view(), name='monitoring-overview'),
     path('api/dashboard/', DashboardView.as_view(), name='dashboard'),
     path('api/nav-counts/', NavCountsView.as_view(), name='nav-counts'),
+    path('api/search/', SearchView.as_view(), name='search'),
     path('api/inquiries/', include('apps.inquiries.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
 

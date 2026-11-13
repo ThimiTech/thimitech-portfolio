@@ -12,6 +12,7 @@ import { confirmState } from "../components/app/ui/confirm";
 import { toast } from "../components/app/ui/toast";
 import { useTheme } from "../components/app/ui/theme";
 import { ICONS, ME, activeItem, navFor } from "../components/app/nav";
+import { pageTitle } from "../components/app/ui/crumb";
 import api from "../api/api";
 
 const { user, logout, hasRole } = useAuth();
@@ -107,6 +108,7 @@ watch(
   async () => {
     drawer.value = false;
     menuOpen.value = false;
+    pageTitle.value = ""; // the next page names itself once it has loaded
     refreshBadges();
     if (firstRoute) return void (firstRoute = false);
     await nextTick();
@@ -153,10 +155,34 @@ watch(user, (u) => {
   if (!u && !signingOut) router.push({ name: "login", query: { next: route.fullPath } });
 });
 
-// ── Command palette (Ctrl/Cmd+K) ──
+// ── Named pages: breadcrumb, browser tab, and the last few under "Recent" in search ──
+const RECENT_KEY = "thimi.recent";
+interface Recent { to: string; label: string; icon: keyof typeof ICONS }
+const recent = ref<Recent[]>([]);
+try {
+  recent.value = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
+} catch {
+  /* storage blocked or stale shape: start empty */
+}
+watch(pageTitle, (title) => {
+  if (!title) return;
+  document.title = `${title} · Thimitech`;
+  recent.value = [{ to: route.path, label: title, icon: current.value?.item.icon ?? "dashboard" }, ...recent.value.filter((r) => r.to !== route.path)].slice(0, 5);
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(recent.value));
+  } catch {
+    /* storage blocked */
+  }
+});
+
+// ── Phone: the four places people go most, one thumb away; everything else is under More ──
+const TABS = computed(() => groups.value.flatMap((g) => g.items).filter((i) => ["/app", "/app/attendance", "/app/leave", "/app/projects"].includes(i.to)));
+
+// ── Search and command palette (Ctrl/Cmd+K, or "/") ──
 const paletteOpen = ref(false);
 const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 const commands = computed<Command[]>(() => [
+  ...recent.value.filter((r) => r.to !== route.path).map((r) => ({ id: `recent-${r.to}`, label: r.label, group: "Recent", icon: ICONS[r.icon], to: r.to })),
   ...groups.value.flatMap((g) =>
     g.items.map((i) => ({ id: i.to, label: i.label, group: g.title || "Home", icon: ICONS[i.icon], keywords: i.keywords, to: i.to })),
   ),
@@ -176,6 +202,9 @@ function onGlobalKey(e: KeyboardEvent) {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
     e.preventDefault();
     paletteOpen.value = !paletteOpen.value;
+  } else if (e.key === "/" && !paletteOpen.value && !(e.target as HTMLElement).closest?.("input, textarea, select, [contenteditable], [role=dialog]")) {
+    e.preventDefault();
+    paletteOpen.value = true;
   } else if (e.key === "Escape" && drawer.value) drawer.value = false;
 }
 
@@ -301,27 +330,16 @@ onBeforeUnmount(() => {
     <!-- Main column -->
     <div class="transition-[padding] duration-200 motion-reduce:transition-none" :class="collapsed ? 'lg:pl-[72px]' : 'lg:pl-[252px]'">
       <header class="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-ink/10 bg-paper/85 px-3 backdrop-blur sm:gap-3 sm:px-6">
-        <button
-          type="button"
-          class="rounded-md p-2 text-ink/70 hover:bg-panel focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40 lg:hidden"
-          aria-label="Open navigation"
-          aria-controls="app-sidebar"
-          :aria-expanded="drawer"
-          @click="drawer = true"
-        >
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-        </button>
-
         <!-- Breadcrumb -->
         <nav aria-label="Breadcrumb" class="min-w-0">
           <ol class="flex min-w-0 items-center gap-1.5 text-[13px]">
             <li class="hidden text-ink/45 sm:block">{{ current?.group.title || (isMe ? "Me" : "Workspace") }}</li>
             <li class="hidden text-ink/25 sm:block" aria-hidden="true">/</li>
-            <li v-if="current && route.path !== current.item.to && route.meta.title !== current.item.label" class="flex min-w-0 items-center gap-1.5">
+            <li v-if="current && route.path !== current.item.to && route.meta.title !== current.item.label" class="hidden min-w-0 items-center gap-1.5 sm:flex">
               <RouterLink :to="current.item.to" class="truncate text-ink/55 hover:text-ink">{{ current.item.label }}</RouterLink>
               <span class="text-ink/25" aria-hidden="true">/</span>
             </li>
-            <li class="truncate font-medium text-ink" aria-current="page">{{ route.meta.title ?? current?.item.label ?? "Workspace" }}</li>
+            <li class="truncate font-medium text-ink" aria-current="page">{{ pageTitle || (route.meta.title ?? current?.item.label ?? "Workspace") }}</li>
           </ol>
         </nav>
 
@@ -329,12 +347,12 @@ onBeforeUnmount(() => {
           <button
             type="button"
             class="flex items-center gap-2 rounded-lg border border-ink/12 bg-sheet/60 px-2.5 py-1.5 text-sm text-ink/55 transition hover:border-ink/25 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/40"
-            aria-label="Search pages (Ctrl+K)"
+            aria-label="Search the workspace (Ctrl+K)"
             aria-keyshortcuts="Control+K Meta+K"
             @click="paletteOpen = true"
           >
             <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-            <span class="hidden md:inline">Jump to…</span>
+            <span class="hidden md:inline">Search…</span>
             <kbd class="hidden rounded border border-ink/15 px-1 font-mono text-[10px] text-ink/45 md:inline">{{ isMac ? "⌘" : "Ctrl" }} K</kbd>
           </button>
 
@@ -377,12 +395,39 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
-      <main id="main-content" ref="main" tabindex="-1" class="mx-auto w-full max-w-[1280px] px-4 py-6 outline-none sm:px-6 lg:px-8 lg:py-8">
+      <main id="main-content" ref="main" tabindex="-1" class="mx-auto w-full max-w-[1280px] px-4 pt-6 pb-24 outline-none sm:px-6 lg:px-8 lg:py-8">
         <RouterView v-slot="{ Component }">
           <component :is="Component" :key="route.path" class="rise" />
         </RouterView>
       </main>
     </div>
+
+    <!-- Phone tab bar -->
+    <nav class="fixed inset-x-0 bottom-0 z-30 flex border-t border-ink/10 bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Quick navigation">
+      <RouterLink
+        v-for="t in TABS"
+        :key="t.to"
+        :to="t.to"
+        class="relative flex min-w-0 flex-1 flex-col items-center gap-1 py-2.5 text-[10.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-flag/40"
+        :class="isActive(t.to) ? 'font-medium text-flag' : 'text-ink/60'"
+        :aria-current="isActive(t.to) ? 'page' : undefined"
+      >
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="ICONS[t.icon]" /></svg>
+        <span class="truncate">{{ t.to === "/app" ? "Home" : t.label }}</span>
+        <span v-if="badges[t.to]" class="absolute top-1.5 left-1/2 ml-2 h-2 w-2 rounded-full bg-flag" :aria-label="`${badges[t.to]} ${BADGE_LABEL[t.to]}`" />
+      </RouterLink>
+      <button
+        type="button"
+        class="flex min-w-0 flex-1 flex-col items-center gap-1 py-2.5 text-[10.5px] text-ink/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-flag/40"
+        aria-label="More: open navigation"
+        aria-controls="app-sidebar"
+        :aria-expanded="drawer"
+        @click="drawer = true"
+      >
+        <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+        <span>More</span>
+      </button>
+    </nav>
 
     <CommandPalette :open="paletteOpen" :commands="commands" @close="paletteOpen = false" @select="runCommand" />
     <PasswordModal :open="pwOpen" @close="pwOpen = false" @saved="pwOpen = false; toast.success('Password changed.')" />
