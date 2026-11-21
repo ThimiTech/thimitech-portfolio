@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { dateLabel, isOverdue, type Board, type Task } from './pm'
+import { dateLabel, isBlocked, isOverdue, TYPES, type Board, type Task } from './pm'
 const props = defineProps<{
   board: Board
   tasks: Task[]
   canManage: boolean
   userId?: number
   busy: boolean
+  /** Every project item, to name parents and resolve blockers. */
+  all?: Task[]
 }>()
+const byId = computed(() => new Map((props.all || props.tasks).map((t) => [t.id, t])))
 const emit = defineEmits<{
   select: [task: Task]
   move: [task: Task, column: number]
@@ -80,7 +83,11 @@ function drop(column: number) {
           @dragend="endDrag"
         >
           <div class="mb-3 flex justify-between gap-2 font-mono text-[10px]">
-            <span class="text-ink/55">{{ task.key }}</span
+            <span class="flex items-center gap-1.5 text-ink/55"
+              ><span v-if="task.type !== 'task'" class="rounded px-1 font-sans" :class="TYPES[task.type].badge">{{ TYPES[task.type].label }}</span
+              >{{ task.key }}<span v-if="task.status !== 'done' && isBlocked(task, byId)" class="font-sans text-rust" :title="task.blocker || 'Blocked by another item'"
+                >⚠ blocked</span
+              ></span
             ><span
               :class="['high', 'urgent'].includes(task.priority) ? 'text-rust' : 'text-ink/55'"
               >{{ task.priority }}</span
@@ -92,6 +99,9 @@ function drop(column: number) {
           >
             {{ task.title }}
           </button>
+          <p v-if="task.parent && byId.get(task.parent)" class="mt-1 truncate text-[11px] text-ink/55">
+            {{ byId.get(task.parent)!.title }}
+          </p>
           <div v-if="task.labels.length" class="mt-3 flex flex-wrap gap-1">
             <span
               v-for="label in task.labels"

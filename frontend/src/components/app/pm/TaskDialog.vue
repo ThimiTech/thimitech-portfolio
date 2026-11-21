@@ -4,7 +4,7 @@ import api from '@/api/api'
 import Modal from '../ui/Modal.vue'
 import { useAuth } from '@/stores/auth'
 import { confirmDialog } from '../ui/confirm'
-import { errorMessage, type Project, type Task, type Milestone, type Comment, type Sprint } from './pm'
+import { errorMessage, isBlocked, TYPES, type ItemType, type Project, type Task, type Milestone, type Comment, type Sprint } from './pm'
 const props = withDefaults(
   defineProps<{
     open: boolean
@@ -13,8 +13,10 @@ const props = withDefaults(
     column: number
     milestones: Milestone[]
     sprints?: Sprint[]
+    tasks?: Task[]
+    defaults?: { type: ItemType; parent: number | null }
   }>(),
-  { sprints: () => [] },
+  { sprints: () => [], tasks: () => [], defaults: () => ({ type: 'task', parent: null }) },
 )
 const emit = defineEmits<{ close: []; saved: [] }>()
 const { user } = useAuth()
@@ -26,6 +28,10 @@ const commentsLoading = ref(false)
 const comment = ref('')
 const posting = ref(false)
 const form = reactive({
+  type: 'task' as ItemType,
+  parent: null as number | null,
+  blocked_by: [] as number[],
+  blocker: '',
   title: '',
   description: '',
   column: 0,
@@ -41,6 +47,27 @@ const form = reactive({
 const columns = computed(
   () =>
     props.project.boards.find((b) => b.columns.some((c) => c.id === form.column))?.columns || [],
+)
+const byId = computed(() => new Map(props.tasks.map((t) => [t.id, t])))
+/** Parents must rank above the item; that also rules out the item itself and its descendants. */
+const parents = computed(() => props.tasks.filter((t) => TYPES[t.type].rank < TYPES[form.type].rank))
+const others = computed(() => props.tasks.filter((t) => t.id !== props.task?.id))
+const trail = computed(() => {
+  const out: Task[] = []
+  for (let id = form.parent; id && out.length < 5; id = byId.value.get(id)?.parent ?? null) {
+    const t = byId.value.get(id)
+    if (!t) break
+    out.unshift(t)
+  }
+  return out
+})
+const children = computed(() => (props.task ? props.tasks.filter((t) => t.parent === props.task!.id) : []))
+const blocking = computed(() => (props.task ? props.tasks.filter((t) => t.blocked_by.includes(props.task!.id)) : []))
+watch(
+  () => form.type,
+  () => {
+    if (form.parent && !parents.value.some((t) => t.id === form.parent)) form.parent = null
+  },
 )
 const canMove = computed(() => props.project.can_manage || props.task?.assignee === user.value?.id)
 async function loadComments() {
@@ -66,6 +93,10 @@ watch(
     commentsError.value = ''
     const t = props.task
     Object.assign(form, {
+      type: t?.type || props.defaults.type,
+      parent: t ? t.parent : props.defaults.parent,
+      blocked_by: [...(t?.blocked_by || [])],
+      blocker: t?.blocker || '',
       title: t?.title || '',
       description: t?.description || '',
       column: t?.column || props.column,
@@ -147,11 +178,28 @@ async function remove() {
 <template>
   <Modal
     :open="open"
-    :title="task ? task.key : 'New task'"
+    :title="task ? `${TYPES[task.type].label} · ${task.key}` : `New ${TYPES[form.type].label.toLowerCase()}`"
     width="max-w-2xl"
     @close="emit('close')"
   >
     <form class="grid gap-4" @submit.prevent="save">
+      <nav v-if="trail.length" aria-label="Parent items" class="-mt-1 flex flex-wrap gap-1 text-xs text-ink/60">
+        <span v-for="(t, i) in trail" :key="t.id">{{ i ? '› ' : '' }}{{ t.title }}</span>
+      </nav>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="field"
+          ><span class="ledger-label">Type</span
+          ><select v-model="form.type" class="input" :disabled="!project.can_manage">
+            <option v-for="(v, k) in TYPES" :key="k" :value="k">{{ v.label }}</option>
+          </select></label
+        ><label class="field"
+          ><span class="ledger-label">Parent</span
+          ><select v-model="form.parent" class="input" :disabled="!project.can_manage || form.type === 'module'">
+            <option :value="null">None (top level)</option>
+            <option v-for="p in parents" :key="p.id" :value="p.id">{{ TYPES[p.type].label }} · {{ p.key }} {{ p.title }}</option>
+          </select></label
+        >
+      </div>
       <label class="field"
         ><span class="ledger-label">Title</span
         ><input
@@ -244,6 +292,29 @@ async function remove() {
             </option>
           </select></label
         >
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="field"
+          ><span class="ledger-label">Blocker (what's in the way)</span
+          ><input v-model="form.blocker" class="input" maxlength="300" placeholder="e.g. Waiting on client data" :readonly="!project.can_manage"
+        /></label
+        ><label class="field"
+          ><span class="ledger-label">Blocked by (Ctrl/Cmd-click for several)</span
+          ><select v-model="form.blocked_by" class="input" multiple size="3" :disabled="!project.can_manage">
+            <option v-for="t in others" :key="t.id" :value="t.id">{{ t.key }} {{ t.title }}{{ t.status === 'done' ? ' ✓' : '' }}</option>
+          </select></label
+        >
+      </div>
+      <div v-if="children.length || blocking.length" class="grid gap-2 rounded-lg bg-panel/40 p-3 text-xs">
+        <p v-if="children.length">
+          <span class="ledger-label">Contains {{ children.filter((c) => c.status === 'done').length }}/{{ children.length }} done:</span>
+          <span v-for="c in children" :key="c.id" class="mr-2 inline-block" :class="c.status === 'done' ? 'text-moss' : isBlocked(c, byId) ? 'text-rust' : ''"
+            >{{ c.key }} {{ c.title }}</span
+          >
+        </p>
+        <p v-if="blocking.length" class="text-rust">
+          <span class="ledger-label">Blocking:</span> {{ blocking.map((t) => t.key).join(', ') }}
+        </p>
       </div>
       <p v-if="error" role="alert" class="text-sm text-rust">{{ error }}</p>
       <div class="flex justify-between gap-3">

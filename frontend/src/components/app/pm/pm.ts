@@ -51,11 +51,18 @@ export const HEALTH: Record<Health, { label: string; pill: string }> = {
   at_risk: { label: 'At risk', pill: 'review' },
   off_track: { label: 'Off track', pill: 'overdue' },
 }
+export * from './plan'
+import type { ItemType } from './plan'
+
 export interface Task {
   id: number
   key: string
   project: number
   board: number
+  type: ItemType
+  parent: number | null
+  blocked_by: number[]
+  blocker: string
   title: string
   description: string
   column: number

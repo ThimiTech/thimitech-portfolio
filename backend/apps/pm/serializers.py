@@ -158,7 +158,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         if hasattr(project, 'total_tasks'):
             total, done = project.total_tasks, project.done_tasks
         else:  # newly created objects have not been through the annotated read queryset
-            tasks = Task.objects.filter(column__board__project=project)
+            tasks = Task.objects.filter(column__board__project=project).exclude(type__in=Task.CONTAINERS)
             total, done = tasks.count(), tasks.filter(column__status='done').count()
         return {'total': total, 'done': done, 'percent': round(done / total * 100) if total else 0}
 
@@ -172,10 +172,13 @@ class TaskSerializer(serializers.ModelSerializer):
     status = serializers.CharField(source='column.status', read_only=True)
     assignee_name = serializers.SerializerMethodField()
     key = serializers.SerializerMethodField()
+    blocked_by = serializers.PrimaryKeyRelatedField(many=True, queryset=Task.objects.all(), required=False)
 
     class Meta:
         model = Task
-        fields = ['id', 'key', 'project', 'board', 'title', 'description', 'column', 'status', 'assignee', 'assignee_name', 'priority', 'estimate', 'labels', 'position', 'milestone', 'sprint', 'start_date', 'due_date', 'completed_at', 'created_by', 'created_at', 'updated_at']
+        fields = ['id', 'key', 'project', 'board', 'type', 'parent', 'title', 'description', 'column', 'status', 'assignee', 'assignee_name',
+                  'priority', 'estimate', 'labels', 'position', 'milestone', 'sprint', 'blocked_by', 'blocker', 'start_date', 'due_date',
+                  'completed_at', 'created_by', 'created_at', 'updated_at']
         read_only_fields = ['created_by', 'created_at', 'updated_at', 'completed_at']
 
     def get_key(self, task) -> str:
@@ -205,8 +208,25 @@ class TaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'sprint': 'Choose a sprint in this project.'})
         if sprint and sprint.status == 'completed' and sprint.pk != getattr(self.instance, 'sprint_id', None):
             raise serializers.ValidationError({'sprint': 'This sprint is already completed.'})
+        hierarchy_valid(attrs, self.instance, project)
         dates_valid(attrs, self.instance)
         return attrs
+
+
+def hierarchy_valid(attrs, instance, project):
+    """Parent ranks strictly above the item (so no cycles); blockers and parent stay in the project."""
+    kind = attrs.get('type', getattr(instance, 'type', Task.Type.TASK))
+    parent = attrs.get('parent', getattr(instance, 'parent', None))
+    if parent:
+        if parent.column.board.project_id != project.pk:
+            raise serializers.ValidationError({'parent': 'Choose a parent in this project.'})
+        if Task.RANK[parent.type] >= Task.RANK[kind]:
+            raise serializers.ValidationError({'parent': f'A {kind} can only sit under a higher level (module › epic › story › task).'})
+    if instance and 'type' in attrs and any(Task.RANK[c] <= Task.RANK[kind] for c in instance.children.values_list('type', flat=True)):
+        raise serializers.ValidationError({'type': 'Move its child items first: they must rank below their parent.'})
+    for blocker in attrs.get('blocked_by', []):
+        if blocker.column.board.project_id != project.pk or (instance and blocker.pk == instance.pk):
+            raise serializers.ValidationError({'blocked_by': 'Blockers must be other items in this project.'})
 
 
 class ProjectChildSerializer(serializers.ModelSerializer):
