@@ -35,6 +35,8 @@ function toggleTheme() {
 const groups = computed(() => navFor(hasRole));
 const current = computed(() => activeItem(route.path));
 const isActive = (to: string) => current.value?.item.to === to;
+/** One instance per page. The delivery workspace (meta.wide) keeps its loaded project across its child views. */
+const pageKey = computed(() => (route.meta.wide ? `work:${String(route.params.id)}` : route.path));
 const isMe = computed(() => ME.some((i) => route.path === i.to || route.path.startsWith(i.to + "/")));
 
 // ── Theme: scoped to the workspace so the public site never inherits it ──
@@ -395,9 +397,9 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
-      <main id="main-content" ref="main" tabindex="-1" class="mx-auto w-full max-w-[1280px] px-4 pt-6 pb-24 outline-none sm:px-6 lg:px-8 lg:py-8">
+      <main id="main-content" ref="main" tabindex="-1" class="mx-auto w-full px-4 pt-6 pb-24 outline-none sm:px-6 lg:px-8 lg:py-8" :class="route.meta.wide ? 'max-w-[1720px]' : 'max-w-[1280px]'">
         <RouterView v-slot="{ Component }">
-          <component :is="Component" :key="route.path" class="rise" />
+          <component :is="Component" :key="pageKey" class="rise" />
         </RouterView>
       </main>
     </div>

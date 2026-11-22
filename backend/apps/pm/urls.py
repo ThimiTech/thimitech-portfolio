@@ -1,7 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import (ProjectViewSet, BoardViewSet, ColumnViewSet, TaskViewSet, CommentViewSet, MilestoneViewSet, LinkViewSet,
-                    SummaryView, SprintViewSet, DocumentViewSet, NoteViewSet, MeetingViewSet, WhiteboardViewSet, PublicProjectViewSet)
+                    SummaryView, SprintViewSet, DocumentViewSet, NoteViewSet, MeetingViewSet, WhiteboardViewSet, PublicProjectViewSet, ActivityViewSet)
 
 router = DefaultRouter()
 router.register('projects', ProjectViewSet, basename='pm-project')
@@ -16,5 +16,6 @@ router.register('documents', DocumentViewSet, basename='pm-document')
 router.register('notes', NoteViewSet, basename='pm-note')
 router.register('meetings', MeetingViewSet, basename='pm-meeting')
 router.register('whiteboards', WhiteboardViewSet, basename='pm-whiteboard')
+router.register('activity', ActivityViewSet, basename='pm-activity')
 router.register('public', PublicProjectViewSet, basename='pm-public')
 urlpatterns = [path('summary/', SummaryView.as_view())] + router.urls

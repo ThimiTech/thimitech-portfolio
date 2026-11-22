@@ -129,7 +129,7 @@ class EventHookTests(APITestCase):
         t = self.client.post('/api/pm/tasks/', {'title': 'Survey', 'column': col, 'assignee': self.emp.pk}, format='json')
         self.assertEqual(t.status_code, 201, t.data)
         n = Notification.objects.get(recipient=self.emp, kind='task_assigned')
-        self.assertEqual((n.title, n.body, n.link), (f"Mgr assigned you PRJ-{t.data['id']}", 'Survey', f"/app/projects/{project['id']}"))
+        self.assertEqual((n.title, n.body, n.link), (f"Mgr assigned you PRJ-{t.data['id']}", 'Survey', f"/app/projects/{project['id']}/work?issue=PRJ-{t.data['id']}"))
         # a non-assignment edit does not re-notify; self-assignment never notifies
         self.client.patch(f"/api/pm/tasks/{t.data['id']}/", {'title': 'Survey 2'}, format='json')
         self.client.patch(f"/api/pm/tasks/{t.data['id']}/", {'assignee': self.mgr.pk}, format='json')

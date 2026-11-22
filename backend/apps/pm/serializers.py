@@ -7,7 +7,7 @@ from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field, extend_schema_serializer
 from apps.permissions.permissions import ClassifiedMixin
 from .access import visible_projects, require_manager, can_manage
-from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard
+from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard, TaskActivity
 
 User = get_user_model()
 
@@ -171,6 +171,8 @@ class TaskSerializer(serializers.ModelSerializer):
     board = serializers.IntegerField(source='column.board_id', read_only=True)
     status = serializers.CharField(source='column.status', read_only=True)
     assignee_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
     key = serializers.SerializerMethodField()
     blocked_by = serializers.PrimaryKeyRelatedField(many=True, queryset=Task.objects.all(), required=False)
 
@@ -178,7 +180,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = ['id', 'key', 'project', 'board', 'type', 'parent', 'title', 'description', 'column', 'status', 'assignee', 'assignee_name',
                   'priority', 'estimate', 'labels', 'position', 'milestone', 'sprint', 'blocked_by', 'blocker', 'start_date', 'due_date',
-                  'completed_at', 'created_by', 'created_at', 'updated_at']
+                  'completed_at', 'created_by', 'created_by_name', 'comment_count', 'created_at', 'updated_at']
         read_only_fields = ['created_by', 'created_at', 'updated_at', 'completed_at']
 
     def get_key(self, task) -> str:
@@ -186,6 +188,13 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def get_assignee_name(self, task) -> str | None:
         return name_of(task.assignee)
+
+    def get_created_by_name(self, task) -> str | None:
+        return name_of(task.created_by)
+
+    def get_comment_count(self, task) -> int:
+        # annotated on list reads (TaskViewSet); a freshly saved instance counts directly
+        return task.n_comments if hasattr(task, 'n_comments') else task.comments.count()
 
     def validate_labels(self, value):
         return string_list(value, 12, 40, 'text labels')
@@ -227,6 +236,22 @@ def hierarchy_valid(attrs, instance, project):
     for blocker in attrs.get('blocked_by', []):
         if blocker.column.board.project_id != project.pk or (instance and blocker.pk == instance.pk):
             raise serializers.ValidationError({'blocked_by': 'Blockers must be other items in this project.'})
+
+
+class TaskActivitySerializer(serializers.ModelSerializer):
+    actor_name = serializers.SerializerMethodField()
+    task_key = serializers.SerializerMethodField()
+    task_title = serializers.CharField(source='task.title', read_only=True)
+
+    class Meta:
+        model = TaskActivity
+        fields = ['id', 'task', 'task_key', 'task_title', 'actor', 'actor_name', 'field', 'old', 'new', 'at']
+
+    def get_actor_name(self, row) -> str | None:
+        return name_of(row.actor)
+
+    def get_task_key(self, row) -> str:
+        return f'{row.task.column.board.project.key}-{row.task_id}'
 
 
 class ProjectChildSerializer(serializers.ModelSerializer):
