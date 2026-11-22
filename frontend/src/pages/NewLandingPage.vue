@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * /new — "The descent". The page is one continuous zoom: it opens in orbit and ends at
+ * / — "The descent". The page is one continuous zoom: it opens in orbit and ends at
  * street level in Thimi. Scroll position is altitude; the instrument on the right reads it out,
  * and the page goes from night to daylight on the way down.
  */
@@ -114,13 +114,13 @@ onBeforeUnmount(() => {
     <a href="#main-content" class="skip">Skip to content</a>
 
     <header class="bar">
-      <RouterLink to="/new#home" class="brand">Thimi Tech</RouterLink>
+      <RouterLink to="/#home" class="brand">Thimi Tech</RouterLink>
       <nav aria-label="Sections">
-        <RouterLink to="/new#services">Services</RouterLink>
-        <RouterLink to="/new#projects">Work</RouterLink>
-        <RouterLink to="/new#mission">Founder</RouterLink>
-        <RouterLink to="/new#hiring">Careers</RouterLink>
-        <RouterLink to="/new#contact">Contact</RouterLink>
+        <RouterLink to="/#services">Services</RouterLink>
+        <RouterLink to="/#projects">Work</RouterLink>
+        <RouterLink to="/#mission">Founder</RouterLink>
+        <RouterLink to="/#hiring">Careers</RouterLink>
+        <RouterLink to="/#contact">Contact</RouterLink>
       </nav>
       <RouterLink v-if="hasRole('employee')" to="/app" class="enter">Workspace →</RouterLink>
       <RouterLink v-else-if="!isLoggedIn" to="/login" class="enter">Sign in</RouterLink>

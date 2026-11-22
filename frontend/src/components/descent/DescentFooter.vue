@@ -50,7 +50,7 @@ onBeforeUnmount(() => {
         <p class="kicker">Next waypoint</p>
         <p class="big">Somewhere on your map<br />is a problem <em>worth solving.</em></p>
         <div class="cta">
-          <RouterLink to="/new#contact" class="btn btn-solid">Start a project <span aria-hidden="true">→</span></RouterLink>
+          <RouterLink to="/#contact" class="btn btn-solid">Start a project <span aria-hidden="true">→</span></RouterLink>
           <a :href="`mailto:${site.email}`" class="btn">{{ site.email }}</a>
         </div>
       </div>
@@ -67,11 +67,11 @@ onBeforeUnmount(() => {
         </div>
         <nav aria-label="Footer">
           <p class="label">Explore</p>
-          <RouterLink to="/new#services">Services</RouterLink>
-          <RouterLink to="/new#projects">Work</RouterLink>
-          <RouterLink to="/new#mission">Founder’s note</RouterLink>
-          <RouterLink to="/new#hiring">Careers</RouterLink>
-          <RouterLink to="/new#contact">Contact</RouterLink>
+          <RouterLink to="/#services">Services</RouterLink>
+          <RouterLink to="/#projects">Work</RouterLink>
+          <RouterLink to="/#mission">Founder’s note</RouterLink>
+          <RouterLink to="/#hiring">Careers</RouterLink>
+          <RouterLink to="/#contact">Contact</RouterLink>
         </nav>
         <nav aria-label="Recent work">
           <p class="label">Recent work</p>

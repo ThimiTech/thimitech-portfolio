@@ -193,11 +193,11 @@ Phase 1 API surface (illustrative): `POST /api/attendance/check-in|check-out`,
 Phase 1 frontend: `/app` shell (sidebar by role) → dashboard, attendance, leave, calendar,
 notices, directory, my-profile.
 
-Public landing variants: `/` restores the pre-Codex landing page from Git. Original
-components live in `frontend/src/components/original/` and original font/color
-tokens are scoped in `frontend/src/assets/original.css`.
+Public landing: `/` is "The descent" (it used to live at `/new`, which now redirects to `/`, keeping the `#section`).
+The previous landing page (`pages/LandingPage.vue`, `components/original/`, `assets/original.css`) no longer has a
+route; its files stay for the unit tests and for components shared with `/apply` and `/work`.
 
-`/new` is "The descent" (`pages/NewLandingPage.vue` + `components/descent/`): one scroll-driven zoom from orbit
+"The descent" (`pages/NewLandingPage.vue` + `components/descent/`): one scroll-driven zoom from orbit
 to street level in Thimi, night to daylight, and night again in the footer. Anchors: `#home #about #services #projects
 #mission #hiring #contact` (no `#team`; `#mission` is the founder's note). All scroll animation is GSAP ScrollTrigger
 behind `descent/motion.ts canAnimate` (false with reduced motion or in tests, where every section renders its static

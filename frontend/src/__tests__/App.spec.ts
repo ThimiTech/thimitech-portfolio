@@ -27,12 +27,12 @@ beforeEach(() => {
 
 describe('Public portfolio', () => {
   it.each([
-    ['/', 'Turning Geographic Data into Digital Solutions.', 'See our work', '#projects'],
-    ['/new', 'From place to possibility.', 'Explore our work', '/new#projects'],
+    ['/classic', 'Turning Geographic Data into Digital Solutions.', 'See our work', '#projects'],
+    ['/', 'From place to possibility.', 'Explore our work', '/#projects'],
   ])('renders the correct public design at %s', async (path, heading, workLink, workHref) => {
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{ path: '/', component: LandingPage }, { path: '/new', component: NewLandingPage }],
+      routes: [{ path: '/', component: NewLandingPage }, { path: '/classic', component: LandingPage }],
     })
     await router.push(path)
     const wrapper = mount(App, {
@@ -49,28 +49,28 @@ describe('Public portfolio', () => {
     ).toBe(true)
     wrapper.unmount()
   })
-  it('keeps /new links and skip link on the new design', async () => {
+  it('keeps section links and skip link on the home page', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{ path: '/new', component: NewLandingPage }],
+      routes: [{ path: '/', component: NewLandingPage }],
     })
-    await router.push('/new')
+    await router.push('/')
     const wrapper = mount(App, {
       global: { plugins: [router], stubs: { GlobeScene: true } },
     })
     await flushPromises()
     expect(wrapper.find('a[href="#main-content"]').exists()).toBe(true)
-    expect(wrapper.find('a[href="/new#contact"]').exists()).toBe(true)
-    expect(wrapper.find('a[href="/#contact"]').exists()).toBe(false)
-    expect(wrapper.find('a[href="/new#projects"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/#contact"]').exists()).toBe(true)
+    expect(wrapper.find('a[href="/#projects"]').exists()).toBe(true)
+    expect(wrapper.find('a[href^="/new"]').exists()).toBe(false)
     wrapper.unmount()
   })
-  it('fills /new from the backend: published case studies and the founder, no team grid', async () => {
+  it('fills the home page from the backend: published case studies and the founder, no team grid', async () => {
     const router = createRouter({
       history: createMemoryHistory(),
-      routes: [{ path: '/new', component: NewLandingPage }],
+      routes: [{ path: '/', component: NewLandingPage }],
     })
-    await router.push('/new')
+    await router.push('/')
     const wrapper = mount(App, { global: { plugins: [router] } })
     await flushPromises()
     expect(wrapper.find('#projects a[href="/work/flood-atlas"]').text()).toContain('Bagmati Flood Atlas')

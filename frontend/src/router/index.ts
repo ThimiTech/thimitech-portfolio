@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LandingPage from '../pages/LandingPage.vue'
+import NewLandingPage from '../pages/NewLandingPage.vue'
 import ApplyPage from '../pages/ApplyPage.vue'
 import DetailPage from '../pages/DetailPage.vue'
 import { useAuth, type Access } from '../stores/auth'
@@ -21,8 +21,9 @@ const router = createRouter({
     { path: '/projects/:id', name: 'projects', component: DetailPage },
     { path: '/work', name: 'work', component: () => import('../pages/WorkPage.vue'), meta: { title: 'Our work' } },
     { path: '/work/:slug', name: 'work-detail', component: () => import('../pages/WorkDetailPage.vue') },
-    { path: '/', name: 'home', component: LandingPage },
-    { path: '/new', name: 'new-home', component: () => import('../pages/NewLandingPage.vue') },
+    { path: '/', name: 'home', component: NewLandingPage },
+    // "The descent" used to live at /new; keep old links (and their #section) working.
+    { path: '/new', redirect: (to) => ({ path: '/', hash: to.hash, query: to.query }) },
     { path: '/apply/:jobId', name: 'apply', component: ApplyPage },
     { path: '/s/:token', name: 'shared', component: () => import('../pages/SharedPage.vue'), meta: { title: 'Shared files' } },
     { path: '/login', name: 'login', component: () => import('../pages/AuthPage.vue'), meta: { title: 'Sign in', guestOnly: true } },
