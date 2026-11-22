@@ -31,6 +31,7 @@ const range = computed(() => {
   const end = Math.max(...days) + 7
   return { start, span: Math.max(end - start + 1, 21) }
 })
+const undated = computed(() => props.tasks.filter((t) => !isContainer(t)).length - dated.value.filter((t) => !isContainer(t)).length)
 const width = computed(() => range.value.span * px.value)
 const x = (ymd: string) => (dayNum(ymd) - range.value.start) * px.value
 const today = computed(() => {
@@ -182,7 +183,7 @@ const barTone = (t: Task) =>
     <div class="panel-head flex-wrap">
       <div>
         <h2 class="font-medium">Delivery timeline</h2>
-        <span class="text-xs text-ink/60">{{ tasks.filter((t) => !isContainer(t)).length - dated.filter((t) => !isContainer(t)).length }} work items without dates</span>
+        <span class="text-xs text-ink/60">{{ undated }} work item{{ undated === 1 ? '' : 's' }} without dates</span>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2 text-xs text-ink/60"

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+/** Project profile (/app/projects/:id): overview, knowledge (notes, docs, meetings, whiteboards), links, finance and
+ *  settings. Planning and delivery (backlog, board, modules, timeline, reports) live in the delivery workspace at
+ *  /app/projects/:id/work; both read the same issues, so work done there shows here. */
 import { computed, onMounted, ref, watch } from 'vue'
 import { pageTitle } from '@/components/app/ui/crumb'
 import { useRoute, useRouter } from 'vue-router'
@@ -7,75 +10,56 @@ import { toast } from '@/components/app/ui/toast'
 import PageHeader from '@/components/app/ui/PageHeader.vue'
 import TabBar from '@/components/app/ui/TabBar.vue'
 import StatusPill from '@/components/app/ui/StatusPill.vue'
-import EmptyState from '@/components/app/ui/EmptyState.vue'
 import LoadError from '@/components/app/org/LoadError.vue'
 import { useAuth } from '@/stores/auth'
-import TaskBoard from '@/components/app/pm/TaskBoard.vue'
-import TaskTimeline from '@/components/app/pm/TaskTimeline.vue'
-import TaskDialog from '@/components/app/pm/TaskDialog.vue'
 import ProjectHub from '@/components/app/pm/ProjectHub.vue'
 import ProjectSettings from '@/components/app/pm/ProjectSettings.vue'
 import LinkedFinance from '@/components/app/finance/LinkedFinance.vue'
 import ProjectOverview from '@/components/app/pm/ProjectOverview.vue'
-import SprintsPanel from '@/components/app/pm/SprintsPanel.vue'
 import NotesPanel from '@/components/app/pm/NotesPanel.vue'
 import DocumentsPanel from '@/components/app/pm/DocumentsPanel.vue'
 import MeetingsPanel from '@/components/app/pm/MeetingsPanel.vue'
 import WhiteboardPanel from '@/components/app/pm/WhiteboardPanel.vue'
 import ProfileEditor from '@/components/app/pm/ProfileEditor.vue'
-import PlanPanel from '@/components/app/pm/PlanPanel.vue'
+import IssuePanel from '@/components/app/pm/work/IssuePanel.vue'
+import CreateIssue from '@/components/app/pm/work/CreateIssue.vue'
+import { createWorkspace } from '@/components/app/pm/work/workspace'
 import {
-  errorMessage,
   HEALTH,
-  isContainer,
   isOverdue,
   resolveLink,
-  type ItemType,
   type Doc,
   type Meeting,
-  type Milestone,
   type Note,
-  type Project,
   type ProjectLink,
-  type Sprint,
   type Task,
   type Whiteboard,
 } from '@/components/app/pm/pm'
 
 const route = useRoute()
 const router = useRouter()
-const { user, hasRole } = useAuth()
-const project = ref<Project | null>(null)
-const tasks = ref<Task[]>([])
-const milestones = ref<Milestone[]>([])
+const { hasRole } = useAuth()
+const ws = createWorkspace(() => String(route.params.id))
 const links = ref<ProjectLink[]>([])
-const sprints = ref<Sprint[]>([])
 const notes = ref<Note[]>([])
 const docs = ref<Doc[]>([])
 const meetings = ref<Meeting[]>([])
 const whiteboards = ref<Whiteboard[]>([])
-const loading = ref(true)
-const error = ref('')
-const busy = ref(false)
-const boardId = ref(0)
-const search = ref('')
-const onlyMine = ref(false)
-const sprintOnly = ref(false)
-const dialog = ref(false)
-const selected = ref<Task | null>(null)
-const newColumn = ref(0)
-const newDefaults = ref<{ type: ItemType; parent: number | null }>({ type: 'task', parent: null })
+const extraError = ref(false)
 const focus = ref<Record<string, number | null>>({})
+const project = computed(() => ws.project)
+const work = computed(() => `/app/projects/${route.params.id}/work`)
 
 watch(() => project.value?.name, (name) => (pageTitle.value = name ?? ''), { immediate: true })
 
-const TABS = ['Overview', 'Plan', 'Board', 'Sprints', 'Timeline', 'Notes', 'Docs', 'Meetings', 'Whiteboard', 'Hub']
+/** The delivery tabs moved to the workspace: old links (?tab=Board …) land on the matching view. */
+const MOVED: Record<string, string> = { Plan: 'list', Board: 'board', Sprints: 'backlog', Timeline: 'timeline' }
+const TABS = ['Overview', 'Notes', 'Docs', 'Meetings', 'Whiteboard', 'Hub']
 const views = computed(() =>
   [...TABS, ...(hasRole('finance') ? ['Finance'] : []), ...(project.value?.can_manage ? ['Profile', 'Settings'] : [])].map((id) => ({
     id,
     label: id === 'Hub' ? 'Links & milestones' : id === 'Profile' ? 'Public profile' : id,
-    count:
-      id === 'Board' ? overdue.value || undefined : id === 'Meetings' ? upcomingMeetings.value || undefined : undefined,
+    count: id === 'Meetings' ? upcomingMeetings.value || undefined : undefined,
   })),
 )
 const tab = computed({
@@ -90,33 +74,24 @@ const tab = computed({
   },
 })
 let pendingFocus: Record<string, number> | null = null
-const board = computed(
-  () => project.value?.boards.find((b) => b.id === boardId.value) || project.value?.boards[0],
+watch(
+  () => route.query.tab,
+  (t) => {
+    if (typeof t === 'string' && MOVED[t]) {
+      const query = { ...route.query }
+      delete query.tab
+      router.replace({ path: `${work.value}/${MOVED[t]}`, query })
+    }
+  },
+  { immediate: true },
 )
-const activeSprint = computed(() => sprints.value.find((s) => s.status === 'active'))
-/** Stories, tasks and bugs: what the board, sprints and overview count. Modules/epics live in the Plan. */
-const workItems = computed(() => tasks.value.filter((t) => !isContainer(t)))
-const filtered = computed(() =>
-  workItems.value.filter(
-    (t) =>
-      t.board === board.value?.id &&
-      (!onlyMine.value || t.assignee === user.value?.id) &&
-      (!sprintOnly.value || t.sprint === activeSprint.value?.id) &&
-      `${t.title} ${t.key} ${t.labels.join(' ')}`
-        .toLowerCase()
-        .includes(search.value.toLowerCase()),
-  ),
-)
-const overdue = computed(() => workItems.value.filter(isOverdue).length)
+const overdue = computed(() => ws.work.filter(isOverdue).length)
 const upcomingMeetings = computed(
   () => meetings.value.filter((m) => m.status === 'scheduled' && Date.parse(m.end) >= Date.now()).length,
 )
 
 const LISTS = {
-  tasks: ['pm/tasks/', tasks],
-  milestones: ['pm/milestones/', milestones],
   links: ['pm/links/', links],
-  sprints: ['pm/sprints/', sprints],
   notes: ['pm/notes/', notes],
   docs: ['pm/documents/', docs],
   meetings: ['pm/meetings/', meetings],
@@ -133,71 +108,27 @@ async function refresh(...keys: ListKey[]) {
   )
 }
 async function load(initial = false) {
-  if (initial) loading.value = true
-  error.value = ''
-  try {
-    const [p] = await Promise.all([
-      api.get<Project>(`pm/projects/${route.params.id}/`),
-      refresh(...(Object.keys(LISTS) as ListKey[])),
-    ])
-    project.value = p.data
-    if (!p.data.boards.some((b) => b.id === boardId.value)) boardId.value = p.data.boards[0]?.id || 0
-  } catch {
-    error.value = 'Could not load this project. It may be unavailable or you may no longer have access.'
-  } finally {
-    loading.value = false
-  }
-}
-async function reloadProject() {
-  project.value = (await api.get<Project>(`pm/projects/${route.params.id}/`)).data
-}
-async function afterTaskChange() {
-  await Promise.all([refresh('tasks', 'sprints'), reloadProject()])
+  extraError.value = false
+  await Promise.all([
+    ws.load(initial),
+    refresh(...(Object.keys(LISTS) as ListKey[])).catch(() => (extraError.value = true)),
+  ])
 }
 
-function select(task: Task) {
-  selected.value = task
-  dialog.value = true
-}
-function create(column?: number, type: ItemType = 'task', parent: number | null = null) {
-  selected.value = null
-  newColumn.value = column || board.value?.columns[0]?.id || project.value?.boards[0]?.columns[0]?.id || 0
-  newDefaults.value = { type, parent }
-  dialog.value = true
-}
-async function move(task: Task, column: number) {
-  busy.value = true
-  try {
-    await api.patch(`pm/tasks/${task.id}/`, { column })
-    await afterTaskChange()
-    toast.success(`${task.key} moved.`)
-  } catch (e) {
-    toast.error(errorMessage(e))
-  } finally {
-    busy.value = false
-  }
-}
-async function reschedule(task: Task, start_date: string, due_date: string) {
-  try {
-    await api.patch(`pm/tasks/${task.id}/`, { start_date, due_date })
-    await refresh('tasks')
-    toast.success(`${task.key} rescheduled.`)
-  } catch (e) {
-    toast.error(errorMessage(e))
-  }
-}
+const select = (task: Task) => ws.go(task)
 function go(t: string, id?: number) {
+  if (MOVED[t]) return void router.push(`${work.value}/${MOVED[t]}`)
   pendingFocus = id ? { [t]: id } : null
   tab.value = t
 }
 function openLink(target: string) {
-  const node = resolveLink(target, notes.value, docs.value, tasks.value, meetings.value)
+  const node = resolveLink(target, notes.value, docs.value, ws.tasks, meetings.value)
   if (node.kind === 'note' || node.kind === 'ghost') {
     if (node.kind === 'ghost') return toast.error(`“${target}” isn’t written yet — create it from the Notes tab.`)
     go('Notes', node.ref!)
   } else if (node.kind === 'doc') go('Docs', node.ref!)
   else if (node.kind === 'meeting') go('Meetings', node.ref!)
-  else select(tasks.value.find((t) => t.id === node.ref)!)
+  else select(ws.byId.get(node.ref!)!)
 }
 function upsertNote(n: Note) {
   const i = notes.value.findIndex((x) => x.id === n.id)
@@ -216,13 +147,13 @@ onMounted(() => load(true))
     <RouterLink to="/app/projects" class="mb-4 inline-flex items-center gap-1 text-sm text-ink/60 hover:text-ink"
       >← All projects</RouterLink
     >
-    <div v-if="loading" class="grid gap-4" aria-busy="true" aria-label="Loading project">
+    <div v-if="ws.loading" class="grid gap-4" aria-busy="true" aria-label="Loading project">
       <div class="h-16 w-2/3 rounded-lg bg-panel/70 motion-safe:animate-pulse" />
       <div class="h-80 rounded-xl bg-panel/70 motion-safe:animate-pulse" />
     </div>
-    <LoadError v-else-if="error" :message="error" @retry="load(true)" />
+    <LoadError v-else-if="ws.error" :message="ws.error" @retry="load(true)" />
     <template v-else-if="project">
-      <PageHeader :eyebrow="`Delivery · ${project.key}`" :title="project.name" :description="project.tagline || project.description">
+      <PageHeader :eyebrow="`Delivery · ${project.key}`" :title="project.name" :description="project.tagline">
         <template #actions>
           <StatusPill v-if="project.archived" status="neutral" label="Archived" />
           <StatusPill :status="HEALTH[project.health].pill" :label="HEALTH[project.health].label" />
@@ -234,93 +165,39 @@ onMounted(() => load(true))
             class="btn-ghost btn-sm"
             >Public page ↗</a
           >
-          <button
-            v-if="project.can_manage && (tab === 'Board' || tab === 'Plan') && board?.columns.length"
-            class="btn-primary"
-            @click="create()"
-          >
-            <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
-            New task
-          </button>
+          <RouterLink :to="`${work}/backlog`" class="btn-ghost">Backlog</RouterLink>
+          <RouterLink :to="`${work}/board`" class="btn-primary">
+            <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 3h3v10h-3zM6.5 3h3v7h-3zM10.5 3h3v5h-3z" /></svg>
+            Open board
+            <span v-if="overdue" class="readout rounded-full bg-on-accent/20 px-1.5 text-[10.5px]" :aria-label="`${overdue} overdue`">{{ overdue }}</span>
+          </RouterLink>
         </template>
       </PageHeader>
       <TabBar v-model="tab" :tabs="views" label="Project views" id-prefix="prj" class="mb-6" />
+      <p v-if="extraError" role="alert" class="mb-4 text-sm text-rust">
+        Some project content could not be loaded. <button type="button" class="underline" @click="load()">Retry</button>
+      </p>
       <div :id="`prj-panel-${tab}`" role="tabpanel" :aria-labelledby="`prj-tab-${tab}`">
         <ProjectOverview
           v-if="tab === 'Overview'"
           :project="project"
-          :tasks="workItems"
-          :sprints="sprints"
-          :milestones="milestones"
+          :tasks="ws.work"
+          :sprints="ws.sprints"
+          :milestones="ws.milestones"
           :meetings="meetings"
           :notes="notes"
           :docs="docs"
           :links="links"
           @go="go"
           @select="select"
-          @saved="reloadProject"
-        />
-        <PlanPanel
-          v-else-if="tab === 'Plan'"
-          :project="project"
-          :tasks="tasks"
-          :user-id="user?.id"
-          @select="select"
-          @create="(type, parent) => create(undefined, type, parent)"
-          @changed="afterTaskChange"
-        />
-        <template v-else-if="tab === 'Board'">
-          <h2 class="sr-only">{{ board?.name || 'Project board' }}</h2>
-          <div class="mb-5 flex flex-wrap items-center gap-3">
-            <label class="field"
-              ><span class="sr-only">Board</span
-              ><select v-model="boardId" class="input">
-                <option :value="0" disabled>Select board</option>
-                <option v-for="b in project.boards" :key="b.id" :value="b.id">{{ b.name }}</option>
-              </select></label
-            ><label class="field min-w-0 flex-1 sm:max-w-xs"
-              ><span class="sr-only">Search tasks</span
-              ><input v-model="search" class="input" type="search" placeholder="Search tasks or labels…" /></label
-            ><label class="flex items-center gap-2 text-xs text-ink/65"
-              ><input v-model="onlyMine" type="checkbox" class="accent-ink" /> Assigned to me</label
-            ><label v-if="activeSprint" class="flex items-center gap-2 text-xs text-ink/65"
-              ><input v-model="sprintOnly" type="checkbox" class="accent-ink" /> {{ activeSprint.name }} only</label
-            >
-          </div>
-          <TaskBoard
-            v-if="board"
-            :board="board"
-            :tasks="filtered"
-            :all="tasks"
-            :can-manage="project.can_manage"
-            :user-id="user?.id"
-            :busy="busy"
-            @select="select"
-            @move="move"
-            @create="create"
-          />
-          <div v-else class="panel">
-            <EmptyState title="No boards yet" :hint="project.can_manage ? 'Add a board in the Settings tab to start tracking tasks.' : 'Your project lead has not set up a board yet.'">
-              <button v-if="project.can_manage" class="btn-ghost btn-sm" @click="tab = 'Settings'">Open settings</button>
-            </EmptyState>
-          </div>
-        </template>
-        <SprintsPanel v-else-if="tab === 'Sprints'" :project="project" :tasks="workItems" :sprints="sprints" @changed="afterTaskChange" @select="select" />
-        <TaskTimeline
-          v-else-if="tab === 'Timeline'"
-          :tasks="tasks"
-          :milestones="milestones"
-          :sprints="sprints"
-          :can-manage="project.can_manage"
-          @select="select"
-          @reschedule="reschedule"
+          @saved="ws.refreshProject()"
         />
         <NotesPanel
           v-else-if="tab === 'Notes'"
           :project="project"
           :notes="notes"
           :docs="docs"
-          :tasks="tasks"
+          :tasks="ws.tasks"
           :meetings="meetings"
           :open-id="focus.Notes"
           @upsert="upsertNote"
@@ -335,27 +212,17 @@ onMounted(() => load(true))
           :project="project"
           :meetings="meetings"
           :open-id="focus.Meetings"
-          @changed="refresh('meetings', 'tasks')"
+          @changed="refresh('meetings'), ws.refreshTasks()"
           @wikilink="openLink"
         />
         <WhiteboardPanel v-else-if="tab === 'Whiteboard'" :project="project" :boards="whiteboards" @changed="refresh('whiteboards')" />
-        <ProjectHub v-else-if="tab === 'Hub'" :project="project" :milestones="milestones" :links="links" @saved="refresh('milestones', 'links')" />
+        <ProjectHub v-else-if="tab === 'Hub'" :project="project" :milestones="ws.milestones" :links="links" @saved="refresh('links'), ws.refreshMilestones()" />
         <LinkedFinance v-else-if="tab === 'Finance' && hasRole('finance')" :key="project.id" :project="project.id" />
-        <ProfileEditor v-else-if="tab === 'Profile' && project.can_manage" :project="project" :docs="docs" :links="links" @saved="reloadProject" />
+        <ProfileEditor v-else-if="tab === 'Profile' && project.can_manage" :project="project" :docs="docs" :links="links" @saved="ws.refreshProject()" />
         <ProjectSettings v-else-if="tab === 'Settings' && project.can_manage" :project="project" @saved="load()" />
       </div>
-      <TaskDialog
-        :open="dialog"
-        :project="project"
-        :task="selected"
-        :column="newColumn"
-        :defaults="newDefaults"
-        :tasks="tasks"
-        :milestones="milestones"
-        :sprints="sprints"
-        @close="dialog = false"
-        @saved="afterTaskChange"
-      />
+      <IssuePanel />
+      <CreateIssue />
     </template>
   </div>
 </template>

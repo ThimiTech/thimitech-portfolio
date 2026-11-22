@@ -270,15 +270,33 @@ days; no cash-out policy has been defined.
   when live, otherwise by beat task `apps.notices.tasks.email_due_urgent_notices` (every 5 min, looks back 1 day).
 - **Passwords**: HR resets someone else's via `PATCH /api/org/people/{id}/ {password}` (same edit rights as other HR
   fields); everyone changes their own via `POST /api/org/people/me/password/ {current_password, new_password}`.
-- **Delivery workspace** (`apps/pm`): tabs Overview · Plan · Board · Sprints · Timeline · Notes · Docs · Meetings · Whiteboard ·
-  Links & milestones · Public profile · Settings (`/app/projects/:id?tab=`). Members create/edit notes, docs, meetings and
-  whiteboards; only the owner or a project manager deletes.
+- **Projects** (`apps/pm`) have two faces that share one set of issues:
+  - **Project profile** `/app/projects/:id?tab=` (`pages/app/ProjectPage.vue`): Overview · Notes · Docs · Meetings · Whiteboard ·
+    Links & milestones · Finance · Public profile · Settings. The overview mirrors delivery (progress, sprint, modules, issue
+    activity). Old `?tab=Plan|Board|Sprints|Timeline` links redirect into the workspace. Members create/edit notes, docs,
+    meetings and whiteboards; only the owner or a project manager deletes.
+  - **Delivery workspace** `/app/projects/:id/work/…` (`pages/app/WorkspacePage.vue` + `components/app/pm/work/`), Jira-style:
+    Summary · Backlog (sprints + backlog, drag to plan/rank, epics panel) · Board (active sprint or all issues, swimlanes by
+    epic/module/assignee, drag to move/rank) · List (the hierarchy tree, sheet import/export) · Modules & epics
+    (`modules/:id`, `epics/:id`: a module lists its epics with their issues; an epic its stories with their tasks; create
+    each level in place, drag to reorder or move between epics) · Timeline · Reports (burndown, sprint report, velocity).
+    `?issue=KEY-12` opens the issue panel (`work/IssuePanel.vue`, every field saves on change) on any workspace or profile
+    route; notifications and search link there. Press **C** to create. Route meta `wide` widens the shell and keeps the
+    page mounted across child views (AppLayout `pageKey`).
+  - State lives in `work/workspace.ts` (`createWorkspace` provides it; views `useWorkspace()`), with optimistic `patch`.
+    Pure helpers: `work/meta.ts` (hierarchy, roll-ups, ranking) and `work/reports.ts`, tested in `Workspace.spec.ts`.
   **Hierarchy:** `Task.type` Module › Epic › Story › Task/Bug with `parent` (must rank strictly higher, so no cycles),
   `blocked_by` (M2M, same project) and free-text `blocker`. Modules/epics are planning containers: off the board and
-  sprints, excluded from project progress. The Plan tab is a tree with rolled-up progress/deadlines and blockers.
+  sprints, excluded from project progress.
+  **Ranking:** `Task.position` is one project-wide rank. `POST /api/pm/tasks/reorder/ {project, ids}` (manager) swaps the
+  listed items' rank slots among themselves, so any view (column, sprint, epic) can reorder its subset without disturbing
+  others (`pm/activity.py rerank`, bulk update, not audited). New issues go to the bottom.
+  **History:** `TaskActivity` rows (display text, not audited) are written on create/update (`pm/activity.py`);
+  `GET /api/pm/tasks/{id}/activity/` and `GET /api/pm/activity/?project=` (latest 50). Comments notify the assignee and
+  reporter (`task_comment`). Employees still only move their own issues; managers edit everything.
   `POST /api/pm/tasks/import/ {project, text}` (manager) reads a pasted TSV outline (Module | Epic | Story | Task |
   Description | Status | Blocker | Assignee | Deadline; blank level = inherit from above), matched by (parent, type,
-  title) so re-imports update rather than duplicate (`pm/importer.py`). Plan → Export writes the same layout.
+  title) so re-imports update rather than duplicate (`pm/importer.py`). List → Export writes the same layout.
   Timeline → Group "Epic" (default once epics exist) draws each epic as a summary bar over its subtree's dates with
   done-fill. Pure tree logic lives in `pm/plan.ts` (re-exported by `pm.ts`) so `PlanTree.spec.ts` runs in the node env. Only one sprint per project can be active (DB constraint).
   `Task.completed_at` is set in `Task.save()` and feeds the burndown. `[[wikilinks]]` resolve on the client
@@ -343,7 +361,8 @@ days; no cash-out policy has been defined.
   `/api/drive/shared/{token}/` (throttle `THROTTLE_DRIVE_SHARE`). Links to employee/project/transaction/claim/invoice/
   statement drive the "Money & documents" panel on profiles and the project Finance tab (`LinkedFinance.vue`).
 - Tables that scroll sideways need `relative` on the `overflow-x-auto` wrapper, or `sr-only` headers escape it and widen the page.
-- Frontend tests need Node 22 (`C:\Users\Admin\AppData\Local\nvm\v22.14.0`); Node 20 crashes vitest. npm 10 hits an
+- Frontend tests need Node 22 (`C:\Users\Admin\AppData\Local\nvm\v22.14.0`); Node 20 crashes vitest. On Node 25 run them with
+  `NODE_OPTIONS=--no-experimental-webstorage` (its built-in `localStorage` breaks jsdom). npm 10 hits an
   arborist bug on this lockfile; use `npx -y npm@11 …` for installs/audit fixes.
 
 ## Repo housekeeping

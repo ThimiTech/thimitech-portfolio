@@ -1,25 +1,34 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+/** The whole plan as one tree (Module › Epic › Story › Task/Bug) with roll-ups, blockers, and spreadsheet import/export. */
+import { computed, reactive, ref } from 'vue'
 import api from '@/api/api'
-import Modal from '../ui/Modal.vue'
-import StatusPill from '../ui/StatusPill.vue'
-import EmptyState from '../ui/EmptyState.vue'
-import { toast } from '../ui/toast'
-import {
-  buildTree,
-  dateLabel,
-  errorMessage,
-  isBlocked,
-  todayNPT,
-  TYPES,
-  type ItemType,
-  type Project,
-  type Task,
-  type TreeNode,
-} from './pm'
+import Modal from '../../../ui/Modal.vue'
+import EmptyState from '../../../ui/EmptyState.vue'
+import { toast } from '../../../ui/toast'
+import { buildTree, dateLabel, errorMessage, isBlocked, todayNPT, TYPES, type ItemType, type Task, type TreeNode } from '../../pm'
+import TypeIcon from '../TypeIcon.vue'
+import StatusMenu from '../StatusMenu.vue'
+import PersonMenu from '../PersonMenu.vue'
+import PriorityIcon from '../PriorityIcon.vue'
+import { useWorkspace } from '../workspace'
 
-const props = defineProps<{ project: Project; tasks: Task[]; userId?: number }>()
-const emit = defineEmits<{ select: [task: Task]; create: [type: ItemType, parent: number | null]; changed: [] }>()
+const ws = useWorkspace()
+const props = reactive({
+  get project() {
+    return ws.project!
+  },
+  get tasks() {
+    return ws.tasks
+  },
+  get userId() {
+    return ws.me ?? undefined
+  },
+})
+const emit = (event: 'select' | 'create' | 'changed', a?: unknown, b?: unknown) => {
+  if (event === 'select') ws.go(a as Task)
+  else if (event === 'create') ws.openCreate({ type: a as ItemType, parent: (b as number | null) ?? null })
+  else ws.refreshTasks().then(() => ws.refreshProject())
+}
 
 const search = ref('')
 const depth = ref(3) // deepest rank shown: 0 modules … 3 everything
@@ -124,13 +133,13 @@ function exportSheet() {
 </script>
 
 <template>
-  <div class="grid gap-5">
+  <div class="grid grid-cols-1 gap-5">
     <section v-if="modules.length" aria-label="Modules" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <button
+      <RouterLink
         v-for="m in modules"
         :key="m.task.id"
-        class="panel p-4 text-left hover:ring-2 hover:ring-river/30"
-        @click="emit('select', m.task)"
+        :to="ws.pathOf(m.task)"
+        class="panel min-w-0 p-4 text-left hover:ring-2 hover:ring-river/30"
       >
         <span class="font-mono text-[10px] text-ink/55">{{ m.task.key }}</span>
         <span class="mt-1 block truncate text-sm font-medium">{{ m.task.title }}</span>
@@ -141,11 +150,11 @@ function exportSheet() {
           ><span>{{ m.done }}/{{ m.total }} done · {{ pct(m) }}%</span
           ><span :class="overdue(m) ? 'text-rust' : ''">{{ m.due ? dateLabel(m.due) : '' }}</span></span
         >
-      </button>
+      </RouterLink>
     </section>
 
     <div class="flex flex-wrap items-center gap-3">
-      <label class="field min-w-0 flex-1 sm:max-w-xs"
+      <label class="field w-full sm:w-64"
         ><span class="sr-only">Search the plan</span
         ><input v-model="search" class="input" type="search" placeholder="Search titles, keys, people, blockers…"
       /></label>
@@ -170,37 +179,37 @@ function exportSheet() {
       <div class="ml-auto flex flex-wrap gap-2">
         <button class="btn-ghost btn-sm" @click="collapsed = new Set()">Expand all</button>
         <button class="btn-ghost btn-sm" @click="collapseAll">Collapse</button>
-        <button class="btn-ghost btn-sm" :disabled="!tasks.length" @click="exportSheet">Export</button>
-        <template v-if="project.can_manage">
+        <button class="btn-ghost btn-sm" :disabled="!props.tasks.length" @click="exportSheet">Export</button>
+        <template v-if="props.project.can_manage">
           <button class="btn-ghost btn-sm" @click="openImport">Import from sheet</button>
           <button class="btn-primary btn-sm" @click="emit('create', 'module', null)">+ Module</button>
         </template>
       </div>
     </div>
 
-    <div v-if="!tasks.length" class="panel">
+    <div v-if="!props.tasks.length" class="panel">
       <EmptyState
         title="No plan yet"
         :hint="
-          project.can_manage
+          props.project.can_manage
             ? 'Break the project into modules, epics, stories and tasks, or paste your existing spreadsheet.'
             : 'Your project lead has not set up a plan yet.'
         "
       >
-        <button v-if="project.can_manage" class="btn-ghost btn-sm" @click="openImport">Import from sheet</button>
+        <button v-if="props.project.can_manage" class="btn-ghost btn-sm" @click="openImport">Import from sheet</button>
       </EmptyState>
     </div>
     <div v-else class="relative overflow-x-auto rounded-xl border border-ink/10">
-      <table class="w-full min-w-[56rem] text-sm">
+      <table class="w-full min-w-[60rem] table-fixed text-sm">
         <thead class="bg-panel/50 text-left text-[11px] uppercase tracking-wide text-ink/55">
           <tr>
             <th class="px-3 py-2 font-medium">Work</th>
-            <th class="w-28 px-3 py-2 font-medium">Status</th>
-            <th class="w-36 px-3 py-2 font-medium">Progress</th>
-            <th class="w-36 px-3 py-2 font-medium">Assignee</th>
+            <th class="w-32 px-3 py-2 font-medium">Status</th>
+            <th class="w-32 px-3 py-2 font-medium">Progress</th>
+            <th class="w-40 px-3 py-2 font-medium">Assignee</th>
             <th class="w-24 px-3 py-2 font-medium">Deadline</th>
-            <th class="w-56 px-3 py-2 font-medium">Blockers</th>
-            <th v-if="project.can_manage" class="w-10 px-2 py-2"><span class="sr-only">Add child</span></th>
+            <th class="w-40 px-3 py-2 font-medium">Blockers</th>
+            <th v-if="props.project.can_manage" class="w-10 px-2 py-2"><span class="sr-only">Add child</span></th>
           </tr>
         </thead>
         <tbody>
@@ -217,9 +226,7 @@ function exportSheet() {
                   {{ collapsed.has(n.task.id) && !matches ? '▸' : '▾' }}
                 </button>
                 <span v-else class="w-4 shrink-0" />
-                <span class="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium" :class="TYPES[n.task.type].badge">{{
-                  TYPES[n.task.type].label
-                }}</span>
+                <TypeIcon :type="n.task.type" />
                 <span class="shrink-0 font-mono text-[10px] text-ink/50">{{ n.task.key }}</span>
                 <button
                   class="min-w-0 truncate text-left hover:text-river"
@@ -231,7 +238,7 @@ function exportSheet() {
                 </button>
               </div>
             </td>
-            <td class="px-3 py-2"><StatusPill :status="n.task.status" :label="STATUS_LABEL[n.task.status]" /></td>
+            <td class="px-3 py-2"><StatusMenu :task="n.task" /></td>
             <td class="px-3 py-2">
               <div v-if="n.total && (n.children.length || TYPES[n.task.type].rank < 2)" class="flex items-center gap-2">
                 <span class="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/10"
@@ -240,7 +247,12 @@ function exportSheet() {
                 <span class="w-12 text-right font-mono text-[10px] text-ink/60">{{ n.done }}/{{ n.total }}</span>
               </div>
             </td>
-            <td class="truncate px-3 py-2 text-ink/70">{{ n.task.assignee_name || '—' }}</td>
+            <td class="px-3 py-2">
+              <span class="flex min-w-0 items-center gap-2">
+                <PriorityIcon :priority="n.task.priority" />
+                <PersonMenu :value="n.task.assignee" :disabled="!props.project.can_manage" show-name :size="22" @change="(id) => ws.patch(n.task, { assignee: id })" />
+              </span>
+            </td>
             <td class="px-3 py-2 text-xs" :class="overdue(n) ? 'text-rust' : 'text-ink/60'">
               {{ n.due ? dateLabel(n.due) : '—' }}
             </td>
@@ -260,7 +272,7 @@ function exportSheet() {
                 </button>
               </span>
             </td>
-            <td v-if="project.can_manage" class="px-2 py-2">
+            <td v-if="props.project.can_manage" class="px-2 py-2">
               <button
                 v-if="CHILD[n.task.type]"
                 class="rounded px-2 py-1 text-ink/60 hover:bg-paper"
@@ -280,7 +292,7 @@ function exportSheet() {
     </div>
 
     <Modal :open="importing" title="Import from a spreadsheet" width="max-w-3xl" @close="importing = false">
-      <form class="grid gap-4" @submit.prevent="runImport">
+      <form class="grid grid-cols-1 gap-4" @submit.prevent="runImport">
         <p class="text-sm text-ink/70">
           Copy rows from Excel or Google Sheets and paste them below, in this column order:
           <span class="font-mono text-xs"

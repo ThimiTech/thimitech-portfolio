@@ -39,7 +39,25 @@ const router = createRouter({
       children: [
         { path: '', name: 'app-dashboard', component: () => import('../pages/app/DashboardPage.vue'), meta: { title: 'Dashboard' } },
         { path: 'projects', name: 'app-projects', component: () => import('../pages/app/ProjectsPage.vue'), meta: { title: 'Projects' } },
-        { path: 'projects/:id', name: 'app-project', component: () => import('../pages/app/ProjectPage.vue'), meta: { title: 'Project workspace' } },
+        { path: 'projects/:id', name: 'app-project', component: () => import('../pages/app/ProjectPage.vue'), meta: { title: 'Project' } },
+        {
+          // Delivery workspace: Jira-style views over one project's issues (see pages/app/WorkspacePage.vue)
+          path: 'projects/:id/work',
+          component: () => import('../pages/app/WorkspacePage.vue'),
+          meta: { title: 'Delivery workspace', wide: true },
+          children: [
+            { path: '', name: 'work', redirect: (to) => ({ path: `${to.path.replace(/\/$/, '')}/board`, query: to.query }) },
+            { path: 'summary', name: 'work-summary', component: () => import('../components/app/pm/work/views/SummaryView.vue'), meta: { view: 'summary' } },
+            { path: 'backlog', name: 'work-backlog', component: () => import('../components/app/pm/work/views/BacklogView.vue'), meta: { view: 'backlog' } },
+            { path: 'board', name: 'work-board', component: () => import('../components/app/pm/work/views/BoardView.vue'), meta: { view: 'board' } },
+            { path: 'list', name: 'work-list', component: () => import('../components/app/pm/work/views/ListView.vue'), meta: { view: 'list' } },
+            { path: 'modules', name: 'work-modules', component: () => import('../components/app/pm/work/views/ModulesView.vue'), meta: { view: 'modules' } },
+            { path: 'modules/:itemId(\\d+)', name: 'work-module', component: () => import('../components/app/pm/work/views/ContainerView.vue'), meta: { view: 'item' } },
+            { path: 'epics/:itemId(\\d+)', name: 'work-epic', component: () => import('../components/app/pm/work/views/ContainerView.vue'), meta: { view: 'item' } },
+            { path: 'timeline', name: 'work-timeline', component: () => import('../components/app/pm/work/views/TimelineView.vue'), meta: { view: 'timeline' } },
+            { path: 'reports', name: 'work-reports', component: () => import('../components/app/pm/work/views/ReportsView.vue'), meta: { view: 'reports' } },
+          ],
+        },
         { path: 'finance', name: 'app-finance', component: () => import('../pages/app/FinancePage.vue'), meta: { title: 'Finance', minRole: 'finance' } },
         { path: 'drive', name: 'app-drive', component: () => import('../pages/app/DrivePage.vue'), meta: { title: 'Drive' } },
         { path: 'inventory', name: 'app-inventory', component: () => import('../pages/app/InventoryPage.vue'), meta: { title: 'Inventory', minRole: 'hr_admin' } },

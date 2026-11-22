@@ -78,6 +78,23 @@ export interface Task {
   start_date: string | null
   due_date: string | null
   completed_at: string | null
+  created_by?: number
+  created_by_name?: string | null
+  comment_count?: number
+  created_at?: string
+  updated_at?: string
+}
+export interface Activity {
+  id: number
+  task: number
+  task_key: string
+  task_title: string
+  actor: number | null
+  actor_name: string | null
+  field: string
+  old: string
+  new: string
+  at: string
 }
 export interface Milestone {
   id: number
