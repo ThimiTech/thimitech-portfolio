@@ -70,6 +70,8 @@ const router = createRouter({
         { path: 'people', name: 'app-people', component: () => import('../pages/app/DirectoryPage.vue'), meta: { title: 'People' } },
         { path: 'people/:id', name: 'app-person', component: () => import('../pages/app/ProfilePage.vue'), meta: { title: 'Profile' } },
         { path: 'hiring', name: 'app-hiring', component: () => import('../pages/app/HiringPage.vue'), meta: { title: 'Hiring', minRole: 'hr_admin' } },
+        { path: 'mail', name: 'app-mail', component: () => import('../pages/app/MailPage.vue'), meta: { title: 'Mail' } },
+        { path: 'mail/callback', name: 'app-mail-callback', component: () => import('../pages/app/MailCallbackPage.vue'), meta: { title: 'Connecting mail' } },
         { path: 'inquiries', name: 'app-inquiries', component: () => import('../pages/app/InquiriesPage.vue'), meta: { title: 'Inquiries', minRole: 'manager' } },
         // "Me": personal pages share one tabbed layout; the paths are unchanged so old links keep working.
         {

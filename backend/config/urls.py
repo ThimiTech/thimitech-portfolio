@@ -72,6 +72,7 @@ urlpatterns = [
     path('api/search/', SearchView.as_view(), name='search'),
     path('api/inquiries/', include('apps.inquiries.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
+    path('api/mail/', include('apps.mail.urls')),
 
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),

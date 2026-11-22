@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.drive',
     'apps.inquiries',
+    'apps.mail',
 
 
     "rest_framework",
@@ -172,6 +173,18 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'Thimi Tech <no-reply@thimitech.com>')
 # Origin of the Vue app, used to build links in emails (password reset).
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173' if DEBUG else 'https://thimitech.com').rstrip('/')
+
+# Zoho Mail (/app/mail). Register a "Server-based Application" at https://api-console.zoho.com with redirect URI
+# ZOHO_REDIRECT_URI (default {FRONTEND_URL}/app/mail/callback). ZOHO_ACCOUNTS_URL is the data centre people sign in
+# at (accounts.zoho.com / .in / .eu …); a callback naming another known Zoho data centre is followed.
+ZOHO_CLIENT_ID = os.getenv('ZOHO_CLIENT_ID', '')
+ZOHO_CLIENT_SECRET = os.getenv('ZOHO_CLIENT_SECRET', '')
+ZOHO_ACCOUNTS_URL = os.getenv('ZOHO_ACCOUNTS_URL', 'https://accounts.zoho.com').rstrip('/')
+ZOHO_REDIRECT_URI = os.getenv('ZOHO_REDIRECT_URI', f'{FRONTEND_URL}/app/mail/callback')
+# Encrypts stored Zoho tokens. Defaults to a key derived from SECRET_KEY (rotating either means reconnecting).
+MAIL_TOKEN_KEY = os.getenv('MAIL_TOKEN_KEY', '')
+MAIL_ATTACHMENT_MAX_BYTES = int(os.getenv('MAIL_ATTACHMENT_MAX_MB', '20')) * 1024 * 1024
+
 CORS_ALLOWED_ORIGINS = [
     "https://thimitech.com",
     "https://www.thimitech.com",
@@ -220,6 +233,7 @@ REST_FRAMEWORK = {
         'token_refresh': os.getenv('THROTTLE_TOKEN_REFRESH', '60/min'),
         'inquiry': os.getenv('THROTTLE_INQUIRY', '10/hour'),  # public contact form, per IP
         'drive_share': os.getenv('THROTTLE_DRIVE_SHARE', '300/hour'),  # public share links, per IP
+        'mail_send': os.getenv('THROTTLE_MAIL_SEND', '120/hour'),  # Zoho Mail sends + attachment uploads, per user
     },
 }
 

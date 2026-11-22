@@ -360,6 +360,14 @@ days; no cash-out policy has been defined.
   (block `location /media/drive/ { internal; }` in prod). Expiring public share links: `/s/{token}` →
   `/api/drive/shared/{token}/` (throttle `THROTTLE_DRIVE_SHARE`). Links to employee/project/transaction/claim/invoice/
   statement drive the "Money & documents" panel on profiles and the project Finance tab (`LinkedFinance.vue`).
+- **Mail** (`apps/mail`, `/app/mail`, employee+): each person connects their own Zoho Mail mailbox over OAuth (Zoho Mail
+  REST API, `mail/zoho.py`). Nothing from the mailbox is stored; only `MailAccount` (account id, send-as addresses,
+  Fernet-encrypted tokens keyed by `MAIL_TOKEN_KEY` or SECRET_KEY, not audited). Flow: `GET /api/mail/connect/` → Zoho
+  consent → `{FRONTEND_URL}/app/mail/callback` (`MailCallbackPage`) → `POST /api/mail/callback/` (signed `state` bound to
+  the user; `accounts-server` only followed if it's a known Zoho DC). Env: `ZOHO_CLIENT_ID`, `ZOHO_CLIENT_SECRET`,
+  `ZOHO_ACCOUNTS_URL` (default accounts.zoho.com), optional `ZOHO_REDIRECT_URI`. A rejected refresh token sets
+  `needs_reconnect`; every mail endpoint then answers 409 and the page shows "Reconnect". Message HTML is DOMPurify'd and
+  shown in a script-less sandboxed iframe whose CSP blocks remote images until "Show images". Tests mock `zoho._http`.
 - Tables that scroll sideways need `relative` on the `overflow-x-auto` wrapper, or `sr-only` headers escape it and widen the page.
 - Frontend tests need Node 22 (`C:\Users\Admin\AppData\Local\nvm\v22.14.0`); Node 20 crashes vitest. On Node 25 run them with
   `NODE_OPTIONS=--no-experimental-webstorage` (its built-in `localStorage` breaks jsdom). npm 10 hits an

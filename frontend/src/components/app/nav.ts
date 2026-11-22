@@ -30,6 +30,7 @@ export const ICONS = {
   audit: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M9 15l2 2 4-4",
   hiring: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6",
   inquiries: "M22 12h-6l-2 3h-4l-2-3H2M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z",
+  mail: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6",
   drive: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
 } as const;
 
@@ -42,6 +43,7 @@ export const NAV: NavGroup[] = [
   {
     title: "Work",
     items: [
+      { label: "Mail", to: "/app/mail", icon: "mail", keywords: "email inbox zoho compose send reply" },
       { label: "Attendance", to: "/app/attendance", icon: "attendance", keywords: "check in punch clock" },
       { label: "Leave", to: "/app/leave", icon: "leave", keywords: "time off holiday request approvals" },
       { label: "Calendar", to: "/app/calendar", icon: "calendar", keywords: "events holidays schedule" },
