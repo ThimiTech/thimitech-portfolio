@@ -270,9 +270,17 @@ days; no cash-out policy has been defined.
   when live, otherwise by beat task `apps.notices.tasks.email_due_urgent_notices` (every 5 min, looks back 1 day).
 - **Passwords**: HR resets someone else's via `PATCH /api/org/people/{id}/ {password}` (same edit rights as other HR
   fields); everyone changes their own via `POST /api/org/people/me/password/ {current_password, new_password}`.
-- **Delivery workspace** (`apps/pm`): tabs Overview · Board · Sprints · Timeline · Notes · Docs · Meetings · Whiteboard ·
+- **Delivery workspace** (`apps/pm`): tabs Overview · Plan · Board · Sprints · Timeline · Notes · Docs · Meetings · Whiteboard ·
   Links & milestones · Public profile · Settings (`/app/projects/:id?tab=`). Members create/edit notes, docs, meetings and
-  whiteboards; only the owner or a project manager deletes. Only one sprint per project can be active (DB constraint).
+  whiteboards; only the owner or a project manager deletes.
+  **Hierarchy:** `Task.type` Module › Epic › Story › Task/Bug with `parent` (must rank strictly higher, so no cycles),
+  `blocked_by` (M2M, same project) and free-text `blocker`. Modules/epics are planning containers: off the board and
+  sprints, excluded from project progress. The Plan tab is a tree with rolled-up progress/deadlines and blockers.
+  `POST /api/pm/tasks/import/ {project, text}` (manager) reads a pasted TSV outline (Module | Epic | Story | Task |
+  Description | Status | Blocker | Assignee | Deadline; blank level = inherit from above), matched by (parent, type,
+  title) so re-imports update rather than duplicate (`pm/importer.py`). Plan → Export writes the same layout.
+  Timeline → Group "Epic" (default once epics exist) draws each epic as a summary bar over its subtree's dates with
+  done-fill. Pure tree logic lives in `pm/plan.ts` (re-exported by `pm.ts`) so `PlanTree.spec.ts` runs in the node env. Only one sprint per project can be active (DB constraint).
   `Task.completed_at` is set in `Task.save()` and feeds the burndown. `[[wikilinks]]` resolve on the client
   (note → doc → task key → meeting). Markdown is rendered with marked + DOMPurify (`pm.ts renderMarkdown`).
   Whiteboard saves send `version`; a stale version gets 409. Whiteboards are excluded from the audit log.

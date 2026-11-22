@@ -84,8 +84,23 @@ class Milestone(models.Model):
 
 
 class Task(models.Model):
+    """One work item. `type` places it in the hierarchy Module › Epic › Story › Task/Bug; `parent` must rank higher."""
+    class Type(models.TextChoices):
+        MODULE = 'module', 'Module'
+        EPIC = 'epic', 'Epic'
+        STORY = 'story', 'Story'
+        TASK = 'task', 'Task'
+        BUG = 'bug', 'Bug'
+
+    RANK = {'module': 0, 'epic': 1, 'story': 2, 'task': 3, 'bug': 3}
+    CONTAINERS = ('module', 'epic')  # planning items: kept off the board and out of progress counts
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
+    type = models.CharField(max_length=8, choices=Type.choices, default=Type.TASK)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children')
+    blocked_by = models.ManyToManyField('self', symmetrical=False, blank=True, related_name='blocks')
+    blocker = models.CharField(max_length=300, blank=True)  # free-text impediment ("waiting on client data")
     column = models.ForeignKey(Column, on_delete=models.PROTECT, related_name='tasks')
     assignee = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='project_tasks')
     milestone = models.ForeignKey(Milestone, null=True, blank=True, on_delete=models.SET_NULL, related_name='tasks')

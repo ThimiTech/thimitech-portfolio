@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { dateLabel, dayNum, ymdOf, todayNPT, isOverdue, type Task, type Milestone, type Sprint } from './pm'
+import { buildTree, dateLabel, dayNum, ymdOf, todayNPT, isContainer, isOverdue, type Task, type Milestone, type Sprint, type TreeNode } from './pm'
 const props = withDefaults(
   defineProps<{ tasks: Task[]; milestones: Milestone[]; sprints?: Sprint[]; canManage?: boolean }>(),
   { sprints: () => [], canManage: false },
@@ -13,12 +13,13 @@ const emit = defineEmits<{
 const ZOOM = { Days: 34, Weeks: 14, Months: 5 } as const
 const zoom = ref<keyof typeof ZOOM>('Weeks')
 const px = computed(() => ZOOM[zoom.value])
-const groupBy = ref<'none' | 'milestone' | 'assignee'>('none')
+const groupBy = ref<'none' | 'epic' | 'milestone' | 'assignee'>(props.tasks.some((t) => t.type === 'epic') ? 'epic' : 'none')
+const byStart = (a: Task, b: Task) => (a.start_date || a.due_date!).localeCompare(b.start_date || b.due_date!)
 
 const dated = computed(() =>
   props.tasks
     .filter((t) => t.start_date || t.due_date)
-    .sort((a, b) => (a.start_date || a.due_date!).localeCompare(b.start_date || b.due_date!)),
+    .sort(byStart),
 )
 const range = computed(() => {
   const days = [
@@ -61,9 +62,59 @@ const ticks = computed(() => {
   return out
 })
 
-const groups = computed(() => {
+interface Group {
+  key: string
+  label: string
+  tasks: Task[]
+  /** Epic mode: a summary bar spanning every date in the epic's subtree. */
+  epic?: Task
+  start?: number
+  end?: number
+  done?: number
+  total?: number
+}
+/** One group per epic in plan order (module › epic); its rows are the dated work items beneath it. */
+const epicGroups = computed(() => {
+  const out: Group[] = []
+  const seen = new Set<number>()
+  const flat = (n: TreeNode): Task[] => [n.task, ...n.children.flatMap(flat)]
+  const visit = (nodes: TreeNode[], module?: Task) => {
+    for (const n of nodes) {
+      if (n.task.type !== 'epic') {
+        visit(n.children, n.task.type === 'module' ? n.task : module)
+        continue
+      }
+      const all = flat(n)
+      all.forEach((t) => seen.add(t.id))
+      const days = all.flatMap((t) => [t.start_date, t.due_date]).filter((d): d is string => !!d).map(dayNum)
+      if (!days.length) continue
+      out.push({
+        key: `e${n.task.id}`,
+        label: module ? `${module.title} › ${n.task.title}` : n.task.title,
+        tasks: all.filter((t) => !isContainer(t) && (t.start_date || t.due_date)).sort(byStart),
+        epic: n.task,
+        start: Math.min(...days),
+        end: Math.max(...days),
+        done: n.done,
+        total: n.total,
+      })
+    }
+  }
+  visit(buildTree(props.tasks))
+  const rest = dated.value.filter((t) => !seen.has(t.id) && !isContainer(t))
+  if (rest.length) out.push({ key: 'none', label: 'No epic', tasks: rest })
+  return out
+})
+const epicBar = (g: Group) => ({
+  left: `${(g.start! - range.value.start) * px.value}px`,
+  width: `${Math.max((g.end! - g.start! + 1) * px.value, 8)}px`,
+})
+const epicLate = (g: Group) => g.end! < dayNum(todayNPT()) && g.done! < g.total!
+
+const groups = computed<Group[]>(() => {
   if (groupBy.value === 'none') return [{ key: 'all', label: '', tasks: dated.value }]
-  const map = new Map<string, { key: string; label: string; tasks: Task[] }>()
+  if (groupBy.value === 'epic') return epicGroups.value
+  const map = new Map<string, Group>()
   for (const t of dated.value) {
     const key = groupBy.value === 'milestone' ? String(t.milestone ?? '') : String(t.assignee ?? '')
     const label =
@@ -131,13 +182,14 @@ const barTone = (t: Task) =>
     <div class="panel-head flex-wrap">
       <div>
         <h2 class="font-medium">Delivery timeline</h2>
-        <span class="text-xs text-ink/60">{{ tasks.length - dated.length }} tasks without dates</span>
+        <span class="text-xs text-ink/60">{{ tasks.filter((t) => !isContainer(t)).length - dated.filter((t) => !isContainer(t)).length }} work items without dates</span>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <label class="flex items-center gap-2 text-xs text-ink/60"
           >Group
           <select v-model="groupBy" class="input !w-auto !py-1 text-xs">
             <option value="none">None</option>
+            <option value="epic">Epic</option>
             <option value="milestone">Milestone</option>
             <option value="assignee">Assignee</option>
           </select></label
@@ -166,7 +218,16 @@ const barTone = (t: Task) =>
         <div class="sticky top-0 z-10 h-14 border-b border-ink/10 bg-sheet px-3 pt-8 ledger-label">Work item</div>
         <div v-if="sprints.length" class="flex h-8 items-center border-b border-dashed border-ink/10 px-3 text-xs text-ink/60">Sprints</div>
         <template v-for="g in groups" :key="g.key">
-          <div v-if="g.label" class="flex h-8 items-center bg-panel/50 px-3 text-xs font-medium">{{ g.label }}</div>
+          <button
+            v-if="g.epic"
+            class="flex h-8 w-full items-center gap-2 bg-panel/50 px-3 text-left text-xs font-medium hover:text-river"
+            :title="g.label"
+            @click="emit('select', g.epic)"
+          >
+            <span class="truncate">{{ g.label }}</span>
+            <span class="ml-auto shrink-0 font-mono text-[10px] font-normal text-ink/55">{{ g.done }}/{{ g.total }}</span>
+          </button>
+          <div v-else-if="g.label" class="flex h-8 items-center bg-panel/50 px-3 text-xs font-medium">{{ g.label }}</div>
           <button
             v-for="t in g.tasks"
             :key="t.id"
@@ -232,7 +293,19 @@ const barTone = (t: Task) =>
           </div>
         </div>
         <template v-for="g in groups" :key="`r${g.key}`">
-          <div v-if="g.label" class="h-8 bg-panel/50" />
+          <div v-if="g.label" class="relative h-8 bg-panel/50">
+            <button
+              v-if="g.epic"
+              class="absolute top-2 h-4 overflow-hidden rounded border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/50"
+              :class="epicLate(g) ? 'border-rust/60 bg-rust/10' : 'border-contour/60 bg-contour/15'"
+              :style="epicBar(g)"
+              :title="`${g.epic.title}: ${dateLabel(ymdOf(g.start!))} – ${dateLabel(ymdOf(g.end!))} · ${g.done}/${g.total} done`"
+              :aria-label="`Epic ${g.epic.title}, ${dateLabel(ymdOf(g.start!))} to ${dateLabel(ymdOf(g.end!))}, ${g.done} of ${g.total} done`"
+              @click="emit('select', g.epic)"
+            >
+              <span class="block h-full bg-moss/60" :style="{ width: `${g.total ? (g.done! / g.total) * 100 : 0}%` }" />
+            </button>
+          </div>
           <div v-for="t in g.tasks" :key="t.id" class="relative h-10 border-b border-ink/5">
             <button
               class="group absolute top-2 flex h-6 items-center overflow-hidden rounded-md px-2 text-left text-[10px] text-on-accent shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag/50"
@@ -268,6 +341,7 @@ const barTone = (t: Task) =>
     </div>
     <div class="flex flex-wrap gap-4 border-t border-dashed border-ink/15 px-5 py-2.5 text-[11px] text-ink/60">
       <span v-for="[c, l] in [['bg-river', 'Backlog'], ['bg-flag', 'In progress'], ['bg-contour', 'Review'], ['bg-moss', 'Done'], ['bg-rust', 'Overdue']]" :key="l" class="flex items-center gap-1.5"><span class="h-2 w-3 rounded-sm" :class="c" />{{ l }}</span>
+      <span v-if="groupBy === 'epic'" class="flex items-center gap-1.5"><span class="h-2 w-3 rounded-sm border border-contour/60 bg-contour/15" />Epic span (fill = done)</span>
       <span v-if="canManage" class="ml-auto">Drag a bar to reschedule · drag its right edge to change the end</span>
     </div>
   </section>

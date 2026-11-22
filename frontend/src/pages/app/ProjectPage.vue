@@ -23,11 +23,14 @@ import DocumentsPanel from '@/components/app/pm/DocumentsPanel.vue'
 import MeetingsPanel from '@/components/app/pm/MeetingsPanel.vue'
 import WhiteboardPanel from '@/components/app/pm/WhiteboardPanel.vue'
 import ProfileEditor from '@/components/app/pm/ProfileEditor.vue'
+import PlanPanel from '@/components/app/pm/PlanPanel.vue'
 import {
   errorMessage,
   HEALTH,
+  isContainer,
   isOverdue,
   resolveLink,
+  type ItemType,
   type Doc,
   type Meeting,
   type Milestone,
@@ -61,11 +64,12 @@ const sprintOnly = ref(false)
 const dialog = ref(false)
 const selected = ref<Task | null>(null)
 const newColumn = ref(0)
+const newDefaults = ref<{ type: ItemType; parent: number | null }>({ type: 'task', parent: null })
 const focus = ref<Record<string, number | null>>({})
 
 watch(() => project.value?.name, (name) => (pageTitle.value = name ?? ''), { immediate: true })
 
-const TABS = ['Overview', 'Board', 'Sprints', 'Timeline', 'Notes', 'Docs', 'Meetings', 'Whiteboard', 'Hub']
+const TABS = ['Overview', 'Plan', 'Board', 'Sprints', 'Timeline', 'Notes', 'Docs', 'Meetings', 'Whiteboard', 'Hub']
 const views = computed(() =>
   [...TABS, ...(hasRole('finance') ? ['Finance'] : []), ...(project.value?.can_manage ? ['Profile', 'Settings'] : [])].map((id) => ({
     id,
@@ -90,8 +94,10 @@ const board = computed(
   () => project.value?.boards.find((b) => b.id === boardId.value) || project.value?.boards[0],
 )
 const activeSprint = computed(() => sprints.value.find((s) => s.status === 'active'))
+/** Stories, tasks and bugs: what the board, sprints and overview count. Modules/epics live in the Plan. */
+const workItems = computed(() => tasks.value.filter((t) => !isContainer(t)))
 const filtered = computed(() =>
-  tasks.value.filter(
+  workItems.value.filter(
     (t) =>
       t.board === board.value?.id &&
       (!onlyMine.value || t.assignee === user.value?.id) &&
@@ -101,7 +107,7 @@ const filtered = computed(() =>
         .includes(search.value.toLowerCase()),
   ),
 )
-const overdue = computed(() => tasks.value.filter(isOverdue).length)
+const overdue = computed(() => workItems.value.filter(isOverdue).length)
 const upcomingMeetings = computed(
   () => meetings.value.filter((m) => m.status === 'scheduled' && Date.parse(m.end) >= Date.now()).length,
 )
@@ -153,9 +159,10 @@ function select(task: Task) {
   selected.value = task
   dialog.value = true
 }
-function create(column?: number) {
+function create(column?: number, type: ItemType = 'task', parent: number | null = null) {
   selected.value = null
-  newColumn.value = column || board.value?.columns[0]?.id || 0
+  newColumn.value = column || board.value?.columns[0]?.id || project.value?.boards[0]?.columns[0]?.id || 0
+  newDefaults.value = { type, parent }
   dialog.value = true
 }
 async function move(task: Task, column: number) {
@@ -228,7 +235,7 @@ onMounted(() => load(true))
             >Public page ↗</a
           >
           <button
-            v-if="project.can_manage && tab === 'Board' && board?.columns.length"
+            v-if="project.can_manage && (tab === 'Board' || tab === 'Plan') && board?.columns.length"
             class="btn-primary"
             @click="create()"
           >
@@ -242,7 +249,7 @@ onMounted(() => load(true))
         <ProjectOverview
           v-if="tab === 'Overview'"
           :project="project"
-          :tasks="tasks"
+          :tasks="workItems"
           :sprints="sprints"
           :milestones="milestones"
           :meetings="meetings"
@@ -252,6 +259,15 @@ onMounted(() => load(true))
           @go="go"
           @select="select"
           @saved="reloadProject"
+        />
+        <PlanPanel
+          v-else-if="tab === 'Plan'"
+          :project="project"
+          :tasks="tasks"
+          :user-id="user?.id"
+          @select="select"
+          @create="(type, parent) => create(undefined, type, parent)"
+          @changed="afterTaskChange"
         />
         <template v-else-if="tab === 'Board'">
           <h2 class="sr-only">{{ board?.name || 'Project board' }}</h2>
@@ -275,6 +291,7 @@ onMounted(() => load(true))
             v-if="board"
             :board="board"
             :tasks="filtered"
+            :all="tasks"
             :can-manage="project.can_manage"
             :user-id="user?.id"
             :busy="busy"
@@ -288,7 +305,7 @@ onMounted(() => load(true))
             </EmptyState>
           </div>
         </template>
-        <SprintsPanel v-else-if="tab === 'Sprints'" :project="project" :tasks="tasks" :sprints="sprints" @changed="afterTaskChange" @select="select" />
+        <SprintsPanel v-else-if="tab === 'Sprints'" :project="project" :tasks="workItems" :sprints="sprints" @changed="afterTaskChange" @select="select" />
         <TaskTimeline
           v-else-if="tab === 'Timeline'"
           :tasks="tasks"
@@ -332,6 +349,8 @@ onMounted(() => load(true))
         :project="project"
         :task="selected"
         :column="newColumn"
+        :defaults="newDefaults"
+        :tasks="tasks"
         :milestones="milestones"
         :sprints="sprints"
         @close="dialog = false"

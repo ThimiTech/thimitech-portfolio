@@ -20,6 +20,7 @@ from apps.notifications.services import push
 from apps.permissions.permissions import IsEmployee, IsManager
 from apps.users.models import Clearance
 from .access import visible_projects, can_manage, require_manager
+from .importer import import_sheet
 from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard
 from .serializers import (ProjectSerializer, BoardSerializer, ColumnSerializer, TaskSerializer, CommentSerializer, MilestoneSerializer,
                           LinkSerializer, ProjectSummarySerializer, SprintSerializer, DocumentSerializer, NoteSerializer,
@@ -29,6 +30,7 @@ INLINE_TYPES = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'}
 TEXT_TYPES = {'txt', 'md', 'csv'}
 IMAGE_TYPES = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 PARSERS = [JSONParser, MultiPartParser, FormParser]
+WORK_ITEM = Q(boards__columns__tasks__type__in=[t for t in Task.RANK if t not in Task.CONTAINERS])
 
 
 def serve_document(doc, download=False):
@@ -59,8 +61,8 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return visible_projects(self.request.user).select_related('lead').prefetch_related('members', 'boards__columns').annotate(
-            total_tasks=Count('boards__columns__tasks', distinct=True),
-            done_tasks=Count('boards__columns__tasks', filter=Q(boards__columns__status='done'), distinct=True),
+            total_tasks=Count('boards__columns__tasks', filter=WORK_ITEM, distinct=True),
+            done_tasks=Count('boards__columns__tasks', filter=WORK_ITEM & Q(boards__columns__status='done'), distinct=True),
         )
 
     @transaction.atomic
@@ -135,7 +137,7 @@ class ColumnViewSet(ScopedViewSet):
 
 @extend_schema(tags=['Project management'])
 class TaskViewSet(ScopedViewSet):
-    queryset = Task.objects.select_related('column__board__project', 'assignee', 'milestone')
+    queryset = Task.objects.select_related('column__board__project', 'assignee', 'milestone').prefetch_related('blocked_by')
     serializer_class = TaskSerializer
     project_path = 'column__board__project'
 
@@ -153,6 +155,24 @@ class TaskViewSet(ScopedViewSet):
     def perform_update(self, serializer):
         before = serializer.instance.assignee_id
         notify_assignee(serializer.save(), before, self.request.user)
+
+    @extend_schema(request=dict, responses=dict)
+    @action(detail=False, methods=['post'], url_path='import')
+    def import_sheet(self, request):
+        """Paste a spreadsheet outline (Module | Epic | Story | Task | Description | Status | Blocker | Assignee | Deadline)."""
+        project, text = str(request.data.get('project', '')), request.data.get('text')
+        if not project.isdigit():
+            raise ValidationError({'project': 'Use a project id.'})
+        project = get_object_or_404(visible_projects(request.user), pk=project)
+        require_manager(request.user, project)
+        if not isinstance(text, str) or not text.strip() or len(text) > 500_000:
+            raise ValidationError({'text': 'Paste the rows to import (at most 500 KB).'})
+        if not project.boards.exists():
+            raise ValidationError('Add a board before importing.')
+        try:
+            return Response(import_sheet(project, text, request.user))
+        except ValueError as e:
+            raise ValidationError({'text': str(e)})
 
     def update(self, request, *args, **kwargs):
         task = self.get_object()
@@ -352,7 +372,7 @@ class PublicProjectViewSet(viewsets.GenericViewSet):
         if 'story' in sections:
             data['story'] = p.story
         if 'progress' in sections:
-            tasks = Task.objects.filter(column__board__project=p)
+            tasks = Task.objects.filter(column__board__project=p).exclude(type__in=Task.CONTAINERS)
             total, done = tasks.count(), tasks.filter(column__status='done').count()
             data['progress'] = {'total': total, 'done': done, 'percent': round(done / total * 100) if total else 0}
         if 'milestones' in sections:
