@@ -64,7 +64,7 @@ describe('Self-service navigation', () => {
     const labels = navFor((r) => r === 'employee').flatMap((g) => g.items.map((i) => i.label))
     expect(ME.map((i) => i.label)).toEqual(expect.arrayContaining(['My pay', 'My assets']))
     expect(ME.every((i) => !i.minRole)).toBe(true)
-    expect(labels).toHaveLength(9)
+    expect(labels).toHaveLength(10)
     expect(labels).not.toContain('Finance')
     expect(labels).not.toContain('Hiring')
   })
