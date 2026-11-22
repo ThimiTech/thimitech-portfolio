@@ -17,6 +17,7 @@ class Notification(models.Model):
         CORRECTION_DECIDED = 'correction_decided', 'Attendance correction decided'
         MEETING = 'meeting', 'Meeting scheduled'
         CLAIM_DECIDED = 'claim_decided', 'Expense claim decided'
+        TASK_COMMENT = 'task_comment', 'Task comment'
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
     kind = models.CharField(max_length=20, choices=Kind.choices)

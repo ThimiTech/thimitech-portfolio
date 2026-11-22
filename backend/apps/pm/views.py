@@ -20,11 +20,13 @@ from apps.notifications.services import push
 from apps.permissions.permissions import IsEmployee, IsManager
 from apps.users.models import Clearance
 from .access import visible_projects, can_manage, require_manager
+from . import activity
+from .activity import next_position
 from .importer import import_sheet
-from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard
+from .models import Project, Board, Column, Task, Comment, Milestone, ProjectLink, Sprint, Document, Note, Meeting, Whiteboard, TaskActivity
 from .serializers import (ProjectSerializer, BoardSerializer, ColumnSerializer, TaskSerializer, CommentSerializer, MilestoneSerializer,
                           LinkSerializer, ProjectSummarySerializer, SprintSerializer, DocumentSerializer, NoteSerializer,
-                          MeetingSerializer, WhiteboardSerializer, name_of)
+                          MeetingSerializer, WhiteboardSerializer, TaskActivitySerializer, name_of)
 
 INLINE_TYPES = {'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'}
 TEXT_TYPES = {'txt', 'md', 'csv'}
@@ -137,7 +139,8 @@ class ColumnViewSet(ScopedViewSet):
 
 @extend_schema(tags=['Project management'])
 class TaskViewSet(ScopedViewSet):
-    queryset = Task.objects.select_related('column__board__project', 'assignee', 'milestone').prefetch_related('blocked_by')
+    queryset = (Task.objects.select_related('column__board__project', 'assignee', 'milestone', 'created_by')
+                .prefetch_related('blocked_by').annotate(n_comments=Count('comments', distinct=True)))
     serializer_class = TaskSerializer
     project_path = 'column__board__project'
 
@@ -147,14 +150,46 @@ class TaskViewSet(ScopedViewSet):
             qs = qs.filter(assignee=self.request.user)
         return qs
 
+    @transaction.atomic
     def perform_create(self, serializer):
         project = serializer.validated_data['column'].board.project
         require_manager(self.request.user, project)
-        notify_assignee(serializer.save(created_by=self.request.user), None, self.request.user)
+        extra = {} if 'position' in self.request.data else {'position': next_position(project)}
+        task = serializer.save(created_by=self.request.user, **extra)
+        activity.created(task, self.request.user)
+        notify_assignee(task, None, self.request.user)
 
+    @transaction.atomic
     def perform_update(self, serializer):
-        before = serializer.instance.assignee_id
-        notify_assignee(serializer.save(), before, self.request.user)
+        before_assignee = serializer.instance.assignee_id
+        before = activity.snapshot(serializer.instance)
+        task = serializer.save()
+        activity.record(task, before, self.request.user)
+        notify_assignee(task, before_assignee, self.request.user)
+
+    @extend_schema(request=dict, responses=dict)
+    @action(detail=False, methods=['post'])
+    @transaction.atomic
+    def reorder(self, request):
+        """Rank items: `{project, ids}` puts these ids in this order (a column, a sprint, the backlog) and leaves the rest."""
+        project, ids = str(request.data.get('project', '')), request.data.get('ids')
+        if not project.isdigit():
+            raise ValidationError({'project': 'Use a project id.'})
+        project = get_object_or_404(visible_projects(request.user), pk=project)
+        require_manager(request.user, project)
+        if not isinstance(ids, list) or not ids or len(ids) > 2000 or not all(isinstance(i, int) for i in ids):
+            raise ValidationError({'ids': 'Send the item ids in their new order.'})
+        try:
+            activity.rerank(project, ids)
+        except ValueError as e:
+            raise ValidationError({'ids': str(e)})
+        return Response({'ordered': len(ids)})
+
+    @extend_schema(responses=TaskActivitySerializer(many=True))
+    @action(detail=True, methods=['get'], url_path='activity')
+    def history(self, request, pk=None):
+        rows = self.get_object().activity.select_related('actor', 'task__column__board__project')[:200]
+        return Response(TaskActivitySerializer(rows, many=True).data)
 
     @extend_schema(request=dict, responses=dict)
     @action(detail=False, methods=['post'], url_path='import')
@@ -182,12 +217,34 @@ class TaskViewSet(ScopedViewSet):
         return super().update(request, *args, **kwargs)
 
 
+def issue_link(task):
+    """Where a task opens: the delivery workspace with the issue panel up."""
+    project = task.column.board.project
+    return f'/app/projects/{project.pk}/work?issue={project.key}-{task.pk}'
+
+
 def notify_assignee(task, previous_assignee_id, actor):
     """In-app notice to a task's new assignee (not when you assign yourself)."""
     if task.assignee_id and task.assignee_id != previous_assignee_id:
         project = task.column.board.project
         push([task.assignee], 'task_assigned', f'{actor.full_name} assigned you {project.key}-{task.pk}',
-             task.title, f'/app/projects/{project.pk}', exclude=actor)
+             task.title, issue_link(task), exclude=actor)
+
+
+@extend_schema(tags=['Project management'])
+class ActivityViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Recent issue history across a project (`?project=`, newest first, at most 50)."""
+    serializer_class = TaskActivitySerializer
+    permission_classes = [IsEmployee]
+    pagination_class = None
+
+    def get_queryset(self):
+        project = self.request.query_params.get('project', '')
+        if not project.isdigit():
+            raise ValidationError({'project': 'Use a project id.'})
+        return (TaskActivity.objects.filter(task__column__board__project__in=visible_projects(self.request.user),
+                                            task__column__board__project_id=project)
+                .select_related('actor', 'task__column__board__project')[:50])
 
 
 @extend_schema(tags=['Project management'])
@@ -418,8 +475,13 @@ class CommentViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, mixins.Dest
             qs = qs.filter(task_id=task)
         return qs
 
+    @transaction.atomic
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        comment = serializer.save(author=self.request.user)
+        task = comment.task
+        project = task.column.board.project
+        push([task.assignee, task.created_by], 'task_comment', f'{name_of(self.request.user)} commented on {project.key}-{task.pk}',
+             comment.body[:200], issue_link(task), exclude=self.request.user)
 
     def perform_destroy(self, instance):
         if instance.author_id != self.request.user.pk:

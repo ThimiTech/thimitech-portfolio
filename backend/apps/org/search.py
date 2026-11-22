@@ -68,7 +68,7 @@ class SearchView(APIView):
         for t in tasks.order_by('-updated_at')[:PER_KIND]:
             project = t.column.board.project
             hits.append(_hit('task', t.title, f'{project.key.upper()}-{t.pk} · {project.name}',
-                             f'/app/projects/{project.pk}?tab=Board'))
+                             f'/app/projects/{project.pk}/work?issue={project.key}-{t.pk}'))
 
         for kind, model, tab in (('note', Note, 'Notes'), ('document', Document, 'Docs')):
             rows = (model.objects.filter(project__in=projects, classification__lte=user.clearance)

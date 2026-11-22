@@ -245,3 +245,18 @@ class Whiteboard(models.Model):
 
     class Meta:
         ordering = ['-updated_at', 'id']
+
+
+class TaskActivity(models.Model):
+    """Issue history ("Ravi changed Status: To do → In progress"). Values are stored as display text, so the trail
+    still reads correctly after a column, sprint or person is renamed or removed. Written by `pm.activity.record`."""
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='activity')
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='+')
+    field = models.CharField(max_length=30)  # 'created' or a Task field name
+    old = models.CharField(max_length=300, blank=True)
+    new = models.CharField(max_length=300, blank=True)
+    at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-at', '-id']
+        indexes = [models.Index(fields=['task', '-at'])]
