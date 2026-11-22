@@ -162,8 +162,8 @@ onBeforeUnmount(() => ctx?.revert())
             street where the work gets done.
           </p>
           <div class="cta">
-            <RouterLink to="/new#projects" class="btn btn-solid">Explore our work</RouterLink>
-            <RouterLink to="/new#contact" class="btn">Start a project</RouterLink>
+            <RouterLink to="/#projects" class="btn btn-solid">Explore our work</RouterLink>
+            <RouterLink to="/#contact" class="btn">Start a project</RouterLink>
           </div>
         </div>
       </div>
